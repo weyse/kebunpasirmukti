@@ -18,3 +18,24 @@ export type Visit = {
   discounted_cost?: number;
   down_payment?: number;
 };
+
+// Dashboard types
+export type DashboardMetrics = {
+  totalVisits: number;
+  upcomingVisits: number;
+  totalRevenue: number;
+  completedPayments: number;
+  pendingPayments: number;
+};
+
+export type MonthlyVisitData = {
+  month: string;
+  count: number;
+};
+
+export type UpcomingVisit = {
+  id: string;
+  institution_name: string;
+  visit_date: string;
+  total_visitors: number;
+};

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileExcel, FileText } from 'lucide-react';
+import { FileText, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportAllVisitsToExcel } from '@/utils/exportHelpers';
 import { Visit } from '@/types/visit';
@@ -34,7 +34,7 @@ export const VisitExportButtons: React.FC<VisitExportButtonsProps> = ({ filtered
         Export PDF
       </Button>
       <Button variant="outline" onClick={handleExcelExport}>
-        <FileExcel className="mr-2 h-4 w-4" />
+        <FileSpreadsheet className="mr-2 h-4 w-4" />
         Export Excel
       </Button>
     </div>
