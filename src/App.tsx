@@ -71,6 +71,8 @@ function App() {
           <Route path="guest-registration" element={<GuestRegistrationList />} />
           <Route path="guest-registration/new" element={<GuestRegistrationForm />} />
           <Route path="guest-registration/edit/:id" element={<GuestRegistrationForm />} />
+          <Route path="guest-registration/view/:id" element={<GuestRegistrationForm />} />
+          <Route path="check-in/:id" element={<GuestRegistrationForm />} />
         </Route>
         
         {/* 404 Route */}

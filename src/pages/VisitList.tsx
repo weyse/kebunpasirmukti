@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Search, ArrowUpDown, Download, Filter } from 'lucide-react';
+import { Search, ArrowUpDown, Download, Filter, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,84 +23,19 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define visit data types
 type Visit = {
   id: string;
-  institutionName: string;
-  responsiblePerson: string;
-  totalVisitors: number;
-  activityType: string;
-  visitDate: Date;
-  status: 'completed' | 'cancelled' | 'no_show';
+  order_id: string;
+  institution_name: string;
+  responsible_person: string;
+  total_visitors: number;
+  visit_type: string;
+  visit_date: string;
+  payment_status: 'lunas' | 'belum_lunas';
 };
-
-// Mock data for past visits
-const mockVisits: Visit[] = [
-  {
-    id: 'PSD-AB1CD2',
-    institutionName: 'SD Negeri 5 Jakarta',
-    responsiblePerson: 'Bambang Sutrisno',
-    totalVisitors: 95,
-    activityType: 'wisata_edukasi',
-    visitDate: new Date('2025-04-15'),
-    status: 'completed',
-  },
-  {
-    id: 'PSD-EF3GH4',
-    institutionName: 'SMA Negeri 2 Bogor',
-    responsiblePerson: 'Dewi Lestari',
-    totalVisitors: 78,
-    activityType: 'penelitian',
-    visitDate: new Date('2025-04-12'),
-    status: 'completed',
-  },
-  {
-    id: 'PSD-IJ5KL6',
-    institutionName: 'Komunitas Lingkungan Hijau',
-    responsiblePerson: 'Eko Prabowo',
-    totalVisitors: 20,
-    activityType: 'camping',
-    visitDate: new Date('2025-04-10'),
-    status: 'completed',
-  },
-  {
-    id: 'PSD-MN7OP8',
-    institutionName: 'TK Bunga Bangsa',
-    responsiblePerson: 'Fitri Handayani',
-    totalVisitors: 35,
-    activityType: 'field_trip',
-    visitDate: new Date('2025-04-08'),
-    status: 'no_show',
-  },
-  {
-    id: 'PSD-QR9ST0',
-    institutionName: 'PT Maju Bersama',
-    responsiblePerson: 'Gunawan Wibisono',
-    totalVisitors: 42,
-    activityType: 'outbound',
-    visitDate: new Date('2025-04-05'),
-    status: 'cancelled',
-  },
-  {
-    id: 'PSD-UV1WX2',
-    institutionName: 'Keluarga Arjuna',
-    responsiblePerson: 'Hari Setiawan',
-    totalVisitors: 5,
-    activityType: 'wisata_edukasi',
-    visitDate: new Date('2025-04-03'),
-    status: 'completed',
-  },
-  {
-    id: 'PSD-YZ3AB4',
-    institutionName: 'SMP Negeri 3 Bandung',
-    responsiblePerson: 'Indra Gunawan',
-    totalVisitors: 66,
-    activityType: 'field_trip',
-    visitDate: new Date('2025-04-01'),
-    status: 'completed',
-  },
-];
 
 // Helper function for activity type labels
 const getActivityLabel = (type: string): string => {
@@ -118,16 +53,12 @@ const getActivityLabel = (type: string): string => {
 // Helper function for status labels and colors
 const getStatusInfo = (status: string) => {
   const statusMap: Record<string, { label: string; className: string }> = {
-    completed: {
+    lunas: {
       label: 'Selesai',
       className: 'bg-green-100 text-green-800 border-green-200',
     },
-    cancelled: {
-      label: 'Dibatalkan',
-      className: 'bg-red-100 text-red-800 border-red-200',
-    },
-    no_show: {
-      label: 'Tidak Hadir',
+    belum_lunas: {
+      label: 'Belum Lunas',
       className: 'bg-amber-100 text-amber-800 border-amber-200',
     },
   };
@@ -139,16 +70,59 @@ const VisitList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedActivityType, setSelectedActivityType] = useState<string | null>(null);
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Fetch visits from Supabase
+  useEffect(() => {
+    const fetchVisits = async () => {
+      setIsLoading(true);
+      
+      try {
+        const { data, error } = await supabase
+          .from('guest_registrations')
+          .select('id, order_id, institution_name, responsible_person, visit_type, visit_date, payment_status, adult_count, children_count, teacher_count')
+          .order('visit_date', { ascending: false });
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          // Transform data to match the Visit type
+          const transformedVisits: Visit[] = data.map(item => ({
+            id: item.id,
+            order_id: item.order_id || 'N/A',
+            institution_name: item.institution_name,
+            responsible_person: item.responsible_person,
+            total_visitors: (item.adult_count || 0) + (item.children_count || 0) + (item.teacher_count || 0),
+            visit_type: item.visit_type,
+            visit_date: item.visit_date,
+            payment_status: item.payment_status
+          }));
+          
+          setVisits(transformedVisits);
+        }
+      } catch (error) {
+        console.error('Error fetching visits:', error);
+        toast('Error fetching visits');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchVisits();
+  }, []);
   
   // Filter visits based on search and filters
-  const filteredVisits = mockVisits.filter((visit) => {
+  const filteredVisits = visits.filter((visit) => {
     const matchesSearch =
-      visit.responsiblePerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.institutionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.id.toLowerCase().includes(searchTerm.toLowerCase());
+      visit.responsible_person.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      visit.institution_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      visit.order_id.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = selectedStatus ? visit.status === selectedStatus : true;
-    const matchesActivity = selectedActivityType ? visit.activityType === selectedActivityType : true;
+    const matchesStatus = selectedStatus ? visit.payment_status === selectedStatus : true;
+    const matchesActivity = selectedActivityType ? visit.visit_type === selectedActivityType : true;
     
     return matchesSearch && matchesStatus && matchesActivity;
   });
@@ -202,10 +176,9 @@ const VisitList = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="">Semua Status</SelectItem>
-                    <SelectItem value="completed">Selesai</SelectItem>
-                    <SelectItem value="no_show">Tidak Hadir</SelectItem>
-                    <SelectItem value="cancelled">Dibatalkan</SelectItem>
+                    <SelectItem value="all">Semua Status</SelectItem>
+                    <SelectItem value="lunas">Selesai</SelectItem>
+                    <SelectItem value="belum_lunas">Belum Lunas</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -216,7 +189,7 @@ const VisitList = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="">Semua Kegiatan</SelectItem>
+                    <SelectItem value="all">Semua Kegiatan</SelectItem>
                     <SelectItem value="wisata_edukasi">Wisata Edukasi</SelectItem>
                     <SelectItem value="outbound">Outbound</SelectItem>
                     <SelectItem value="camping">Camping</SelectItem>
@@ -259,7 +232,16 @@ const VisitList = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredVisits.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="flex justify-center items-center">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      <span>Memuat data...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredVisits.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     Tidak ada data yang sesuai dengan filter
@@ -267,20 +249,20 @@ const VisitList = () => {
                 </TableRow>
               ) : (
                 filteredVisits.map((visit) => {
-                  const statusInfo = getStatusInfo(visit.status);
+                  const statusInfo = getStatusInfo(visit.payment_status);
                   
                   return (
                     <TableRow key={visit.id}>
-                      <TableCell className="font-medium">{visit.id}</TableCell>
-                      <TableCell>{visit.institutionName}</TableCell>
-                      <TableCell>{visit.responsiblePerson}</TableCell>
+                      <TableCell className="font-medium">{visit.order_id}</TableCell>
+                      <TableCell>{visit.institution_name}</TableCell>
+                      <TableCell>{visit.responsible_person}</TableCell>
                       <TableCell>
-                        {format(visit.visitDate, 'dd MMM yyyy')}
+                        {format(new Date(visit.visit_date), 'dd MMM yyyy')}
                       </TableCell>
                       <TableCell className="text-center">
-                        {getActivityLabel(visit.activityType)}
+                        {getActivityLabel(visit.visit_type)}
                       </TableCell>
-                      <TableCell className="text-center">{visit.totalVisitors}</TableCell>
+                      <TableCell className="text-center">{visit.total_visitors}</TableCell>
                       <TableCell className="text-center">
                         <Badge
                           variant="outline"
@@ -299,7 +281,7 @@ const VisitList = () => {
         
         <div className="flex items-center justify-between px-4 py-4 border-t">
           <div className="text-sm text-muted-foreground">
-            Menampilkan {filteredVisits.length} dari {mockVisits.length} kunjungan
+            Menampilkan {filteredVisits.length} dari {visits.length} kunjungan
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" disabled>
