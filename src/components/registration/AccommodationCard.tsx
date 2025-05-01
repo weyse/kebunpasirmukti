@@ -1,6 +1,9 @@
 
 import React from 'react';
 import { Input } from "@/components/ui/input";
+import { BedDouble, Plus } from "lucide-react"; 
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface AccommodationCardProps {
   name: string;
@@ -9,8 +12,12 @@ interface AccommodationCardProps {
   capacity: number;
   features: string[];
   count: number;
+  extraBedCount: number;
   onCountChange: (count: number) => void;
+  onExtraBedChange: (count: number) => void;
 }
+
+const EXTRA_BED_PRICE = 160000;
 
 const AccommodationCard: React.FC<AccommodationCardProps> = ({
   name,
@@ -19,12 +26,24 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
   capacity,
   features,
   count,
-  onCountChange
+  extraBedCount,
+  onCountChange,
+  onExtraBedChange
 }) => {
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
     onCountChange(isNaN(value) ? 0 : value);
   };
+
+  const handleExtraBedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    onExtraBedChange(isNaN(value) ? 0 : Math.min(value, count * 2));
+  };
+
+  // Calculate total price including extra beds
+  const roomPrice = price * count;
+  const extraBedPrice = EXTRA_BED_PRICE * extraBedCount;
+  const totalPrice = roomPrice + extraBedPrice;
 
   return (
     <div className="border rounded-md p-4 space-y-3">
@@ -45,7 +64,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
         ))}
       </div>
       
-      <div className="pt-2">
+      <div className="pt-2 space-y-3">
         <div className="flex items-center justify-between">
           <label htmlFor={`room-count-${name}`} className="text-sm font-medium">
             Jumlah Kamar:
@@ -60,10 +79,43 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
             className="w-20 text-center"
           />
         </div>
+        
         {count > 0 && (
-          <p className="text-sm text-right text-muted-foreground mt-2">
-            Kamar yang dipilih: {count} dari {capacity} tersedia
-          </p>
+          <>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <BedDouble className="h-4 w-4" />
+                <label htmlFor={`extra-bed-${name}`} className="text-sm font-medium">
+                  Extra Bed (Rp {EXTRA_BED_PRICE.toLocaleString()}/bed):
+                </label>
+              </div>
+              <Input
+                id={`extra-bed-${name}`}
+                type="number"
+                min="0"
+                max={count * 2} 
+                value={extraBedCount}
+                onChange={handleExtraBedChange}
+                className="w-20 text-center"
+              />
+            </div>
+            
+            {extraBedCount > 0 && (
+              <div className="text-sm text-right text-green-600">
+                Extra Bed: {extraBedCount} × Rp {EXTRA_BED_PRICE.toLocaleString()} = Rp {extraBedPrice.toLocaleString()}
+              </div>
+            )}
+            
+            <div className="pt-1 border-t">
+              <p className="text-sm text-right font-medium">
+                Total: Rp {totalPrice.toLocaleString()}
+              </p>
+            </div>
+            
+            <p className="text-sm text-right text-muted-foreground">
+              Kamar yang dipilih: {count} dari {capacity} tersedia
+            </p>
+          </>
         )}
       </div>
     </div>

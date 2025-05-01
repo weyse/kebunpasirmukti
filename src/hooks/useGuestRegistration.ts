@@ -11,6 +11,9 @@ export type VisitType = 'wisata_edukasi' | 'outbound' | 'camping' | 'field_trip'
 export type PaymentStatus = 'belum_lunas' | 'lunas';
 export type ClassType = 'kb_tk' | 'sd_1_2' | 'sd_3_4' | 'sd_5_6' | 'smp' | 'sma' | 'umum_a' | 'umum_b' | 'abk';
 
+// Extra bed price constant
+export const EXTRA_BED_PRICE = 160000;
+
 // Class options constant
 export const classOptions = [
   { id: 'kb_tk', label: 'KB/TK' },
@@ -78,6 +81,7 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
   const [selectedClasses, setSelectedClasses] = useState<ClassType[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string>('');
   const [accommodationCounts, setAccommodationCounts] = useState<Record<string, number>>({});
+  const [extraBedCounts, setExtraBedCounts] = useState<Record<string, number>>({});
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const [totalCost, setTotalCost] = useState(0);
   const [discountedCost, setDiscountedCost] = useState(0);
@@ -171,10 +175,13 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
         
         // Initialize accommodation counts
         const initialCounts: Record<string, number> = {};
+        const initialExtraBedCounts: Record<string, number> = {};
         data.forEach(room => {
           initialCounts[room.id] = 0;
+          initialExtraBedCounts[room.id] = 0;
         });
         setAccommodationCounts(prev => ({...prev, ...initialCounts}));
+        setExtraBedCounts(prev => ({...prev, ...initialExtraBedCounts}));
       }
     };
 
@@ -289,6 +296,7 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
     watchDownPayment,
     selectedPackage,
     accommodationCounts,
+    extraBedCounts,
     selectedVenues,
     packages,
     venues
@@ -378,6 +386,11 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
       return sum + (accommodation ? accommodation.price * count : 0);
     }, 0);
     
+    // Calculate extra bed cost
+    const extraBedCost = Object.entries(extraBedCounts).reduce((sum, [id, count]) => {
+      return sum + (count * EXTRA_BED_PRICE);
+    }, 0);
+    
     // Calculate venue cost
     const venueCost = selectedVenues.reduce((sum, venueId) => {
       const venue = venues.find(v => v.id === venueId);
@@ -387,8 +400,8 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
     // Calculate participants cost
     const participantsCost = (adultCount * adultPrice) + (childrenCount * childrenPrice) + (teacherCount * teacherPrice);
     
-    // Calculate total cost
-    const total = participantsCost + accommodationCost + venueCost;
+    // Calculate total cost including extra beds
+    const total = participantsCost + accommodationCost + extraBedCost + venueCost;
     setTotalCost(total);
     
     // Apply discount
@@ -412,6 +425,24 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
 
   const handleAccommodationChange = (id: string, count: number) => {
     setAccommodationCounts(prev => ({
+      ...prev,
+      [id]: count
+    }));
+    
+    // Reset extra bed count if room count is reduced
+    setExtraBedCounts(prev => {
+      if (count < prev[id]) {
+        return {
+          ...prev,
+          [id]: 0
+        };
+      }
+      return prev;
+    });
+  };
+  
+  const handleExtraBedChange = (id: string, count: number) => {
+    setExtraBedCounts(prev => ({
       ...prev,
       [id]: count
     }));
@@ -445,6 +476,9 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
       const visitDateForDB = formValues.visit_date ? formValues.visit_date.toISOString().split('T')[0] : null;
       const paymentDateForDB = formValues.payment_date ? formValues.payment_date.toISOString().split('T')[0] : null;
       
+      // Calculate extra bed cost for inclusion in submission
+      const extraBedCost = Object.values(extraBedCounts).reduce((sum, count) => sum + (count * EXTRA_BED_PRICE), 0);
+      
       // Prepare data for submission
       const submissionData = {
         responsible_person: formValues.responsible_person,
@@ -465,7 +499,8 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
         down_payment: Number(formValues.down_payment || 0),
         payment_date: paymentDateForDB,
         bank_name: formValues.bank_name || '',
-        payment_status: dbPaymentStatus
+        payment_status: dbPaymentStatus,
+        extra_bed_cost: extraBedCost
       };
 
       let registrationId;
@@ -543,12 +578,25 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
   const getSummaryData = () => {
     const values = form.getValues();
     
+    // Calculate extra bed cost for summary
+    const totalExtraBedCost = Object.values(extraBedCounts).reduce(
+      (sum, count) => sum + (count * EXTRA_BED_PRICE), 0
+    );
+    
     const basicInfo = [
       { label: 'PIC', value: values.responsible_person || '-' },
       { label: 'Institusi', value: values.institution_name || '-' },
       { label: 'Tanggal Kunjungan', value: values.visit_date ? format(values.visit_date, 'dd MMM yyyy') : '-' },
       { label: 'Jumlah Peserta', value: `${Number(values.adult_count) + Number(values.children_count) + Number(values.teacher_count)}` }
     ];
+    
+    // Add extra bed info if any
+    if (totalExtraBedCost > 0) {
+      basicInfo.push({ 
+        label: 'Extra Bed', 
+        value: `${Object.values(extraBedCounts).reduce((sum, count) => sum + count, 0)} (Rp ${totalExtraBedCost.toLocaleString()})` 
+      });
+    }
     
     const paymentInfo = [];
     if (values.bank_name) {
@@ -575,6 +623,7 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
     selectedClasses,
     selectedPackage,
     accommodationCounts,
+    extraBedCounts,
     selectedVenues,
     totalCost,
     discountedCost,
@@ -585,6 +634,7 @@ export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
     handleClassChange,
     handlePackageChange,
     handleAccommodationChange,
+    handleExtraBedChange,
     handleVenueChange,
     handleSubmit,
     getSummaryData

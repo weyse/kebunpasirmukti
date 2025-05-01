@@ -23,6 +23,7 @@ const GuestRegistrationForm = () => {
     selectedClasses,
     selectedPackage,
     accommodationCounts,
+    extraBedCounts,
     selectedVenues,
     totalCost,
     discountedCost,
@@ -33,6 +34,7 @@ const GuestRegistrationForm = () => {
     handleClassChange,
     handlePackageChange,
     handleAccommodationChange,
+    handleExtraBedChange,
     handleVenueChange,
     handleSubmit,
     getSummaryData
@@ -88,7 +90,9 @@ const GuestRegistrationForm = () => {
           <AccommodationSelectionForm
             accommodations={accommodations}
             accommodationCounts={accommodationCounts}
+            extraBedCounts={extraBedCounts}
             onAccommodationChange={handleAccommodationChange}
+            onExtraBedChange={handleExtraBedChange}
           />
           
           {/* Venue Section */}

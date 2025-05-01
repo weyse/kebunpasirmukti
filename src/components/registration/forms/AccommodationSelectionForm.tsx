@@ -15,13 +15,17 @@ interface Accommodation {
 interface AccommodationSelectionFormProps {
   accommodations: Accommodation[];
   accommodationCounts: Record<string, number>;
+  extraBedCounts: Record<string, number>;
   onAccommodationChange: (id: string, count: number) => void;
+  onExtraBedChange: (id: string, count: number) => void;
 }
 
 const AccommodationSelectionForm: React.FC<AccommodationSelectionFormProps> = ({ 
   accommodations,
   accommodationCounts,
-  onAccommodationChange
+  extraBedCounts,
+  onAccommodationChange,
+  onExtraBedChange
 }) => {
   return (
     <Card>
@@ -42,7 +46,9 @@ const AccommodationSelectionForm: React.FC<AccommodationSelectionFormProps> = ({
               capacity={accommodation.capacity}
               features={accommodation.features}
               count={accommodationCounts[accommodation.id] || 0}
+              extraBedCount={extraBedCounts[accommodation.id] || 0}
               onCountChange={(count) => onAccommodationChange(accommodation.id, count)}
+              onExtraBedChange={(count) => onExtraBedChange(accommodation.id, count)}
             />
           ))}
         </div>
