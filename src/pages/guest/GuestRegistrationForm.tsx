@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -45,6 +44,11 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+
+// Define type for visit_type to match database enum
+type VisitType = 'wisata_edukasi' | 'outbound' | 'camping' | 'field_trip' | 'penelitian' | 'lainnya';
+type PaymentStatus = 'belum_lunas' | 'lunas';
+type PackageType = 'HEMAT' | 'REGULER' | 'LENGKAP';
 
 const formSchema = z.object({
   responsible_person: z.string().min(2, {
@@ -106,8 +110,8 @@ const GuestRegistrationForm = () => {
     adult_count: '0',
     children_count: '0',
     teacher_count: '0',
-    visit_type: 'INSTANSI',
-    package_type: 'HEMAT',
+    visit_type: 'INSTANSI' as 'INSTANSI' | 'UMUM',
+    package_type: 'HEMAT' as PackageType,
     notes: '',
     document_url: '',
     discount_percentage: '',
@@ -167,6 +171,14 @@ const GuestRegistrationForm = () => {
         // Convert payment_status enum to boolean
         const paymentStatusBool = data.payment_status === 'lunas';
 
+        // Map database visit_type to form values
+        const formVisitType = data.visit_type === 'wisata_edukasi' ? 'INSTANSI' : 'UMUM';
+        
+        // Ensure package_type matches allowed values
+        const packageType = ['HEMAT', 'REGULER', 'LENGKAP'].includes(data.package_type) 
+          ? data.package_type as PackageType 
+          : 'HEMAT';
+
         setFormData({
           responsible_person: data.responsible_person || '',
           institution_name: data.institution_name || '',
@@ -176,8 +188,8 @@ const GuestRegistrationForm = () => {
           adult_count: String(data.adult_count) || '0',
           children_count: String(data.children_count) || '0',
           teacher_count: String(data.teacher_count) || '0',
-          visit_type: data.visit_type === 'wisata_edukasi' ? 'INSTANSI' : 'UMUM', // Map DB value to form value
-          package_type: data.package_type || 'HEMAT',
+          visit_type: formVisitType as 'INSTANSI' | 'UMUM',
+          package_type: packageType,
           notes: data.notes || '',
           document_url: data.document_url || '',
           discount_percentage: String(data.discount_percentage) || '0',
@@ -197,8 +209,8 @@ const GuestRegistrationForm = () => {
           adult_count: String(data.adult_count) || '0',
           children_count: String(data.children_count) || '0',
           teacher_count: String(data.teacher_count) || '0',
-          visit_type: data.visit_type === 'wisata_edukasi' ? 'INSTANSI' : 'UMUM', // Map DB value to form value
-          package_type: data.package_type || 'HEMAT',
+          visit_type: formVisitType as 'INSTANSI' | 'UMUM',
+          package_type: packageType,
           notes: data.notes || '',
           document_url: data.document_url || '',
           discount_percentage: String(data.discount_percentage) || '0',
@@ -267,10 +279,14 @@ const GuestRegistrationForm = () => {
       const discountedCost = calculateFinalCost();
       
       // Map the boolean payment_status to the expected enum values
-      const dbPaymentStatus = formData.payment_status ? 'lunas' : 'belum_lunas';
+      const dbPaymentStatus: PaymentStatus = formData.payment_status ? 'lunas' : 'belum_lunas';
       
       // Map form visit_type to DB visit_type
-      const dbVisitType = formData.visit_type === 'INSTANSI' ? 'wisata_edukasi' : 'lainnya';
+      const dbVisitType: VisitType = formData.visit_type === 'INSTANSI' ? 'wisata_edukasi' : 'lainnya';
+      
+      // Format visit_date and payment_date to ISO string format for database
+      const visitDateForDB = formData.visit_date ? formData.visit_date.toISOString().split('T')[0] : null;
+      const paymentDateForDB = formData.payment_date ? formData.payment_date.toISOString().split('T')[0] : null;
       
       // Prepare data for submission
       const submissionData = {
@@ -278,7 +294,7 @@ const GuestRegistrationForm = () => {
         institution_name: formData.institution_name,
         phone_number: formData.phone_number,
         address: formData.address,
-        visit_date: formData.visit_date,
+        visit_date: visitDateForDB,
         adult_count: Number(formData.adult_count),
         children_count: Number(formData.children_count),
         teacher_count: Number(formData.teacher_count),
@@ -290,7 +306,7 @@ const GuestRegistrationForm = () => {
         discount_percentage: Number(formData.discount_percentage || 0),
         discounted_cost: discountedCost,
         down_payment: Number(formData.down_payment || 0),
-        payment_date: formData.payment_date || null,
+        payment_date: paymentDateForDB,
         bank_name: formData.bank_name || '',
         payment_status: dbPaymentStatus
       };
@@ -412,6 +428,7 @@ const GuestRegistrationForm = () => {
                   <FormLabel>Tanggal Kunjungan</FormLabel>
                   <FormControl>
                     <DatePicker
+                      date={field.value}
                       onSelect={(date) => {
                         field.onChange(date);
                         handleDateChange("visit_date", date);
@@ -486,7 +503,7 @@ const GuestRegistrationForm = () => {
                   <FormLabel>Tipe Kunjungan</FormLabel>
                   <Select onValueChange={(value) => {
                     field.onChange(value);
-                    setFormData(prev => ({ ...prev, visit_type: value }));
+                    setFormData(prev => ({ ...prev, visit_type: value as 'INSTANSI' | 'UMUM' }));
                   }} defaultValue={formData.visit_type}>
                     <FormControl>
                       <SelectTrigger>
@@ -510,7 +527,7 @@ const GuestRegistrationForm = () => {
                   <FormLabel>Tipe Paket</FormLabel>
                   <Select onValueChange={(value) => {
                     field.onChange(value);
-                    setFormData(prev => ({ ...prev, package_type: value }));
+                    setFormData(prev => ({ ...prev, package_type: value as PackageType }));
                   }} defaultValue={formData.package_type}>
                     <FormControl>
                       <SelectTrigger>
@@ -601,11 +618,12 @@ const GuestRegistrationForm = () => {
                   <FormLabel>Tanggal Pembayaran</FormLabel>
                   <FormControl>
                     <DatePicker
+                      date={field.value}
                       onSelect={(date) => {
                         field.onChange(date);
                         handleDateChange("payment_date", date);
                       }}
-                      defaultMonth={formData.payment_date}
+                      defaultMonth={formData.payment_date || undefined}
                       mode="single"
                       captionLayout="dropdown"
                       disabled={!formData.payment_status}
@@ -647,10 +665,11 @@ const GuestRegistrationForm = () => {
                   </div>
                   <FormControl>
                     <Checkbox
-                      checked={formData.payment_status}
+                      checked={field.value}
                       onCheckedChange={(checked) => {
                         field.onChange(checked);
-                        handleCheckboxChange({ target: { name: 'payment_status', checked } } as any);
+                        const isChecked = !!checked;
+                        handleCheckboxChange({ target: { name: 'payment_status', checked: isChecked } } as any);
                       }}
                     />
                   </FormControl>
