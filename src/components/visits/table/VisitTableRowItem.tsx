@@ -13,13 +13,23 @@ interface VisitTableRowItemProps {
 }
 
 export function VisitTableRowItem({ visit, setVisitToDelete }: VisitTableRowItemProps) {
+  // Function to safely format date
+  const formatVisitDate = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'dd MMM yyyy');
+    } catch (error) {
+      console.error(`Error formatting date: ${dateString}`, error);
+      return dateString;
+    }
+  };
+  
   return (
     <TableRow>
-      <TableCell className="font-medium">{visit.order_id}</TableCell>
+      <TableCell className="font-medium">{visit.order_id || '-'}</TableCell>
       <TableCell>{visit.institution_name}</TableCell>
       <TableCell>{visit.responsible_person}</TableCell>
       <TableCell>
-        {format(new Date(visit.visit_date), 'dd MMM yyyy')}
+        {formatVisitDate(visit.visit_date)}
       </TableCell>
       <TableCell className="text-center">
         {getActivityLabel(visit.visit_type)}
