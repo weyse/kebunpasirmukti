@@ -61,6 +61,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               <span className="text-muted-foreground">Total Biaya Dasar:</span>
               <span>Rp {costCalculation.baseTotal.toLocaleString()}</span>
             </div>
+            {costCalculation.baseTotal !== costCalculation.discountedTotal && (
+              <div className="flex justify-between text-green-600">
+                <span>Diskon untuk Anak-anak:</span>
+                <span>- Rp {(costCalculation.baseTotal - costCalculation.discountedTotal).toLocaleString()}</span>
+              </div>
+            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Setelah Diskon:</span>
               <span>Rp {costCalculation.discountedTotal.toLocaleString()}</span>

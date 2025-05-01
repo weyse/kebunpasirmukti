@@ -28,6 +28,7 @@ const GuestRegistrationForm = () => {
     totalCost,
     discountedCost,
     remainingBalance,
+    calculationSummary,
     packages,
     accommodations,
     venues,
@@ -108,6 +109,7 @@ const GuestRegistrationForm = () => {
             totalCost={totalCost}
             discountedCost={discountedCost}
             remainingBalance={remainingBalance}
+            calculationSummary={calculationSummary}
           />
           
           {/* Notes and Order Summary */}

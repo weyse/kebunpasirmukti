@@ -39,7 +39,7 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
     handleVenueChange,
   } = useSelectionState();
   
-  const { totalCost, discountedCost, remainingBalance } = useCostCalculation(
+  const { totalCost, discountedCost, remainingBalance, calculationSummary } = useCostCalculation(
     form,
     selectedPackage,
     accommodationCounts,
@@ -137,6 +137,7 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
     totalCost,
     discountedCost,
     remainingBalance,
+    calculationSummary,
     packages,
     accommodations,
     venues,

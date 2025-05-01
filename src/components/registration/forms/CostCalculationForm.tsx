@@ -13,19 +13,23 @@ import {
 } from "@/components/ui/form";
 import { UseFormReturn } from 'react-hook-form';
 import { DatePicker } from "@/components/ui/date-picker";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CostCalculationSummary } from "@/hooks/registration/useCostCalculation";
 
 interface CostCalculationFormProps {
   form: UseFormReturn<any>;
   totalCost: number;
   discountedCost: number;
   remainingBalance: number;
+  calculationSummary: CostCalculationSummary;
 }
 
 const CostCalculationForm: React.FC<CostCalculationFormProps> = ({ 
   form, 
   totalCost, 
   discountedCost, 
-  remainingBalance 
+  remainingBalance,
+  calculationSummary
 }) => {
   return (
     <Card>
@@ -49,13 +53,78 @@ const CostCalculationForm: React.FC<CostCalculationFormProps> = ({
           </div>
         </div>
         
+        {/* Detailed cost calculation table */}
+        <div className="mt-4">
+          <h3 className="font-medium mb-2">Ringkasan Perhitungan</h3>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Komponen</TableHead>
+                <TableHead className="text-right">Jumlah</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>Dewasa</TableCell>
+                <TableCell className="text-right">Rp {calculationSummary.adultCost.toLocaleString()}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  Anak-anak
+                  {calculationSummary.childrenDiscountAmount > 0 && (
+                    <span className="block text-xs text-green-600">
+                      Diskon {form.getValues("discount_percentage")}% (- Rp {calculationSummary.childrenDiscountAmount.toLocaleString()})
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  <span className={calculationSummary.childrenDiscountAmount > 0 ? "line-through text-muted-foreground" : ""}>
+                    Rp {calculationSummary.childrenCost.toLocaleString()}
+                  </span>
+                  {calculationSummary.childrenDiscountAmount > 0 && (
+                    <span className="block font-medium text-green-600">
+                      Rp {(calculationSummary.childrenCost - calculationSummary.childrenDiscountAmount).toLocaleString()}
+                    </span>
+                  )}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Guru</TableCell>
+                <TableCell className="text-right">Rp {calculationSummary.teacherCost.toLocaleString()}</TableCell>
+              </TableRow>
+              {calculationSummary.accommodationCost > 0 && (
+                <TableRow>
+                  <TableCell>Akomodasi</TableCell>
+                  <TableCell className="text-right">Rp {calculationSummary.accommodationCost.toLocaleString()}</TableCell>
+                </TableRow>
+              )}
+              {calculationSummary.extraBedCost > 0 && (
+                <TableRow>
+                  <TableCell>Extra Bed</TableCell>
+                  <TableCell className="text-right">Rp {calculationSummary.extraBedCost.toLocaleString()}</TableCell>
+                </TableRow>
+              )}
+              {calculationSummary.venueCost > 0 && (
+                <TableRow>
+                  <TableCell>Venue</TableCell>
+                  <TableCell className="text-right">Rp {calculationSummary.venueCost.toLocaleString()}</TableCell>
+                </TableRow>
+              )}
+              <TableRow className="border-t-2">
+                <TableCell className="font-medium">TOTAL</TableCell>
+                <TableCell className="text-right font-bold">Rp {discountedCost.toLocaleString()}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
           <FormField
             control={form.control}
             name="discount_percentage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Diskon Paket (%)</FormLabel>
+                <FormLabel>Diskon untuk Anak-anak (%)</FormLabel>
                 <FormControl>
                   <Input type="number" {...field} min="0" max="100" />
                 </FormControl>
@@ -63,7 +132,7 @@ const CostCalculationForm: React.FC<CostCalculationFormProps> = ({
                 <div className="text-right text-sm">
                   <span className="text-muted-foreground">Potongan Diskon: </span>
                   <span className="font-medium text-red-500">
-                    Rp {((Number(field.value) / 100) * totalCost).toLocaleString()}
+                    Rp {calculationSummary.childrenDiscountAmount.toLocaleString()}
                   </span>
                 </div>
               </FormItem>
