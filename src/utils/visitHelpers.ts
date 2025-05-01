@@ -30,3 +30,16 @@ export const getStatusInfo = (status: string) => {
   };
   return statusMap[status] || { label: status, className: '' };
 };
+
+// Helper function for activity colors
+export const getActivityColor = (type: string) => {
+  const colors: Record<string, string> = {
+    wisata_edukasi: 'bg-blue-100 text-blue-800 border-blue-200',
+    outbound: 'bg-green-100 text-green-800 border-green-200',
+    camping: 'bg-amber-100 text-amber-800 border-amber-200',
+    field_trip: 'bg-purple-100 text-purple-800 border-purple-200',
+    penelitian: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    lainnya: 'bg-gray-100 text-gray-800 border-gray-200',
+  };
+  return colors[type] || 'bg-gray-100 text-gray-800 border-gray-200';
+};

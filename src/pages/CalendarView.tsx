@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, addMonths, subMonths } from 'date-fns';
+import React, { useState, useEffect } from 'react';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, addMonths, subMonths, parseISO } from 'date-fns';
 import { Calendar, ChevronLeft, ChevronRight, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -21,91 +21,16 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-// Types
-type Visit = {
-  id: string;
-  institutionName: string;
-  totalVisitors: number;
-  activityType: string;
-  date: Date;
-};
-
-// Mock data for visits
-const mockVisits: Visit[] = [
-  {
-    id: 'PSD-RT1XA2',
-    institutionName: 'SD Negeri 1 Cisarua',
-    totalVisitors: 120,
-    activityType: 'wisata_edukasi',
-    date: new Date('2025-05-05'),
-  },
-  {
-    id: 'PSD-MN2BX3',
-    institutionName: 'TK Harapan Bunda',
-    totalVisitors: 45,
-    activityType: 'outbound',
-    date: new Date('2025-05-07'),
-  },
-  {
-    id: 'PSD-PS9CZ7',
-    institutionName: 'Komunitas Pecinta Alam',
-    totalVisitors: 25,
-    activityType: 'camping',
-    date: new Date('2025-05-10'),
-  },
-  {
-    id: 'PSD-LK4DF5',
-    institutionName: 'SMP Negeri 2 Bandung',
-    totalVisitors: 86,
-    activityType: 'field_trip',
-    date: new Date('2025-05-15'),
-  },
-  {
-    id: 'PSD-QW5EF6',
-    institutionName: 'Keluarga Joko',
-    totalVisitors: 4,
-    activityType: 'wisata_edukasi',
-    date: new Date('2025-05-20'),
-  },
-  {
-    id: 'PSD-ZX7GH8',
-    institutionName: 'PT Maju Bersama',
-    totalVisitors: 32,
-    activityType: 'outbound',
-    date: new Date('2025-05-20'),
-  },
-];
+import { supabase } from '@/integrations/supabase/client';
+import { Visit } from '@/types/visit';
+import { getActivityLabel, getActivityColor } from '@/utils/visitHelpers';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Helper functions
 const getVisitsByDate = (date: Date, visits: Visit[]) => {
   return visits.filter(
-    (visit) => format(visit.date, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
+    (visit) => format(parseISO(visit.visit_date), 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
   );
-};
-
-const getActivityLabel = (type: string) => {
-  const labels: Record<string, string> = {
-    wisata_edukasi: 'Wisata Edukasi',
-    outbound: 'Outbound',
-    camping: 'Camping',
-    field_trip: 'Field Trip',
-    penelitian: 'Penelitian',
-    lainnya: 'Lainnya',
-  };
-  return labels[type] || type;
-};
-
-const getActivityColor = (type: string) => {
-  const colors: Record<string, string> = {
-    wisata_edukasi: 'bg-blue-100 text-blue-800 border-blue-200',
-    outbound: 'bg-green-100 text-green-800 border-green-200',
-    camping: 'bg-amber-100 text-amber-800 border-amber-200',
-    field_trip: 'bg-purple-100 text-purple-800 border-purple-200',
-    penelitian: 'bg-indigo-100 text-indigo-800 border-indigo-200',
-    lainnya: 'bg-gray-100 text-gray-800 border-gray-200',
-  };
-  return colors[type] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
 // Component
@@ -115,6 +40,46 @@ const CalendarView = () => {
   const [selectedVisits, setSelectedVisits] = useState<Visit[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'month' | 'list'>('month');
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchVisits = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('guest_registrations')
+          .select('id, order_id, institution_name, responsible_person, visit_date, visit_type, payment_status, adult_count, children_count, teacher_count')
+          .order('visit_date', { ascending: true });
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          // Transform data to match the Visit type
+          const transformedVisits: Visit[] = data.map(item => ({
+            id: item.id,
+            order_id: item.order_id || 'N/A',
+            institution_name: item.institution_name,
+            responsible_person: item.responsible_person,
+            total_visitors: (item.adult_count || 0) + (item.children_count || 0) + (item.teacher_count || 0),
+            visit_type: item.visit_type,
+            visit_date: item.visit_date,
+            payment_status: item.payment_status
+          }));
+          
+          setVisits(transformedVisits);
+        }
+      } catch (error) {
+        console.error('Error fetching visits:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchVisits();
+  }, []);
 
   const daysInMonth = eachDayOfInterval({
     start: startOfMonth(currentMonth),
@@ -130,13 +95,18 @@ const CalendarView = () => {
   };
 
   const handleDateClick = (date: Date) => {
-    const visitsOnDate = getVisitsByDate(date, mockVisits);
+    const visitsOnDate = getVisitsByDate(date, visits);
     setSelectedDate(date);
     setSelectedVisits(visitsOnDate);
     if (visitsOnDate.length > 0) {
       setDialogOpen(true);
     }
   };
+
+  const visitsInCurrentMonth = visits.filter(visit => {
+    const visitDate = parseISO(visit.visit_date);
+    return isSameMonth(visitDate, currentMonth);
+  });
   
   return (
     <div className="space-y-6">
@@ -164,7 +134,19 @@ const CalendarView = () => {
         </Tabs>
       </div>
 
-      {viewMode === 'month' ? (
+      {isLoading ? (
+        <Card className="w-full">
+          <CardHeader>
+            <Skeleton className="h-6 w-1/3 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <div className="h-80 w-full">
+              <Skeleton className="h-full w-full" />
+            </div>
+          </CardContent>
+        </Card>
+      ) : viewMode === 'month' ? (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -198,7 +180,7 @@ const CalendarView = () => {
               ))}
 
               {daysInMonth.map((day) => {
-                const dayVisits = getVisitsByDate(day, mockVisits);
+                const dayVisits = getVisitsByDate(day, visits);
                 const isCurrentDay = isToday(day);
                 const isSameMonthDay = isSameMonth(day, currentMonth);
                 const hasVisits = dayVisits.length > 0;
@@ -221,12 +203,12 @@ const CalendarView = () => {
                       {format(day, 'd')}
                     </div>
                     <div className="overflow-y-auto max-h-[calc(100%-2rem)] space-y-1">
-                      {dayVisits.map((visit, index) => (
+                      {dayVisits.slice(0, 2).map((visit) => (
                         <div
                           key={visit.id}
                           className="text-xs truncate bg-pasirmukti-100 text-pasirmukti-800 rounded px-1 py-0.5"
                         >
-                          {visit.institutionName}
+                          {visit.institution_name}
                         </div>
                       ))}
                     </div>
@@ -252,7 +234,7 @@ const CalendarView = () => {
               Hari ini
             </div>
             <div>
-              Total: {mockVisits.length} kunjungan bulan ini
+              Total: {visitsInCurrentMonth.length} kunjungan bulan ini
             </div>
           </CardFooter>
         </Card>
@@ -266,31 +248,31 @@ const CalendarView = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {mockVisits
-                .sort((a, b) => a.date.getTime() - b.date.getTime())
+              {visits
+                .sort((a, b) => new Date(a.visit_date).getTime() - new Date(b.visit_date).getTime())
                 .map((visit) => (
                   <div 
                     key={visit.id} 
                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
                     onClick={() => {
-                      setSelectedDate(visit.date);
+                      setSelectedDate(parseISO(visit.visit_date));
                       setSelectedVisits([visit]);
                       setDialogOpen(true);
                     }}
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex flex-col items-center justify-center bg-muted rounded-lg p-3 w-14 h-14">
-                        <div className="text-sm font-medium">{format(visit.date, 'dd')}</div>
-                        <div className="text-xs">{format(visit.date, 'MMM')}</div>
+                        <div className="text-sm font-medium">{format(parseISO(visit.visit_date), 'dd')}</div>
+                        <div className="text-xs">{format(parseISO(visit.visit_date), 'MMM')}</div>
                       </div>
                       <div>
-                        <h3 className="font-medium">{visit.institutionName}</h3>
+                        <h3 className="font-medium">{visit.institution_name}</h3>
                         <div className="flex items-center mt-1">
-                          <Badge variant="outline" className={getActivityColor(visit.activityType)}>
-                            {getActivityLabel(visit.activityType)}
+                          <Badge variant="outline" className={getActivityColor(visit.visit_type)}>
+                            {getActivityLabel(visit.visit_type)}
                           </Badge>
                           <span className="ml-2 text-sm text-muted-foreground">
-                            {visit.totalVisitors} pengunjung
+                            {visit.total_visitors} pengunjung
                           </span>
                         </div>
                       </div>
@@ -299,7 +281,7 @@ const CalendarView = () => {
                   </div>
                 ))}
                 
-                {mockVisits.length === 0 && (
+                {visits.length === 0 && (
                   <div className="text-center py-8 text-muted-foreground">
                     Tidak ada kunjungan yang terjadwal
                   </div>
@@ -324,18 +306,20 @@ const CalendarView = () => {
             {selectedVisits.map((visit) => (
               <div key={visit.id} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-medium">{visit.institutionName}</h3>
-                  <Badge variant="outline" className={getActivityColor(visit.activityType)}>
-                    {getActivityLabel(visit.activityType)}
+                  <h3 className="font-medium">{visit.institution_name}</h3>
+                  <Badge variant="outline" className={getActivityColor(visit.visit_type)}>
+                    {getActivityLabel(visit.visit_type)}
                   </Badge>
                 </div>
                 <div className="mt-2 space-y-2">
-                  <p className="text-sm"><strong>ID:</strong> {visit.id}</p>
-                  <p className="text-sm"><strong>Jumlah Pengunjung:</strong> {visit.totalVisitors} orang</p>
-                  <p className="text-sm"><strong>Jenis Kegiatan:</strong> {getActivityLabel(visit.activityType)}</p>
+                  <p className="text-sm"><strong>ID:</strong> {visit.order_id}</p>
+                  <p className="text-sm"><strong>Jumlah Pengunjung:</strong> {visit.total_visitors} orang</p>
+                  <p className="text-sm"><strong>Jenis Kegiatan:</strong> {getActivityLabel(visit.visit_type)}</p>
                 </div>
                 <div className="mt-4 flex justify-end">
-                  <Button variant="outline" size="sm">Lihat Detail</Button>
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/guest-registration/${visit.id}`)}>
+                    Lihat Detail
+                  </Button>
                 </div>
               </div>
             ))}

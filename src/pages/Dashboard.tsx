@@ -5,25 +5,22 @@ import { Button } from '@/components/ui/button';
 import { CalendarCheck, Users, Calendar, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-// Mock data for the dashboard
-const visitData = [
-  { name: 'Jan', visitors: 400 },
-  { name: 'Feb', visitors: 300 },
-  { name: 'Mar', visitors: 600 },
-  { name: 'Apr', visitors: 800 },
-  { name: 'Mei', visitors: 500 },
-  { name: 'Jun', visitors: 700 },
-];
-
-const upcomingVisits = [
-  { id: '001', name: 'SD Negeri 1 Cisarua', date: '2025-05-05', count: 120 },
-  { id: '002', name: 'TK Harapan Bunda', date: '2025-05-07', count: 45 },
-  { id: '003', name: 'Komunitas Pecinta Alam', date: '2025-05-10', count: 25 },
-];
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { format, parseISO } from 'date-fns';
+import { id } from 'date-fns/locale';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { metrics, isLoading } = useDashboardData();
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('id-ID', { 
+      style: 'currency', 
+      currency: 'IDR',
+      maximumFractionDigits: 0
+    }).format(value);
+  };
 
   return (
     <div className="space-y-6">
@@ -44,10 +41,19 @@ const Dashboard = () => {
             <CalendarCheck className="h-4 w-4 text-pasirmukti-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">142</div>
-            <p className="text-xs text-muted-foreground">
-              +12% dari bulan sebelumnya
-            </p>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-8 w-20 mb-1" />
+                <Skeleton className="h-4 w-32" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{metrics.totalVisits}</div>
+                <p className="text-xs text-muted-foreground">
+                  {metrics.monthlyGrowth.visits >= 0 ? '+' : ''}{metrics.monthlyGrowth.visits}% dari bulan sebelumnya
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -56,10 +62,19 @@ const Dashboard = () => {
             <Users className="h-4 w-4 text-pasirmukti-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">4,281</div>
-            <p className="text-xs text-muted-foreground">
-              +8% dari bulan sebelumnya
-            </p>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-8 w-20 mb-1" />
+                <Skeleton className="h-4 w-32" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{metrics.totalVisitors.toLocaleString('id-ID')}</div>
+                <p className="text-xs text-muted-foreground">
+                  {metrics.monthlyGrowth.visitors >= 0 ? '+' : ''}{metrics.monthlyGrowth.visitors}% dari bulan sebelumnya
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -79,10 +94,19 @@ const Dashboard = () => {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Rp 85,420,000</div>
-            <p className="text-xs text-muted-foreground">
-              +14% dari bulan sebelumnya
-            </p>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-8 w-32 mb-1" />
+                <Skeleton className="h-4 w-32" />
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold">{formatCurrency(metrics.totalRevenue)}</div>
+                <p className="text-xs text-muted-foreground">
+                  {metrics.monthlyGrowth.revenue >= 0 ? '+' : ''}{metrics.monthlyGrowth.revenue}% dari bulan sebelumnya
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -94,25 +118,31 @@ const Dashboard = () => {
             <CardDescription>Jumlah pengunjung per bulan</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={visitData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="visitors" fill="#40916c" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {isLoading ? (
+              <div className="h-80 w-full flex items-center justify-center">
+                <Skeleton className="h-64 w-full" />
+              </div>
+            ) : (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={metrics.monthlyVisits}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="visitors" fill="#40916c" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -122,30 +152,45 @@ const Dashboard = () => {
             <CardDescription>Kunjungan yang akan datang dalam waktu dekat</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingVisits.map((visit) => (
-                <div key={visit.id} className="flex items-center space-x-4">
-                  <div className="bg-pasirmukti-100 rounded-full p-2">
-                    <Calendar className="h-5 w-5 text-pasirmukti-600" />
+            {isLoading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </div>
+                    <Skeleton className="h-8 w-16" />
                   </div>
-                  <div className="flex-1 space-y-1">
-                    <p className="text-sm font-medium leading-none">{visit.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(visit.date).toLocaleDateString('id-ID', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                      })}
-                    </p>
+                ))}
+              </div>
+            ) : metrics.upcomingVisits.length > 0 ? (
+              <div className="space-y-4">
+                {metrics.upcomingVisits.map((visit) => (
+                  <div key={visit.id} className="flex items-center space-x-4">
+                    <div className="bg-pasirmukti-100 rounded-full p-2">
+                      <Calendar className="h-5 w-5 text-pasirmukti-600" />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-sm font-medium leading-none">{visit.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(parseISO(visit.date), 'd MMMM yyyy', { locale: id })}
+                      </p>
+                    </div>
+                    <div className="flex items-center">
+                      <span className="rounded-full bg-pasirmukti-100 px-2.5 py-0.5 text-xs font-semibold text-pasirmukti-700">
+                        {visit.count} orang
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <span className="rounded-full bg-pasirmukti-100 px-2.5 py-0.5 text-xs font-semibold text-pasirmukti-700">
-                      {visit.count} orang
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Tidak ada kunjungan mendatang
+              </div>
+            )}
           </CardContent>
           <CardFooter>
             <Button variant="outline" className="w-full" onClick={() => navigate('/visit-list')}>
