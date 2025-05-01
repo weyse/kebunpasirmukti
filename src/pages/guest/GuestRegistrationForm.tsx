@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
-import { DatePicker } from "@/components/ui/date-picker"
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
   FormControl,
@@ -14,14 +15,14 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { toast } from "@/components/ui/use-toast"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
 import {
   Table,
@@ -32,7 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -40,10 +41,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   responsible_person: z.string().min(2, {
@@ -90,7 +91,7 @@ const formSchema = z.object({
   payment_date: z.date().optional().nullable(),
   bank_name: z.string().optional(),
   payment_status: z.boolean().default(false),
-})
+});
 
 const GuestRegistrationForm = () => {
   const navigate = useNavigate();
@@ -111,7 +112,7 @@ const GuestRegistrationForm = () => {
     document_url: '',
     discount_percentage: '',
     down_payment: '',
-    payment_date: null,
+    payment_date: null as Date | null,
     bank_name: '',
     payment_status: false,
   });
@@ -138,7 +139,7 @@ const GuestRegistrationForm = () => {
       bank_name: "",
       payment_status: false,
     },
-  })
+  });
 
   useEffect(() => {
     if (editId) {
@@ -162,6 +163,9 @@ const GuestRegistrationForm = () => {
         // Format the visit_date and payment_date if they exist
         const formattedVisitDate = data.visit_date ? new Date(data.visit_date) : new Date();
         const formattedPaymentDate = data.payment_date ? new Date(data.payment_date) : null;
+        
+        // Convert payment_status enum to boolean
+        const paymentStatusBool = data.payment_status === 'lunas';
 
         setFormData({
           responsible_person: data.responsible_person || '',
@@ -172,7 +176,7 @@ const GuestRegistrationForm = () => {
           adult_count: String(data.adult_count) || '0',
           children_count: String(data.children_count) || '0',
           teacher_count: String(data.teacher_count) || '0',
-          visit_type: data.visit_type || 'INSTANSI',
+          visit_type: data.visit_type === 'wisata_edukasi' ? 'INSTANSI' : 'UMUM', // Map DB value to form value
           package_type: data.package_type || 'HEMAT',
           notes: data.notes || '',
           document_url: data.document_url || '',
@@ -180,7 +184,7 @@ const GuestRegistrationForm = () => {
           down_payment: String(data.down_payment) || '0',
           payment_date: formattedPaymentDate,
           bank_name: data.bank_name || '',
-          payment_status: data.payment_status || false,
+          payment_status: paymentStatusBool,
         });
 
         // Update form default values
@@ -193,7 +197,7 @@ const GuestRegistrationForm = () => {
           adult_count: String(data.adult_count) || '0',
           children_count: String(data.children_count) || '0',
           teacher_count: String(data.teacher_count) || '0',
-          visit_type: data.visit_type || 'INSTANSI',
+          visit_type: data.visit_type === 'wisata_edukasi' ? 'INSTANSI' : 'UMUM', // Map DB value to form value
           package_type: data.package_type || 'HEMAT',
           notes: data.notes || '',
           document_url: data.document_url || '',
@@ -201,16 +205,17 @@ const GuestRegistrationForm = () => {
           down_payment: String(data.down_payment) || '0',
           payment_date: formattedPaymentDate,
           bank_name: data.bank_name || '',
-          payment_status: data.payment_status || false,
+          payment_status: paymentStatusBool,
         });
-        setIsPaymentConfirmed(data.payment_status || false);
+        
+        setIsPaymentConfirmed(paymentStatusBool);
       }
     } catch (error: any) {
       toast({
         title: "Error!",
         description: error.message,
         variant: "destructive",
-      })
+      });
     }
   };
 
@@ -221,7 +226,7 @@ const GuestRegistrationForm = () => {
   };
 
   const calculatePackageCost = () => {
-    const baseCost = packageCosts[formData.package_type] || 0;
+    const baseCost = packageCosts[formData.package_type as keyof typeof packageCosts] || 0;
     const totalGuests = Number(formData.adult_count) + Number(formData.children_count) + Number(formData.teacher_count);
     return baseCost * totalGuests;
   };
@@ -261,6 +266,12 @@ const GuestRegistrationForm = () => {
       const totalCost = basePackageCost;
       const discountedCost = calculateFinalCost();
       
+      // Map the boolean payment_status to the expected enum values
+      const dbPaymentStatus = formData.payment_status ? 'lunas' : 'belum_lunas';
+      
+      // Map form visit_type to DB visit_type
+      const dbVisitType = formData.visit_type === 'INSTANSI' ? 'wisata_edukasi' : 'lainnya';
+      
       // Prepare data for submission
       const submissionData = {
         responsible_person: formData.responsible_person,
@@ -271,7 +282,7 @@ const GuestRegistrationForm = () => {
         adult_count: Number(formData.adult_count),
         children_count: Number(formData.children_count),
         teacher_count: Number(formData.teacher_count),
-        visit_type: formData.visit_type,
+        visit_type: dbVisitType,
         package_type: formData.package_type,
         notes: formData.notes || '',
         document_url: formData.document_url || '',
@@ -281,7 +292,7 @@ const GuestRegistrationForm = () => {
         down_payment: Number(formData.down_payment || 0),
         payment_date: formData.payment_date || null,
         bank_name: formData.bank_name || '',
-        payment_status: formData.payment_status
+        payment_status: dbPaymentStatus
       };
 
       let result;
@@ -293,7 +304,7 @@ const GuestRegistrationForm = () => {
           .eq('id', editId)
           .select();
       } else {
-        // Insert new record - note we're not including order_id as it's auto-generated
+        // For new records, we don't need to include order_id as it's generated by the database
         result = await supabase
           .from('guest_registrations')
           .insert(submissionData)
