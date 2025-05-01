@@ -9,7 +9,278 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      accommodations: {
+        Row: {
+          checkin_date: string
+          checkout_date: string
+          cost: number
+          id: string
+          nights_count: number
+          registration_id: string
+          room_count: number
+          room_type: string
+        }
+        Insert: {
+          checkin_date: string
+          checkout_date: string
+          cost?: number
+          id?: string
+          nights_count?: number
+          registration_id: string
+          room_count?: number
+          room_type: string
+        }
+        Update: {
+          checkin_date?: string
+          checkout_date?: string
+          cost?: number
+          id?: string
+          nights_count?: number
+          registration_id?: string
+          room_count?: number
+          room_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accommodations_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "guest_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      food_selections: {
+        Row: {
+          adult_menu: string | null
+          buffet_menu: string | null
+          children_menu: string | null
+          cost: number
+          id: string
+          registration_id: string
+          special_requests: string | null
+        }
+        Insert: {
+          adult_menu?: string | null
+          buffet_menu?: string | null
+          children_menu?: string | null
+          cost?: number
+          id?: string
+          registration_id: string
+          special_requests?: string | null
+        }
+        Update: {
+          adult_menu?: string | null
+          buffet_menu?: string | null
+          children_menu?: string | null
+          cost?: number
+          id?: string
+          registration_id?: string
+          special_requests?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_selections_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "guest_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_classes: {
+        Row: {
+          class_type: Database["public"]["Enums"]["class_type"]
+          id: string
+          registration_id: string
+        }
+        Insert: {
+          class_type: Database["public"]["Enums"]["class_type"]
+          id?: string
+          registration_id: string
+        }
+        Update: {
+          class_type?: Database["public"]["Enums"]["class_type"]
+          id?: string
+          registration_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guest_classes_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "guest_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guest_registrations: {
+        Row: {
+          address: string | null
+          adult_count: number
+          bank_name: string | null
+          children_count: number
+          created_at: string
+          discount_percentage: number | null
+          discounted_cost: number
+          document_url: string | null
+          down_payment: number | null
+          id: string
+          institution_name: string
+          notes: string | null
+          order_id: string
+          package_type: string
+          payment_date: string | null
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          phone_number: string
+          responsible_person: string
+          teacher_count: number
+          total_cost: number
+          updated_at: string
+          visit_date: string
+          visit_type: Database["public"]["Enums"]["visit_type"]
+        }
+        Insert: {
+          address?: string | null
+          adult_count?: number
+          bank_name?: string | null
+          children_count?: number
+          created_at?: string
+          discount_percentage?: number | null
+          discounted_cost?: number
+          document_url?: string | null
+          down_payment?: number | null
+          id?: string
+          institution_name: string
+          notes?: string | null
+          order_id: string
+          package_type: string
+          payment_date?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          phone_number: string
+          responsible_person: string
+          teacher_count?: number
+          total_cost?: number
+          updated_at?: string
+          visit_date: string
+          visit_type: Database["public"]["Enums"]["visit_type"]
+        }
+        Update: {
+          address?: string | null
+          adult_count?: number
+          bank_name?: string | null
+          children_count?: number
+          created_at?: string
+          discount_percentage?: number | null
+          discounted_cost?: number
+          document_url?: string | null
+          down_payment?: number | null
+          id?: string
+          institution_name?: string
+          notes?: string | null
+          order_id?: string
+          package_type?: string
+          payment_date?: string | null
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          phone_number?: string
+          responsible_person?: string
+          teacher_count?: number
+          total_cost?: number
+          updated_at?: string
+          visit_date?: string
+          visit_type?: Database["public"]["Enums"]["visit_type"]
+        }
+        Relationships: []
+      }
+      packages: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+          package_type: string
+          price_per_adult: number
+          price_per_child: number
+          price_per_teacher: number
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name: string
+          package_type: string
+          price_per_adult: number
+          price_per_child: number
+          price_per_teacher: number
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+          package_type?: string
+          price_per_adult?: number
+          price_per_child?: number
+          price_per_teacher?: number
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          capacity: number
+          id: string
+          price_per_night: number
+          room_name: string
+          room_type: string
+          status: Database["public"]["Enums"]["room_status"]
+        }
+        Insert: {
+          capacity?: number
+          id?: string
+          price_per_night: number
+          room_name: string
+          room_type: string
+          status?: Database["public"]["Enums"]["room_status"]
+        }
+        Update: {
+          capacity?: number
+          id?: string
+          price_per_night?: number
+          room_name?: string
+          room_type?: string
+          status?: Database["public"]["Enums"]["room_status"]
+        }
+        Relationships: []
+      }
+      venues: {
+        Row: {
+          cost: number
+          id: string
+          registration_id: string
+          venue_name: string
+          venue_type: string
+        }
+        Insert: {
+          cost?: number
+          id?: string
+          registration_id: string
+          venue_name: string
+          venue_type: string
+        }
+        Update: {
+          cost?: number
+          id?: string
+          registration_id?: string
+          venue_name?: string
+          venue_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venues_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "guest_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +289,25 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      class_type:
+        | "kb_tk"
+        | "sd_1_2"
+        | "sd_3_4"
+        | "sd_5_6"
+        | "smp"
+        | "sma"
+        | "umum_a"
+        | "umum_b"
+        | "abk"
+      payment_status: "belum_lunas" | "lunas"
+      room_status: "available" | "occupied" | "maintenance"
+      visit_type:
+        | "wisata_edukasi"
+        | "outbound"
+        | "camping"
+        | "field_trip"
+        | "penelitian"
+        | "lainnya"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +422,28 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      class_type: [
+        "kb_tk",
+        "sd_1_2",
+        "sd_3_4",
+        "sd_5_6",
+        "smp",
+        "sma",
+        "umum_a",
+        "umum_b",
+        "abk",
+      ],
+      payment_status: ["belum_lunas", "lunas"],
+      room_status: ["available", "occupied", "maintenance"],
+      visit_type: [
+        "wisata_edukasi",
+        "outbound",
+        "camping",
+        "field_trip",
+        "penelitian",
+        "lainnya",
+      ],
+    },
   },
 } as const

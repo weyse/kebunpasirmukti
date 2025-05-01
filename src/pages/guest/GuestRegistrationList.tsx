@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Search, ArrowUpDown, Filter, Eye, Edit, Trash, CalendarCheck } from 'lucide-react';
+import { Search, ArrowUpDown, Filter, Eye, Edit, Trash, CalendarCheck, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,9 +26,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
-  DialogClose,
 } from '@/components/ui/dialog';
 import {
   Select,
@@ -39,81 +37,26 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 // Define guest data types
 type PaymentStatus = 'belum_lunas' | 'lunas';
 
 type Guest = {
   id: string;
-  responsiblePerson: string;
-  institutionName: string;
-  phoneNumber: string;
-  email: string;
-  totalVisitors: number;
-  activityType: string;
-  visitDate: Date;
-  paymentStatus: PaymentStatus;
+  order_id: string;
+  responsible_person: string;
+  institution_name: string;
+  phone_number: string;
+  email?: string;
+  total_visitors: number;
+  visit_type: string;
+  package_type: string;
+  visit_date: string;
+  payment_status: PaymentStatus;
+  created_at: string;
 };
-
-// Mock data for the guest list
-const mockGuests: Guest[] = [
-  {
-    id: 'PSD-RT1XA2',
-    responsiblePerson: 'Ahmad Yani',
-    institutionName: 'SD Negeri 1 Cisarua',
-    phoneNumber: '081234567890',
-    email: 'sdnegericisarua@edu.id',
-    totalVisitors: 120,
-    activityType: 'wisata_edukasi',
-    visitDate: new Date('2025-05-05'),
-    paymentStatus: 'belum_lunas',
-  },
-  {
-    id: 'PSD-MN2BX3',
-    responsiblePerson: 'Siti Nurhaliza',
-    institutionName: 'TK Harapan Bunda',
-    phoneNumber: '082345678901',
-    email: 'tk.harapanbunda@edu.id',
-    totalVisitors: 45,
-    activityType: 'outbound',
-    visitDate: new Date('2025-05-07'),
-    paymentStatus: 'lunas',
-  },
-  {
-    id: 'PSD-PS9CZ7',
-    responsiblePerson: 'Budi Santoso',
-    institutionName: 'Komunitas Pecinta Alam',
-    phoneNumber: '083456789012',
-    email: 'komunitas.pa@gmail.com',
-    totalVisitors: 25,
-    activityType: 'camping',
-    visitDate: new Date('2025-05-10'),
-    paymentStatus: 'lunas',
-  },
-  {
-    id: 'PSD-LK4DF5',
-    responsiblePerson: 'Diana Putri',
-    institutionName: 'SMP Negeri 2 Bandung',
-    phoneNumber: '084567890123',
-    email: 'smpn2bandung@edu.id',
-    totalVisitors: 86,
-    activityType: 'field_trip',
-    visitDate: new Date('2025-05-15'),
-    paymentStatus: 'belum_lunas',
-  },
-  {
-    id: 'PSD-QW5EF6',
-    responsiblePerson: 'Joko Widodo',
-    institutionName: 'Keluarga Joko',
-    phoneNumber: '085678901234',
-    email: 'joko.widodo@gmail.com',
-    totalVisitors: 4,
-    activityType: 'wisata_edukasi',
-    visitDate: new Date('2025-05-20'),
-    paymentStatus: 'lunas',
-  },
-];
 
 // Helper function for activity type labels
 const getActivityLabel = (type: string): string => {
@@ -128,36 +71,143 @@ const getActivityLabel = (type: string): string => {
   return labels[type] || type;
 };
 
+// Helper function for package type labels
+const getPackageLabel = (type: string): string => {
+  const packageLabels: Record<string, string> = {
+    agropintar: 'Agropintar',
+    agro_junior: 'Agro Junior',
+    kemping: 'Kemping',
+    funtastic: 'Funtastic',
+    ekstrakurikuler: 'Ekstrakurikuler',
+    ceria_outdoor: 'Ceria Outdoor',
+    ceria_indoor: 'Ceria Indoor',
+    lansia: 'Lansia 60+',
+    corporate: 'Corporate',
+    seminar_sehari: 'Seminar Sehari',
+    seminar_inap_biasa: 'Seminar Inap Biasa',
+    seminar_inap_religi: 'Seminar Inap Religi',
+  };
+  return packageLabels[type] || type;
+};
+
 // Main component
 const GuestRegistrationList = () => {
   const navigate = useNavigate();
-  const [guests, setGuests] = useState<Guest[]>(mockGuests);
+  const [guests, setGuests] = useState<Guest[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const [selectedActivityType, setSelectedActivityType] = useState<string | null>(null);
   const [guestToDelete, setGuestToDelete] = useState<Guest | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSorting, setIsSorting] = useState(false);
+  const [sortField, setSortField] = useState<string>('visit_date');
+  const [sortDirection, setSortDirection] = useState<string>('desc');
+  
+  // Fetch guests data
+  useEffect(() => {
+    fetchGuestRegistrations();
+  }, [sortField, sortDirection]);
+
+  // Function to fetch guest registrations from Supabase
+  const fetchGuestRegistrations = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('guest_registrations')
+        .select('*, adult_count, children_count, teacher_count')
+        .order(sortField, { ascending: sortDirection === 'asc' });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        // Process the data to match our Guest type
+        const processedGuests = data.map(guest => ({
+          id: guest.id,
+          order_id: guest.order_id,
+          responsible_person: guest.responsible_person,
+          institution_name: guest.institution_name,
+          phone_number: guest.phone_number,
+          email: guest.email || '',
+          total_visitors: (guest.adult_count || 0) + (guest.children_count || 0) + (guest.teacher_count || 0),
+          visit_type: guest.visit_type,
+          package_type: guest.package_type,
+          visit_date: guest.visit_date,
+          payment_status: guest.payment_status,
+          created_at: guest.created_at,
+        }));
+        
+        setGuests(processedGuests);
+      }
+    } catch (error) {
+      console.error('Error fetching guest registrations:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load guest registrations data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // Filter guests based on search and filters
   const filteredGuests = guests.filter((guest) => {
     const matchesSearch =
-      guest.responsiblePerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guest.institutionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      guest.id.toLowerCase().includes(searchTerm.toLowerCase());
+      guest.responsible_person.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      guest.institution_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      guest.order_id.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = selectedStatus ? guest.paymentStatus === selectedStatus : true;
-    const matchesActivity = selectedActivityType ? guest.activityType === selectedActivityType : true;
+    const matchesStatus = selectedStatus ? guest.payment_status === selectedStatus : true;
+    const matchesActivity = selectedActivityType ? guest.visit_type === selectedActivityType : true;
     
     return matchesSearch && matchesStatus && matchesActivity;
   });
 
+  // Handle sorting
+  const handleSort = (field: string) => {
+    setIsSorting(true);
+    if (sortField === field) {
+      // Toggle direction if clicking the same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Default to ascending for new field
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
   // Handle guest deletion
-  const handleDeleteGuest = () => {
+  const handleDeleteGuest = async () => {
     if (guestToDelete) {
-      setGuests(guests.filter((guest) => guest.id !== guestToDelete.id));
-      toast.success('Data tamu berhasil dihapus', {
-        description: `ID: ${guestToDelete.id}`,
-      });
-      setGuestToDelete(null);
+      try {
+        const { error } = await supabase
+          .from('guest_registrations')
+          .delete()
+          .eq('id', guestToDelete.id);
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Update local state
+        setGuests(guests.filter((guest) => guest.id !== guestToDelete.id));
+        
+        toast({
+          title: 'Data tamu berhasil dihapus',
+          description: `ID: ${guestToDelete.order_id}`,
+        });
+        
+        setGuestToDelete(null);
+      } catch (error) {
+        console.error('Error deleting guest:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to delete guest registration',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -237,54 +287,67 @@ const GuestRegistrationList = () => {
               <TableRow>
                 <TableHead className="w-[120px]">ID Pesanan</TableHead>
                 <TableHead>
-                  <div className="flex items-center">
+                  <div className="flex items-center cursor-pointer" onClick={() => handleSort('institution_name')}>
                     Institusi/Grup
-                    <ArrowUpDown className="ml-2 h-3 w-3 cursor-pointer" />
+                    <ArrowUpDown className="ml-2 h-3 w-3" />
                   </div>
                 </TableHead>
                 <TableHead>Penanggung Jawab</TableHead>
                 <TableHead>
-                  <div className="flex items-center">
+                  <div className="flex items-center cursor-pointer" onClick={() => handleSort('visit_date')}>
                     Tanggal Kunjungan
-                    <ArrowUpDown className="ml-2 h-3 w-3 cursor-pointer" />
+                    <ArrowUpDown className="ml-2 h-3 w-3" />
                   </div>
                 </TableHead>
                 <TableHead className="text-center">Jenis Kegiatan</TableHead>
+                <TableHead className="text-center">Paket</TableHead>
                 <TableHead className="text-center">Jumlah</TableHead>
                 <TableHead className="text-center">Status</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredGuests.length === 0 ? (
+              {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={9} className="text-center py-8">
+                    <div className="flex justify-center items-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-pasirmukti-500 mr-2" />
+                      <span>Memuat data...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredGuests.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                     Tidak ada data yang sesuai dengan filter
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredGuests.map((guest) => (
                   <TableRow key={guest.id}>
-                    <TableCell className="font-medium">{guest.id}</TableCell>
-                    <TableCell>{guest.institutionName}</TableCell>
-                    <TableCell>{guest.responsiblePerson}</TableCell>
+                    <TableCell className="font-medium">{guest.order_id}</TableCell>
+                    <TableCell>{guest.institution_name}</TableCell>
+                    <TableCell>{guest.responsible_person}</TableCell>
                     <TableCell>
-                      {format(guest.visitDate, 'dd MMM yyyy')}
+                      {format(new Date(guest.visit_date), 'dd MMM yyyy')}
                     </TableCell>
                     <TableCell className="text-center">
-                      {getActivityLabel(guest.activityType)}
+                      {getActivityLabel(guest.visit_type)}
                     </TableCell>
-                    <TableCell className="text-center">{guest.totalVisitors}</TableCell>
+                    <TableCell className="text-center">
+                      {getPackageLabel(guest.package_type)}
+                    </TableCell>
+                    <TableCell className="text-center">{guest.total_visitors}</TableCell>
                     <TableCell className="text-center">
                       <Badge
                         variant="outline"
                         className={`${
-                          guest.paymentStatus === 'lunas'
+                          guest.payment_status === 'lunas'
                             ? 'bg-green-100 text-green-800 border-green-200'
                             : 'bg-yellow-100 text-yellow-800 border-yellow-200'
                         }`}
                       >
-                        {guest.paymentStatus === 'lunas' ? 'Lunas' : 'Belum Lunas'}
+                        {guest.payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -368,9 +431,9 @@ const GuestRegistrationList = () => {
             <DialogDescription>
               Apakah Anda yakin ingin menghapus data registrasi ini?
               <div className="mt-4 p-4 border rounded-md bg-muted">
-                <p><strong>ID:</strong> {guestToDelete?.id}</p>
-                <p><strong>Institusi:</strong> {guestToDelete?.institutionName}</p>
-                <p><strong>Tanggal Kunjungan:</strong> {guestToDelete && format(guestToDelete.visitDate, 'dd MMMM yyyy')}</p>
+                <p><strong>ID:</strong> {guestToDelete?.order_id}</p>
+                <p><strong>Institusi:</strong> {guestToDelete?.institution_name}</p>
+                <p><strong>Tanggal Kunjungan:</strong> {guestToDelete && format(new Date(guestToDelete.visit_date), 'dd MMMM yyyy')}</p>
               </div>
             </DialogDescription>
           </DialogHeader>
