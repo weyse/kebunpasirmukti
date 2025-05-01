@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Eye, Edit, Trash, Download } from 'lucide-react';
+import { Eye, Edit, Trash, FileText } from 'lucide-react';
 import { Visit } from '@/types/visit';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -20,8 +20,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import * as XLSX from 'xlsx';
 import { getActivityLabel } from '@/utils/visitHelpers';
+import { exportVisitToExcel } from '@/utils/exportHelpers';
 
 interface VisitTableProps {
   visits: Visit[];
@@ -43,28 +43,6 @@ export function VisitTable({
   setVisitToDelete
 }: VisitTableProps) {
   const navigate = useNavigate();
-  
-  const exportToExcel = (visit: Visit) => {
-    // Create a worksheet from the single visit data
-    const worksheet = XLSX.utils.json_to_sheet([{
-      ID: visit.order_id,
-      'Institusi': visit.institution_name,
-      'Penanggung Jawab': visit.responsible_person,
-      'Tanggal Kunjungan': format(new Date(visit.visit_date), 'dd MMM yyyy'),
-      'Jenis Kegiatan': getActivityLabel(visit.visit_type),
-      'Jumlah Peserta': visit.total_visitors,
-      'Status Pembayaran': visit.payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas'
-    }]);
-    
-    // Create a workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Kunjungan');
-    
-    // Generate Excel file and trigger download
-    XLSX.writeFile(workbook, `kunjungan-${visit.order_id || visit.id}.xlsx`);
-    
-    toast('Data telah diunduh sebagai file Excel');
-  };
 
   // Helper function for sort icons
   const getSortIcon = (field: string) => {
@@ -207,9 +185,9 @@ export function VisitTable({
                           variant="outline"
                           size="icon"
                           className="h-8 w-8"
-                          onClick={() => exportToExcel(visit)}
+                          onClick={() => exportVisitToExcel(visit)}
                         >
-                          <Download className="h-4 w-4" />
+                          <FileText className="h-4 w-4" />
                           <span className="sr-only">Export</span>
                         </Button>
                       </TooltipTrigger>

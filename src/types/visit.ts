@@ -1,38 +1,20 @@
 
-// Define visit data types
+export type PaymentStatus = 'lunas' | 'belum_lunas';
+
 export type Visit = {
   id: string;
   order_id: string;
   institution_name: string;
   responsible_person: string;
-  total_visitors: number;
   visit_type: string;
   visit_date: string;
-  payment_status: 'lunas' | 'belum_lunas';
-};
-
-// Dashboard data types
-export type MonthlyVisitData = {
-  name: string; // Month name
-  visitors: number;
-};
-
-export type UpcomingVisit = {
-  id: string;
-  name: string;
-  date: string;
-  count: number;
-};
-
-export type DashboardMetrics = {
-  totalVisits: number;
-  totalVisitors: number;
-  totalRevenue: number;
-  monthlyGrowth: {
-    visits: number;
-    visitors: number;
-    revenue: number;
-  };
-  monthlyVisits: MonthlyVisitData[];
-  upcomingVisits: UpcomingVisit[];
+  payment_status: PaymentStatus;
+  total_visitors: number;
+  adult_count?: number;
+  children_count?: number;
+  teacher_count?: number;
+  total_cost?: number;
+  discount_percentage?: number;
+  discounted_cost?: number;
+  down_payment?: number;
 };

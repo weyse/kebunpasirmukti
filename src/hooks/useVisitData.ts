@@ -24,7 +24,7 @@ export const useVisitData = () => {
       try {
         const { data, error } = await supabase
           .from('guest_registrations')
-          .select('id, order_id, institution_name, responsible_person, visit_type, visit_date, payment_status, adult_count, children_count, teacher_count')
+          .select('id, order_id, institution_name, responsible_person, visit_type, visit_date, payment_status, adult_count, children_count, teacher_count, total_cost, discount_percentage, discounted_cost, down_payment')
           .order(sortField, { ascending: sortDirection === 'asc' });
           
         if (error) {
@@ -39,9 +39,16 @@ export const useVisitData = () => {
             institution_name: item.institution_name,
             responsible_person: item.responsible_person,
             total_visitors: (item.adult_count || 0) + (item.children_count || 0) + (item.teacher_count || 0),
+            adult_count: item.adult_count || 0,
+            children_count: item.children_count || 0,
+            teacher_count: item.teacher_count || 0,
             visit_type: item.visit_type,
             visit_date: item.visit_date,
-            payment_status: item.payment_status
+            payment_status: item.payment_status,
+            total_cost: item.total_cost,
+            discount_percentage: item.discount_percentage,
+            discounted_cost: item.discounted_cost,
+            down_payment: item.down_payment
           }));
           
           setVisits(transformedVisits);
