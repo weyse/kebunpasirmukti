@@ -6,7 +6,6 @@ import {
   CalendarCheck,
   Home,
   ListOrdered,
-  Users,
   LogOut,
   UserPlus,
 } from 'lucide-react';
@@ -39,13 +38,14 @@ export function Sidebar() {
   return (
     <SidebarComponent>
       <SidebarHeader>
-        <div className="flex items-center justify-start px-4 py-3">
-          <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 rounded-full bg-pasirmukti-50 flex items-center justify-center">
-              <span className="text-pasirmukti-600 font-semibold text-lg">P</span>
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">PasirMukti</span>
-          </div>
+        <div className="flex items-center justify-start p-4">
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/f94a1b65-60bc-4c63-aed5-6543cbeca768.png" 
+              alt="PasirMukti Logo" 
+              className="h-10 w-auto"
+            />
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
