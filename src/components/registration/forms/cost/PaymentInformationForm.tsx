@@ -16,6 +16,39 @@ interface PaymentInformationFormProps {
   form: UseFormReturn<any>;
 }
 
+// List of banks in Indonesia
+const bankOptions = [
+  { value: 'bca', label: 'Bank Central Asia (BCA)' },
+  { value: 'bni', label: 'Bank Negara Indonesia (BNI)' },
+  { value: 'bri', label: 'Bank Rakyat Indonesia (BRI)' },
+  { value: 'mandiri', label: 'Bank Mandiri' },
+  { value: 'btn', label: 'Bank Tabungan Negara (BTN)' },
+  { value: 'cimb', label: 'CIMB Niaga' },
+  { value: 'danamon', label: 'Bank Danamon' },
+  { value: 'permata', label: 'Bank Permata' },
+  { value: 'panin', label: 'Bank Panin' },
+  { value: 'ocbc', label: 'OCBC NISP' },
+  { value: 'mega', label: 'Bank Mega' },
+  { value: 'jago', label: 'Bank Jago' },
+  { value: 'seabank', label: 'SeaBank' },
+  { value: 'blu', label: 'BCA Digital (blu)' },
+  { value: 'jenius', label: 'Jenius (BTPN)' },
+  { value: 'line', label: 'LINE Bank (Hana)' },
+  { value: 'allo', label: 'Bank Allo' },
+  { value: 'neo', label: 'Neo Commerce (BNC)' },
+  { value: 'bsi', label: 'Bank Syariah Indonesia (BSI)' },
+  { value: 'muamalat', label: 'Bank Muamalat' },
+  { value: 'mega_syariah', label: 'Bank Mega Syariah' },
+  { value: 'dki', label: 'Bank DKI' },
+  { value: 'bjb', label: 'Bank BJB (Jabar Banten)' },
+  { value: 'jateng', label: 'Bank Jateng' },
+  { value: 'jatim', label: 'Bank Jatim' },
+  { value: 'sumut', label: 'Bank Sumut' },
+  { value: 'sumsel', label: 'Bank Sumsel Babel' },
+  { value: 'nagari', label: 'Bank Nagari (Sumbar)' },
+  { value: 'kalbar', label: 'Bank Kalbar' },
+];
+
 const PaymentInformationForm: React.FC<PaymentInformationFormProps> = ({ form }) => {
   return (
     <div>
@@ -46,11 +79,12 @@ const PaymentInformationForm: React.FC<PaymentInformationFormProps> = ({ form })
                     <SelectValue placeholder="Pilih Bank" />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent>
-                  <SelectItem value="bca">Bank Central Asia (BCA)</SelectItem>
-                  <SelectItem value="bni">Bank Negara Indonesia (BNI)</SelectItem>
-                  <SelectItem value="bri">Bank Rakyat Indonesia (BRI)</SelectItem>
-                  <SelectItem value="mandiri">Bank Mandiri</SelectItem>
+                <SelectContent className="max-h-[300px]">
+                  {bankOptions.map((bank) => (
+                    <SelectItem key={bank.value} value={bank.value}>
+                      {bank.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
