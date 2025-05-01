@@ -1,6 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import VenueCard from '@/components/registration/VenueCard';
 
 interface Venue {
@@ -22,14 +24,56 @@ const VenueSelectionForm: React.FC<VenueSelectionFormProps> = ({
   selectedVenues,
   onVenueChange
 }) => {
+  const [filter, setFilter] = useState("");
+  const [sort, setSort] = useState<"name" | "capacity" | "price">("name");
+
+  // Filter venues based on search input
+  const filteredVenues = venues.filter(venue => 
+    venue.name.toLowerCase().includes(filter.toLowerCase()) ||
+    venue.features.some(feature => feature.toLowerCase().includes(filter.toLowerCase()))
+  );
+
+  // Sort venues based on selected sort option
+  const sortedVenues = [...filteredVenues].sort((a, b) => {
+    if (sort === "capacity") return b.capacity - a.capacity;
+    if (sort === "price") return a.price - b.price;
+    return a.name.localeCompare(b.name);
+  });
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Pilihan Venue</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <Input
+              placeholder="Cari venue atau fasilitas..."
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <div className="w-full md:w-48">
+            <Select
+              value={sort}
+              onValueChange={(value) => setSort(value as "name" | "capacity" | "price")}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Urutkan berdasarkan" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Nama</SelectItem>
+                <SelectItem value="capacity">Kapasitas (tinggi ke rendah)</SelectItem>
+                <SelectItem value="price">Harga (rendah ke tinggi)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {venues.map(venue => (
+          {sortedVenues.map(venue => (
             <VenueCard
               key={venue.id}
               name={venue.name}
@@ -41,6 +85,12 @@ const VenueSelectionForm: React.FC<VenueSelectionFormProps> = ({
             />
           ))}
         </div>
+        
+        {sortedVenues.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            Tidak ada venue yang sesuai dengan kriteria pencarian.
+          </div>
+        )}
       </CardContent>
     </Card>
   );

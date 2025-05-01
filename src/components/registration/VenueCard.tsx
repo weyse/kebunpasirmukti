@@ -2,6 +2,7 @@
 import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Users } from "lucide-react"; 
 
 interface VenueCardProps {
   name: string;
@@ -35,7 +36,10 @@ const VenueCard: React.FC<VenueCardProps> = ({
       </div>
       
       <div className="ml-8 space-y-2">
-        <p className="text-sm text-muted-foreground">Kapasitas: {capacity} pax</p>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <Users className="h-4 w-4 mr-1.5" />
+          <span>Kapasitas: {capacity} pax</span>
+        </div>
         <p className="font-medium">Rp {price.toLocaleString()}</p>
         
         <div className="flex flex-wrap gap-2 mt-2">
