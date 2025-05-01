@@ -5,6 +5,7 @@ import { VisitFilters } from '@/components/visits/VisitFilters';
 import { VisitTable } from '@/components/visits/VisitTable';
 import { VisitPagination } from '@/components/visits/VisitPagination';
 import { VisitExportButtons } from '@/components/visits/VisitExportButtons';
+import { DeleteVisitDialog } from '@/components/visits/DeleteVisitDialog';
 import { Card } from '@/components/ui/card';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
@@ -16,9 +17,20 @@ const VisitList = () => {
     searchTerm,
     selectedStatus,
     selectedActivityType,
+    visitToDelete,
+    sortField,
+    sortDirection,
+    currentPage,
+    totalPages,
     setSearchTerm,
     setSelectedStatus,
     setSelectedActivityType,
+    setVisitToDelete,
+    handleSort,
+    handleDeleteVisit,
+    nextPage,
+    prevPage,
+    paginate,
     resetFilters
   } = useVisitData();
 
@@ -44,14 +56,29 @@ const VisitList = () => {
           <VisitTable 
             visits={visits} 
             filteredVisits={filteredVisits} 
-            isLoading={isLoading} 
+            isLoading={isLoading}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            handleSort={handleSort}
+            setVisitToDelete={setVisitToDelete}
           />
           
           <VisitPagination 
             filteredVisits={filteredVisits} 
-            totalVisits={visits.length} 
+            totalVisits={visits.length}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            nextPage={nextPage}
+            prevPage={prevPage}
+            paginate={paginate}
           />
         </Card>
+
+        <DeleteVisitDialog 
+          visitToDelete={visitToDelete}
+          setVisitToDelete={setVisitToDelete}
+          handleDeleteVisit={handleDeleteVisit}
+        />
       </div>
     </TooltipProvider>
   );

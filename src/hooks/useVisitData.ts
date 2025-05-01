@@ -10,6 +10,11 @@ export const useVisitData = () => {
   const [selectedActivityType, setSelectedActivityType] = useState<string | null>(null);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [visitsPerPage] = useState(10);
+  const [sortField, setSortField] = useState<string>('visit_date');
+  const [sortDirection, setSortDirection] = useState<string>('desc');
+  const [visitToDelete, setVisitToDelete] = useState<Visit | null>(null);
   
   // Fetch visits from Supabase
   useEffect(() => {
@@ -20,7 +25,7 @@ export const useVisitData = () => {
         const { data, error } = await supabase
           .from('guest_registrations')
           .select('id, order_id, institution_name, responsible_person, visit_type, visit_date, payment_status, adult_count, children_count, teacher_count')
-          .order('visit_date', { ascending: false });
+          .order(sortField, { ascending: sortDirection === 'asc' });
           
         if (error) {
           throw error;
@@ -50,7 +55,7 @@ export const useVisitData = () => {
     };
     
     fetchVisits();
-  }, []);
+  }, [sortField, sortDirection]);
   
   // Filter visits based on search and filters
   const filteredVisits = visits.filter((visit) => {
@@ -65,6 +70,63 @@ export const useVisitData = () => {
     return matchesSearch && matchesStatus && matchesActivity;
   });
 
+  // Handle sorting
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      // Toggle direction if clicking the same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Default to ascending for new field
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Handle visit deletion
+  const handleDeleteVisit = async () => {
+    if (visitToDelete) {
+      try {
+        const { error } = await supabase
+          .from('guest_registrations')
+          .delete()
+          .eq('id', visitToDelete.id);
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Update local state
+        setVisits(visits.filter((visit) => visit.id !== visitToDelete.id));
+        
+        toast('Data kunjungan berhasil dihapus');
+        
+        setVisitToDelete(null);
+      } catch (error) {
+        console.error('Error deleting visit:', error);
+        toast('Gagal menghapus data kunjungan');
+      }
+    }
+  };
+
+  // Pagination logic
+  const indexOfLastVisit = currentPage * visitsPerPage;
+  const indexOfFirstVisit = indexOfLastVisit - visitsPerPage;
+  const currentVisits = filteredVisits.slice(indexOfFirstVisit, indexOfLastVisit);
+  const totalPages = Math.ceil(filteredVisits.length / visitsPerPage);
+  
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   // Reset filters
   const resetFilters = () => {
     setSearchTerm('');
@@ -75,13 +137,26 @@ export const useVisitData = () => {
   return {
     visits,
     filteredVisits,
+    currentVisits,
     isLoading,
     searchTerm,
     selectedStatus,
     selectedActivityType,
+    visitToDelete,
+    sortField,
+    sortDirection,
+    currentPage,
+    totalPages,
+    visitsPerPage,
     setSearchTerm,
     setSelectedStatus,
     setSelectedActivityType,
-    resetFilters
+    setVisitToDelete,
+    handleSort,
+    handleDeleteVisit,
+    resetFilters,
+    paginate,
+    nextPage,
+    prevPage
   };
 };
