@@ -10,6 +10,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  UserPlus,
 } from 'lucide-react';
 import { 
   Sidebar as SidebarComponent,
@@ -32,9 +33,9 @@ export function Sidebar() {
 
   const menuItems = [
     { name: 'Dashboard', path: '/', icon: Home },
-    { name: 'Registrasi Tamu', path: '/guest-registration', icon: Users },
-    { name: 'Kalender Kunjungan', path: '/calendar', icon: CalendarCheck },
     { name: 'Daftar Kunjungan', path: '/visit-list', icon: ListOrdered },
+    { name: 'Registrasi Baru', path: '/guest-registration/new', icon: UserPlus },
+    { name: 'Kalender Kunjungan', path: '/calendar', icon: CalendarCheck },
     { name: 'Laporan', path: '/reports', icon: BarChart3 },
     { name: 'Pengaturan', path: '/settings', icon: Settings },
   ];

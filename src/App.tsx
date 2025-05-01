@@ -66,7 +66,7 @@ function App() {
         {/* Protected Routes */}
         <Route path="/" element={user ? <AppLayout /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
-          <Route path="visits" element={<VisitList />} />
+          <Route path="visit-list" element={<VisitList />} />
           <Route path="calendar" element={<CalendarView />} />
           <Route path="guest-registration" element={<GuestRegistrationList />} />
           <Route path="guest-registration/new" element={<GuestRegistrationForm />} />
