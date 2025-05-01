@@ -11,6 +11,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Visit } from '@/types/visit';
+import { CalendarPermission } from '@/types/calendarPermission';
 import { getActivityLabel, getActivityColor } from '@/utils/visitHelpers';
 
 interface VisitDetailsDialogProps {
@@ -18,15 +19,18 @@ interface VisitDetailsDialogProps {
   onOpenChange: (open: boolean) => void;
   selectedDate: Date | null;
   selectedVisits: Visit[];
+  accessLevel?: CalendarPermission;
 }
 
 export const VisitDetailsDialog = ({ 
   open, 
   onOpenChange, 
   selectedDate, 
-  selectedVisits 
+  selectedVisits,
+  accessLevel = 'view'
 }: VisitDetailsDialogProps) => {
   const navigate = useNavigate();
+  const canEdit = accessLevel === 'admin' || accessLevel === 'edit';
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -55,12 +59,36 @@ export const VisitDetailsDialog = ({
                 <p className="text-sm"><strong>Jenis Kegiatan:</strong> {getActivityLabel(visit.visit_type)}</p>
               </div>
               <div className="mt-4 flex justify-end">
-                <Button variant="outline" size="sm" onClick={() => navigate(`/guest-registration/${visit.id}`)}>
-                  Lihat Detail
+                <Button 
+                  variant={canEdit ? "default" : "outline"} 
+                  size="sm" 
+                  onClick={() => navigate(`/guest-registration/${canEdit ? 'edit' : 'view'}/${visit.id}`)}
+                >
+                  {canEdit ? 'Edit Detail' : 'Lihat Detail'}
                 </Button>
               </div>
             </div>
           ))}
+          
+          {canEdit && (
+            <div className="mt-4 flex justify-center">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  onOpenChange(false);
+                  if (selectedDate) {
+                    // Navigate to registration page with pre-selected date
+                    const dateParam = format(selectedDate, 'yyyy-MM-dd');
+                    navigate(`/guest-registration/new?date=${dateParam}`);
+                  } else {
+                    navigate('/guest-registration/new');
+                  }
+                }}
+              >
+                Tambah Kunjungan Baru
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

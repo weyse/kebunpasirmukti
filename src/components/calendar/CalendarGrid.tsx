@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Visit } from '@/types/visit';
+import { CalendarPermission } from '@/types/calendarPermission';
 import { getVisitsByDate } from '@/utils/calendarHelpers';
 
 interface CalendarGridProps {
@@ -13,6 +14,7 @@ interface CalendarGridProps {
   onDateClick: (date: Date) => void;
   onPreviousMonth: () => void;
   onNextMonth: () => void;
+  accessLevel?: CalendarPermission;
 }
 
 export const CalendarGrid = ({ 
@@ -20,7 +22,8 @@ export const CalendarGrid = ({
   visits, 
   onDateClick,
   onPreviousMonth,
-  onNextMonth
+  onNextMonth,
+  accessLevel = 'view'
 }: CalendarGridProps) => {
   const daysInMonth = useMemo(() => eachDayOfInterval({
     start: startOfMonth(currentMonth),
@@ -66,17 +69,20 @@ export const CalendarGrid = ({
           const isCurrentDay = isToday(day);
           const isSameMonthDay = isSameMonth(day, currentMonth);
           const hasVisits = dayVisits.length > 0;
+          const canEdit = accessLevel === 'admin' || accessLevel === 'edit';
           
           return (
             <div
               key={day.toString()}
               className={cn(
-                "h-24 overflow-hidden border rounded-md p-1 cursor-pointer transition-colors",
+                "h-24 overflow-hidden border rounded-md p-1",
                 isCurrentDay ? "border-pasirmukti-500" : "border-border",
                 isSameMonthDay ? "bg-card" : "bg-muted/50",
-                hasVisits ? "hover:border-pasirmukti-400" : "hover:bg-muted"
+                hasVisits ? "hover:border-pasirmukti-400" : "hover:bg-muted",
+                canEdit ? "cursor-pointer" : hasVisits ? "cursor-pointer" : "cursor-default"
               )}
-              onClick={() => onDateClick(day)}
+              onClick={() => (canEdit || hasVisits) && onDateClick(day)}
+              title={canEdit ? "Klik untuk menambah atau melihat kunjungan" : hasVisits ? "Klik untuk melihat kunjungan" : ""}
             >
               <div className={cn(
                 "flex justify-center items-center h-6 w-6 rounded-full mb-1 mx-auto",

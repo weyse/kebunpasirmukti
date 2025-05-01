@@ -3,11 +3,13 @@ import { useState, useEffect } from 'react';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { Visit } from '@/types/visit';
+import { CalendarPermission } from '@/types/calendarPermission';
 import { toast } from 'sonner';
 
 export const useCalendarData = () => {
   const [visits, setVisits] = useState<Visit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userAccessLevel, setUserAccessLevel] = useState<CalendarPermission>('view');
 
   useEffect(() => {
     const fetchVisits = async () => {
@@ -45,8 +47,16 @@ export const useCalendarData = () => {
       }
     };
     
+    // In a real application, you would fetch the user's access level from your auth system
+    const fetchUserAccessLevel = async () => {
+      // This is a placeholder. In a real app, you would get this from your auth system
+      // For now, we'll default to 'view' access
+      setUserAccessLevel('view');
+    };
+    
     fetchVisits();
+    fetchUserAccessLevel();
   }, []);
 
-  return { visits, isLoading };
+  return { visits, isLoading, userAccessLevel };
 };

@@ -1,19 +1,25 @@
 
 import { format, parseISO } from 'date-fns';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Eye, PenLine } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Visit } from '@/types/visit';
+import { CalendarPermission } from '@/types/calendarPermission';
 import { getActivityLabel, getActivityColor } from '@/utils/visitHelpers';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface VisitListViewProps {
   visits: Visit[];
   onVisitClick: (visit: Visit) => void;
+  accessLevel?: CalendarPermission;
 }
 
-export const VisitListView = ({ visits, onVisitClick }: VisitListViewProps) => {
+export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: VisitListViewProps) => {
   const sortedVisits = [...visits].sort(
     (a, b) => new Date(a.visit_date).getTime() - new Date(b.visit_date).getTime()
   );
+  
+  const canEdit = accessLevel === 'admin' || accessLevel === 'edit';
   
   return (
     <div className="space-y-4">
@@ -30,17 +36,46 @@ export const VisitListView = ({ visits, onVisitClick }: VisitListViewProps) => {
             </div>
             <div>
               <h3 className="font-medium">{visit.institution_name}</h3>
-              <div className="flex items-center mt-1">
+              <div className="flex items-center gap-2 mt-1">
                 <Badge variant="outline" className={getActivityColor(visit.visit_type)}>
                   {getActivityLabel(visit.visit_type)}
                 </Badge>
-                <span className="ml-2 text-sm text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                   {visit.total_visitors} pengunjung
                 </span>
               </div>
             </div>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            {canEdit ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <PenLine className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit Kunjungan</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Lihat Detail</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+            <ChevronRight className="h-5 w-5 text-muted-foreground" />
+          </div>
         </div>
       ))}
       
