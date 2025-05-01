@@ -95,6 +95,7 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
         
         // Update form values
         form.reset({
+          id: registrationData.id, // Set the id field
           responsible_person: registrationData.responsible_person || '',
           institution_name: registrationData.institution_name || '',
           phone_number: registrationData.phone_number || '',

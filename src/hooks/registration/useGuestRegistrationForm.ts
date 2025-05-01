@@ -6,6 +6,7 @@ import { ClassType } from '../types/registrationTypes';
 
 // Define form schema
 export const formSchema = z.object({
+  id: z.string().optional(),
   responsible_person: z.string().min(2, {
     message: "Nama penanggung jawab harus diisi minimal 2 karakter.",
   }),
@@ -54,6 +55,7 @@ export const useGuestRegistrationForm = (initialData?: Partial<FormSchema>) => {
   const form = useForm<FormSchema>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: initialData?.id || undefined,
       responsible_person: initialData?.responsible_person || "",
       institution_name: initialData?.institution_name || "",
       phone_number: initialData?.phone_number || "",
