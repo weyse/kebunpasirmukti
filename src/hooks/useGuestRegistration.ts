@@ -73,7 +73,7 @@ interface UseGuestRegistrationProps {
   editId?: string;
 }
 
-export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {}) => {
+export const useGuestRegistration = ({ editId }: { editId?: string } = {}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedClasses, setSelectedClasses] = useState<ClassType[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string>('');
@@ -117,11 +117,13 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
   useEffect(() => {
     // Fetch packages from database
     const fetchPackages = async () => {
+      console.log("Fetching packages...");
       const { data, error } = await supabase
         .from('packages')
         .select('*');
 
       if (error) {
+        console.error("Error fetching packages:", error);
         toast({
           title: "Error fetching packages",
           description: error.message,
@@ -131,6 +133,7 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
       }
 
       if (data) {
+        console.log("Packages fetched:", data);
         setPackages(data);
         // Initialize accommodation counts
         const initialCounts: Record<string, number> = {};
