@@ -125,6 +125,7 @@ export type Database = {
           discounted_cost: number
           document_url: string | null
           down_payment: number | null
+          extra_bed_cost: number
           id: string
           institution_name: string
           notes: string | null
@@ -150,6 +151,7 @@ export type Database = {
           discounted_cost?: number
           document_url?: string | null
           down_payment?: number | null
+          extra_bed_cost?: number
           id?: string
           institution_name: string
           notes?: string | null
@@ -175,6 +177,7 @@ export type Database = {
           discounted_cost?: number
           document_url?: string | null
           down_payment?: number | null
+          extra_bed_cost?: number
           id?: string
           institution_name?: string
           notes?: string | null

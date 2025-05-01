@@ -1,23 +1,17 @@
 
 import React from 'react';
 import { format } from 'date-fns';
+import { Guest } from '@/hooks/useGuestData';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-
-interface Guest {
-  id: string;
-  order_id: string;
-  institution_name: string;
-  visit_date: string;
-  [key: string]: any;
-}
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface DeleteGuestDialogProps {
   guestToDelete: Guest | null;
@@ -31,34 +25,26 @@ export function DeleteGuestDialog({
   handleDeleteGuest,
 }: DeleteGuestDialogProps) {
   return (
-    <Dialog open={!!guestToDelete} onOpenChange={(open) => !open && setGuestToDelete(null)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Konfirmasi Hapus Data</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={!!guestToDelete} onOpenChange={(open) => !open && setGuestToDelete(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Konfirmasi Hapus Data</AlertDialogTitle>
+          <AlertDialogDescription>
             Apakah Anda yakin ingin menghapus data registrasi ini?
             <div className="mt-4 p-4 border rounded-md bg-muted">
               <p><strong>ID:</strong> {guestToDelete?.order_id}</p>
               <p><strong>Institusi:</strong> {guestToDelete?.institution_name}</p>
-              <p><strong>Tanggal Kunjungan:</strong> {guestToDelete && format(new Date(guestToDelete.visit_date), 'dd MMMM yyyy')}</p>
+              <p><strong>Tanggal:</strong> {guestToDelete && format(new Date(guestToDelete.visit_date), 'dd MMM yyyy')}</p>
             </div>
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setGuestToDelete(null)}
-          >
-            Batal
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDeleteGuest}
-          >
-            Hapus Data
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDeleteGuest}>
+            Hapus
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
