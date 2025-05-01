@@ -7,8 +7,6 @@ import {
   Home,
   ListOrdered,
   Users,
-  BarChart3,
-  Settings,
   LogOut,
   UserPlus,
 } from 'lucide-react';
@@ -36,8 +34,6 @@ export function Sidebar() {
     { name: 'Daftar Kunjungan', path: '/visit-list', icon: ListOrdered },
     { name: 'Registrasi Baru', path: '/guest-registration/new', icon: UserPlus },
     { name: 'Kalender Kunjungan', path: '/calendar', icon: CalendarCheck },
-    { name: 'Laporan', path: '/reports', icon: BarChart3 },
-    { name: 'Pengaturan', path: '/settings', icon: Settings },
   ];
 
   return (
