@@ -18,6 +18,7 @@ export const useDashboardMetrics = () => {
       visits: 0,
       visitors: 0,
       revenue: 0,
+      monthlyVisits: []
     },
     monthlyVisits: [],
     upcomingVisits: []
