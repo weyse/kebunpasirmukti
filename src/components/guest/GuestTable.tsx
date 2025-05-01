@@ -1,0 +1,259 @@
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns';
+import { ArrowUpDown, Eye, Edit, CalendarCheck, Trash, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+// Define guest data types
+type PaymentStatus = 'belum_lunas' | 'lunas';
+
+type Guest = {
+  id: string;
+  order_id: string;
+  responsible_person: string;
+  institution_name: string;
+  phone_number: string;
+  total_visitors: number;
+  visit_type: string;
+  package_type: string;
+  visit_date: string;
+  payment_status: PaymentStatus;
+  created_at: string;
+};
+
+interface GuestTableProps {
+  guests: Guest[];
+  filteredGuests: Guest[];
+  isLoading: boolean;
+  sortField: string;
+  sortDirection: string;
+  handleSort: (field: string) => void;
+  setGuestToDelete: (guest: Guest | null) => void;
+}
+
+export function GuestTable({
+  guests,
+  filteredGuests,
+  isLoading,
+  sortField,
+  sortDirection,
+  handleSort,
+  setGuestToDelete,
+}: GuestTableProps) {
+  const navigate = useNavigate();
+
+  // Helper function for activity type labels
+  const getActivityLabel = (type: string): string => {
+    const labels: Record<string, string> = {
+      wisata_edukasi: 'Wisata Edukasi',
+      outbound: 'Outbound',
+      camping: 'Camping',
+      field_trip: 'Field Trip',
+      penelitian: 'Penelitian',
+      lainnya: 'Lainnya',
+    };
+    return labels[type] || type;
+  };
+
+  // Helper function for package type labels
+  const getPackageLabel = (type: string): string => {
+    const packageLabels: Record<string, string> = {
+      agropintar: 'Agropintar',
+      agro_junior: 'Agro Junior',
+      kemping: 'Kemping',
+      funtastic: 'Funtastic',
+      ekstrakurikuler: 'Ekstrakurikuler',
+      ceria_outdoor: 'Ceria Outdoor',
+      ceria_indoor: 'Ceria Indoor',
+      lansia: 'Lansia 60+',
+      corporate: 'Corporate',
+      seminar_sehari: 'Seminar Sehari',
+      seminar_inap_biasa: 'Seminar Inap Biasa',
+      seminar_inap_religi: 'Seminar Inap Religi',
+    };
+    return packageLabels[type] || type;
+  };
+
+  const exportToExcel = (guest: Guest) => {
+    // Create a worksheet from the single guest data
+    const worksheet = XLSX.utils.json_to_sheet([{
+      ID: guest.order_id,
+      'Institusi': guest.institution_name,
+      'Penanggung Jawab': guest.responsible_person,
+      'Tanggal Kunjungan': format(new Date(guest.visit_date), 'dd MMM yyyy'),
+      'Jenis Kegiatan': getActivityLabel(guest.visit_type),
+      'Paket': getPackageLabel(guest.package_type),
+      'Jumlah Peserta': guest.total_visitors,
+      'Status Pembayaran': guest.payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas'
+    }]);
+    
+    // Create a workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Tamu');
+    
+    // Generate Excel file and trigger download
+    XLSX.writeFile(workbook, `registrasi-${guest.order_id || guest.id}.xlsx`);
+    
+    toast({
+      title: 'Export berhasil',
+      description: 'Data telah diunduh sebagai file Excel'
+    });
+  };
+
+  return (
+    <div className="relative w-full overflow-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[120px]">ID Pesanan</TableHead>
+            <TableHead>
+              <div className="flex items-center cursor-pointer" onClick={() => handleSort('institution_name')}>
+                Institusi/Grup
+                <ArrowUpDown className="ml-2 h-3 w-3" />
+              </div>
+            </TableHead>
+            <TableHead>Penanggung Jawab</TableHead>
+            <TableHead>
+              <div className="flex items-center cursor-pointer" onClick={() => handleSort('visit_date')}>
+                Tanggal Kunjungan
+                <ArrowUpDown className="ml-2 h-3 w-3" />
+              </div>
+            </TableHead>
+            <TableHead className="text-center">Jenis Kegiatan</TableHead>
+            <TableHead className="text-center">Paket</TableHead>
+            <TableHead className="text-center">Jumlah</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-right">Aksi</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={9} className="text-center py-8">
+                <div className="flex justify-center items-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-pasirmukti-500 mr-2" />
+                  <span>Memuat data...</span>
+                </div>
+              </TableCell>
+            </TableRow>
+          ) : filteredGuests.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                Tidak ada data yang sesuai dengan filter
+              </TableCell>
+            </TableRow>
+          ) : (
+            filteredGuests.map((guest) => (
+              <TableRow key={guest.id}>
+                <TableCell className="font-medium">{guest.order_id || '-'}</TableCell>
+                <TableCell>{guest.institution_name}</TableCell>
+                <TableCell>{guest.responsible_person}</TableCell>
+                <TableCell>
+                  {format(new Date(guest.visit_date), 'dd MMM yyyy')}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getActivityLabel(guest.visit_type)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getPackageLabel(guest.package_type)}
+                </TableCell>
+                <TableCell className="text-center">{guest.total_visitors}</TableCell>
+                <TableCell className="text-center">
+                  <Badge
+                    variant="outline"
+                    className={`${
+                      guest.payment_status === 'lunas'
+                        ? 'bg-green-100 text-green-800 border-green-200'
+                        : 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                    }`}
+                  >
+                    {guest.payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <span className="sr-only">Buka menu</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="h-4 w-4"
+                        >
+                          <circle cx="12" cy="12" r="1" />
+                          <circle cx="12" cy="5" r="1" />
+                          <circle cx="12" cy="19" r="1" />
+                        </svg>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => navigate(`/guest-registration/view/${guest.id}`)}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Lihat Detail
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate(`/guest-registration/edit/${guest.id}`)}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => navigate(`/check-in/${guest.id}`)}
+                      >
+                        <CalendarCheck className="mr-2 h-4 w-4" />
+                        Check-In
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => exportToExcel(guest)}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        Export Excel
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setGuestToDelete(guest)}
+                      >
+                        <Trash className="mr-2 h-4 w-4" />
+                        Hapus
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
