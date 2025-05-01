@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CalendarCheck, Users, ArrowRight } from 'lucide-react';
+import { CalendarCheck, Users, ArrowRight, DollarSign } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboardMetrics } from '@/hooks/dashboard/useDashboardMetrics';
 import { StatCard } from '@/components/dashboard/StatCard';
@@ -46,20 +46,7 @@ const Dashboard = () => {
           title="Total Pendapatan"
           value={formatCurrency(metrics.totalRevenue)}
           change={metrics.monthlyGrowth.revenue}
-          icon={(props) => (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              {...props}
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          )}
+          icon={DollarSign}
           isLoading={isLoading}
         />
       </div>
