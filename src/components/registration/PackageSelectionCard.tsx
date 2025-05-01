@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface PackageSelectionCardProps {
   id: string;
@@ -28,7 +29,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
           onCheckedChange={onCheckedChange} 
           className="h-5 w-5"
         />
-        <label htmlFor={id} className="flex-1 font-medium text-lg cursor-pointer">{title}</label>
+        <Label htmlFor={id} className="flex-1 font-medium text-lg cursor-pointer">{title}</Label>
       </div>
       
       {description && (

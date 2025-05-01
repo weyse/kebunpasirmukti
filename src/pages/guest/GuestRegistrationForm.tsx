@@ -36,9 +36,9 @@ import OrderSummary from '@/components/registration/OrderSummary';
 // Define types to match database enum
 type VisitType = 'wisata_edukasi' | 'outbound' | 'camping' | 'field_trip' | 'penelitian' | 'lainnya';
 type PaymentStatus = 'belum_lunas' | 'lunas';
-type ClassType = 'kb_tk' | 'sd_1_2' | 'sd_3_4' | 'sd_5_6' | 'smp' | 'sma' | 'umum_a' | 'umum_b' | 'abk' | 'htm';
+type ClassType = 'kb_tk' | 'sd_1_2' | 'sd_3_4' | 'sd_5_6' | 'smp' | 'sma' | 'umum_a' | 'umum_b' | 'abk';
 
-// Define class options for selection
+// Define class options for selection - this could come from API/DB in the future
 const classOptions = [
   { id: 'kb_tk', label: 'KB/TK' },
   { id: 'sd_1_2', label: 'SD Kelas 1 & 2' },
@@ -48,90 +48,7 @@ const classOptions = [
   { id: 'sma', label: 'SMA' },
   { id: 'umum_a', label: 'Umum A' },
   { id: 'umum_b', label: 'Umum B' },
-  { id: 'abk', label: 'ABK' },
-  { id: 'htm', label: 'HTM' },
-];
-
-// Define package options
-const packageOptions = [
-  { id: 'edukatif_agropintar', label: 'PAKET EDUKATIF AGROPINTAR', description: 'Paket lengkap dengan pembelajaran agrikultur', price: 150000 },
-  { id: 'agro_junior', label: 'PAKET AGRO JUNIOR', description: 'Untuk anak-anak usia dini', price: 120000 },
-  { id: 'kemping', label: 'PAKET KEMPING', description: 'Menginap dan aktivitas outdoor', price: 250000 },
-  { id: 'funtastic', label: 'PAKET FUNTASTIC', description: 'Fokus pada permainan edukatif', price: 175000 },
-  { id: 'ekstrakurikuler', label: 'PAKET EKSTRAKURIKULER', description: 'Program untuk kegiatan sekolah', price: 130000 },
-  { id: 'ceria', label: 'PAKET CERIA', description: 'Fun games dan edukasi ringan', price: 100000 },
-  { id: 'lansia', label: 'PAKET LANSIA 60+', description: 'Program khusus untuk lansia', price: 80000 },
-  { id: 'corporate_outbound', label: 'PAKET CORPORATE OUTBOUND', description: 'Kegiatan team building', price: 350000 },
-  { id: 'seminar_sehari', label: 'PAKET SEMINAR SEHARI', description: 'Fasilitas untuk acara seminar', price: 200000 },
-  { id: 'seminar_inap', label: 'PAKET SEMINAR INAP', description: 'Fasilitas seminar dengan penginapan', price: 450000 },
-];
-
-// Define accommodations data
-const accommodations = [
-  {
-    id: 'pondok_kopel',
-    name: 'Pondok Kopel',
-    price: 1250000,
-    details: 'Kamar AC 5 org, shower/toilet indoor.',
-    capacity: 8,
-    features: ['Semangka 1', 'Semangka 2', 'Sirsak 1', 'Sirsak 2', 'Salak 1', 'Salak 2', 'Srikaya 1', 'Srikaya 2']
-  },
-  {
-    id: 'pondok_nangka',
-    name: 'Pondok Nangka',
-    price: 1750000,
-    details: 'Kamar AC 10 org, shower/toilet komunal.',
-    capacity: 6,
-    features: ['Nangka 1', 'Nangka 2', 'Nangka 3', 'Nangka 4', 'Nangka 5', 'Nangka 6']
-  },
-  {
-    id: 'pondok_manggis',
-    name: 'Pondok Manggis Bawah',
-    price: 3700000,
-    details: 'Kamar AC 20 org, shower/toilet komunal.',
-    capacity: 4,
-    features: []
-  },
-  {
-    id: 'pondok_duku',
-    name: 'Pondok Duku',
-    price: 1575000,
-    details: '2 kamar AC, 5 org, shower/toilet indoor.',
-    capacity: 2,
-    features: []
-  },
-];
-
-// Define venue data
-const venues = [
-  {
-    id: 'saung_gardena',
-    name: 'Saung Gardena',
-    capacity: 100,
-    price: 2660000,
-    features: ['Toilet (WC)', 'Halaman Luas', 'Podium 2.2 m', 'Meja 2', 'Kursi kayu', 'Listrik 2000 watt', 'Terpal 10x5 m (2 buah)', 'Kebersihan']
-  },
-  {
-    id: 'saung_cempaka',
-    name: 'Saung Cempaka',
-    capacity: 300,
-    price: 6000000,
-    features: ['Mushollah', 'Toilet (WC)', 'Podium 2.5 m', 'Meja 2', 'Kursi 100', 'Listrik 2000 watt', 'Terpal 10x5 m (2 buah)', 'Kebersihan']
-  },
-  {
-    id: 'saung_tribun',
-    name: 'Saung Tribun 1 (S. Padi & Panggung)',
-    capacity: 300,
-    price: 6650000,
-    features: ['Toilet (WC)', 'Panggung', 'Mushollah', 'Halaman luas', 'Meja 2', 'Listrik 2000 watt', 'Terpal 10x5 m (1 buah)', 'Kebersihan']
-  },
-  {
-    id: 'saung_kecapi',
-    name: 'Saung Kecapi (Inc. Lapangan Futsal)',
-    capacity: 80,
-    price: 1995000,
-    features: ['Toilet (WC)', 'Mushollah', 'Podium 2.2 m', 'Meja 2', 'Listrik 2000 watt', 'Terpal 10x5 m (1 buah)', 'Kebersihan']
-  },
+  { id: 'abk', label: 'ABK' }
 ];
 
 const formSchema = z.object({
@@ -181,15 +98,16 @@ const GuestRegistrationForm = () => {
   const navigate = useNavigate();
   const { id: editId } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [selectedClasses, setSelectedClasses] = useState<ClassType[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<string>('');
-  const [accommodationCounts, setAccommodationCounts] = useState<Record<string, number>>(
-    accommodations.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {})
-  );
+  const [accommodationCounts, setAccommodationCounts] = useState<Record<string, number>>({});
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
   const [totalCost, setTotalCost] = useState(0);
   const [discountedCost, setDiscountedCost] = useState(0);
   const [remainingBalance, setRemainingBalance] = useState(0);
+  const [packages, setPackages] = useState<any[]>([]);
+  const [accommodations, setAccommodations] = useState<any[]>([]);
+  const [venues, setVenues] = useState<any[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -220,6 +138,107 @@ const GuestRegistrationForm = () => {
   const watchTeacherCount = form.watch("teacher_count");
 
   useEffect(() => {
+    // Fetch packages from database
+    const fetchPackages = async () => {
+      const { data, error } = await supabase
+        .from('packages')
+        .select('*');
+
+      if (error) {
+        toast({
+          title: "Error fetching packages",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setPackages(data);
+        // Initialize accommodation counts
+        const initialCounts: Record<string, number> = {};
+        data.forEach((pkg: any) => {
+          initialCounts[pkg.id] = 0;
+        });
+        setAccommodationCounts(prev => ({...prev, ...initialCounts}));
+      }
+    };
+
+    // Fetch accommodations (rooms) from database
+    const fetchAccommodations = async () => {
+      const { data, error } = await supabase
+        .from('rooms')
+        .select('*');
+
+      if (error) {
+        toast({
+          title: "Error fetching accommodations",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data) {
+        setAccommodations(data.map(room => ({
+          id: room.id,
+          name: room.room_name,
+          price: room.price_per_night,
+          details: `Capacity: ${room.capacity} people`,
+          capacity: room.capacity,
+          features: [room.room_type],
+        })));
+        
+        // Initialize accommodation counts
+        const initialCounts: Record<string, number> = {};
+        data.forEach(room => {
+          initialCounts[room.id] = 0;
+        });
+        setAccommodationCounts(prev => ({...prev, ...initialCounts}));
+      }
+    };
+
+    // This would be a real API call in production
+    const fetchVenues = async () => {
+      // Example venues - in a real app this would come from an API
+      const mockVenues = [
+        {
+          id: 'saung_gardena',
+          name: 'Saung Gardena',
+          capacity: 100,
+          price: 2660000,
+          features: ['Toilet (WC)', 'Halaman Luas', 'Podium 2.2 m', 'Meja 2', 'Kursi kayu']
+        },
+        {
+          id: 'saung_cempaka',
+          name: 'Saung Cempaka',
+          capacity: 300,
+          price: 6000000,
+          features: ['Mushollah', 'Toilet (WC)', 'Podium 2.5 m', 'Meja 2', 'Kursi 100']
+        },
+        {
+          id: 'saung_tribun',
+          name: 'Saung Tribun 1 (S. Padi & Panggung)',
+          capacity: 300,
+          price: 6650000,
+          features: ['Toilet (WC)', 'Panggung', 'Mushollah', 'Halaman luas', 'Meja 2']
+        },
+        {
+          id: 'saung_kecapi',
+          name: 'Saung Kecapi (Inc. Lapangan Futsal)',
+          capacity: 80,
+          price: 1995000,
+          features: ['Toilet (WC)', 'Mushollah', 'Podium 2.2 m', 'Meja 2']
+        },
+      ];
+      
+      setVenues(mockVenues);
+    };
+
+    fetchPackages();
+    fetchAccommodations();
+    fetchVenues();
+
     if (editId) {
       fetchGuestRegistration(editId);
     }
@@ -235,7 +254,9 @@ const GuestRegistrationForm = () => {
     watchDownPayment,
     selectedPackage,
     accommodationCounts,
-    selectedVenues
+    selectedVenues,
+    packages,
+    venues
   ]);
 
   const fetchGuestRegistration = async (id: string) => {
@@ -265,7 +286,7 @@ const GuestRegistrationForm = () => {
           .eq('registration_id', id);
           
         if (classesData) {
-          const classes = classesData.map(c => c.class_type);
+          const classes = classesData.map(c => c.class_type) as ClassType[];
           setSelectedClasses(classes);
         }
 
@@ -311,12 +332,12 @@ const GuestRegistrationForm = () => {
     const teacherCount = Number(form.getValues("teacher_count")) || 0;
     
     // Find the selected package and get its price
-    const selectedPackageData = packageOptions.find(pkg => pkg.id === selectedPackage);
+    const selectedPackageData = packages.find(pkg => pkg.id === selectedPackage);
     
     // Base price per person
-    const adultPrice = selectedPackageData?.price || 100000;
-    const childrenPrice = selectedPackageData?.price * 0.8 || 80000; // 80% of adult price
-    const teacherPrice = selectedPackageData?.price * 0.5 || 50000;  // 50% of adult price
+    const adultPrice = selectedPackageData?.price_per_adult || 100000;
+    const childrenPrice = selectedPackageData?.price_per_child || 80000; 
+    const teacherPrice = selectedPackageData?.price_per_teacher || 50000;  
     
     // Calculate accommodations cost
     const accommodationCost = Object.entries(accommodationCounts).reduce((sum, [id, count]) => {
@@ -348,7 +369,7 @@ const GuestRegistrationForm = () => {
     setRemainingBalance(withDiscount - downPayment);
   };
 
-  const handleClassChange = (classes: string[]) => {
+  const handleClassChange = (classes: ClassType[]) => {
     setSelectedClasses(classes);
   };
 
@@ -391,7 +412,7 @@ const GuestRegistrationForm = () => {
       const visitDateForDB = formValues.visit_date ? formValues.visit_date.toISOString().split('T')[0] : null;
       const paymentDateForDB = formValues.payment_date ? formValues.payment_date.toISOString().split('T')[0] : null;
       
-      // Prepare data for submission - don't include order_id as it's generated by DB trigger
+      // Prepare data for submission
       const submissionData = {
         responsible_person: formValues.responsible_person,
         institution_name: formValues.institution_name,
@@ -427,7 +448,7 @@ const GuestRegistrationForm = () => {
         if (error) throw new Error(error.message);
         registrationId = editId;
       } else {
-        // Insert new record
+        // For new records, we need to omit the order_id as it's generated by a DB trigger
         const { data: insertedData, error } = await supabase
           .from('guest_registrations')
           .insert(submissionData)
@@ -446,20 +467,20 @@ const GuestRegistrationForm = () => {
           await supabase
             .from('guest_classes')
             .delete()
-            .eq('registration_id', registrationId);
+            .eq('registration_id', editId);
         }
         
         // Then insert the new classes - make sure to type them correctly
-        const classInserts = selectedClasses.map(classType => ({
-          registration_id: registrationId,
-          class_type: classType as ClassType
-        }));
-        
-        const { error: classError } = await supabase
-          .from('guest_classes')
-          .insert(classInserts);
-        
-        if (classError) throw new Error(classError.message);
+        for (const classType of selectedClasses) {
+          const { error: classError } = await supabase
+            .from('guest_classes')
+            .insert({
+              registration_id: registrationId,
+              class_type: classType
+            });
+          
+          if (classError) throw new Error(classError.message);
+        }
       }
       
       // TODO: Save accommodation and venue selections similarly
@@ -665,8 +686,8 @@ const GuestRegistrationForm = () => {
               <ClassSelectionGroup
                 title=""
                 options={classOptions}
-                selectedClasses={selectedClasses}
-                onClassChange={handleClassChange}
+                selectedClasses={selectedClasses as string[]}
+                onClassChange={(classes) => handleClassChange(classes as ClassType[])}
               />
             </CardContent>
           </Card>
@@ -678,13 +699,13 @@ const GuestRegistrationForm = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {packageOptions.map(pkg => (
+                {packages.map(pkg => (
                   <PackageSelectionCard
                     key={pkg.id}
                     id={pkg.id}
-                    title={pkg.label}
+                    title={pkg.name}
                     description={pkg.description}
-                    price={pkg.price}
+                    price={pkg.price_per_adult}
                     checked={selectedPackage === pkg.id}
                     onCheckedChange={() => handlePackageChange(pkg.id)}
                   />
@@ -711,7 +732,7 @@ const GuestRegistrationForm = () => {
                     details={accommodation.details}
                     capacity={accommodation.capacity}
                     features={accommodation.features}
-                    count={accommodationCounts[accommodation.id]}
+                    count={accommodationCounts[accommodation.id] || 0}
                     onCountChange={(count) => handleAccommodationChange(accommodation.id, count)}
                   />
                 ))}
