@@ -1,4 +1,3 @@
-
 export type PaymentStatus = 'lunas' | 'belum_lunas';
 
 export type Visit = {
@@ -17,6 +16,7 @@ export type Visit = {
   discount_percentage?: number;
   discounted_cost?: number;
   down_payment?: number;
+  nights_count?: number; // Number of nights staying
 };
 
 // For dashboard data processing

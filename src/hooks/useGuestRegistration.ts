@@ -18,9 +18,10 @@ export type { VisitType, PaymentStatus } from './registration/useRegistrationSub
 
 interface UseGuestRegistrationProps {
   editId?: string;
+  nightsCount?: number;
 }
 
-export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {}) => {
+export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegistrationProps = {}) => {
   // Custom hooks
   const form = useGuestRegistrationForm();
   const { packages, accommodations, venues, fetchGuestRegistration } = useRegistrationData();
@@ -47,7 +48,8 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
     selectedVenues,
     packages,
     accommodations,
-    venues
+    venues,
+    nightsCount
   );
   
   const { isSubmitting, handleSubmit } = useRegistrationSubmit(
@@ -56,7 +58,8 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
     selectedPackage,
     totalCost,
     discountedCost,
-    extraBedCounts
+    extraBedCounts,
+    nightsCount
   );
   
   const { getSummaryData } = useSummaryData(
@@ -64,7 +67,8 @@ export const useGuestRegistration = ({ editId }: UseGuestRegistrationProps = {})
     extraBedCounts,
     totalCost,
     discountedCost,
-    remainingBalance
+    remainingBalance,
+    nightsCount
   );
   
   // Initialize accommodation counts when accommodations are loaded
