@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
-import AppLayout from './components/layout/AppLayout';
+import { AppLayout } from './components/layout/AppLayout';
 import Dashboard from './pages/Dashboard';
 import VisitList from './pages/VisitList';
 import CalendarView from './pages/CalendarView';
