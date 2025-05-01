@@ -32,17 +32,15 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
         <Label htmlFor={id} className="flex-1 font-medium text-lg cursor-pointer">{title}</Label>
       </div>
       
-      {description && (
-        <div className="ml-8 text-sm text-muted-foreground">
-          {description}
-        </div>
-      )}
-      
-      {price !== undefined && (
-        <div className="ml-8 font-medium">
-          Rp {price.toLocaleString()}
-        </div>
-      )}
+      <div className="ml-8 space-y-2">
+        {description && (
+          <p className="text-sm text-muted-foreground">{description}</p>
+        )}
+        
+        {price !== undefined && (
+          <p className="font-medium">Rp {price.toLocaleString()}</p>
+        )}
+      </div>
     </div>
   );
 };

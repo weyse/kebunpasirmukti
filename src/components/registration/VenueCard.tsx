@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface VenueCardProps {
   name: string;
@@ -19,29 +20,34 @@ const VenueCard: React.FC<VenueCardProps> = ({
   selected,
   onSelectionChange
 }) => {
+  const id = `venue-${name.replace(/\s+/g, '-').toLowerCase()}`;
+  
   return (
-    <div className={`border rounded-md p-4 ${selected ? 'bg-primary/10 border-primary' : ''}`}>
-      <div className="flex items-center justify-between mb-2">
+    <div className={`border rounded-md p-4 flex flex-col space-y-2 ${selected ? 'bg-primary/10 border-primary' : ''}`}>
+      <div className="flex items-center space-x-3">
         <Checkbox 
-          id={`venue-${name}`}
+          id={id}
           checked={selected} 
-          onCheckedChange={onSelectionChange}
+          onCheckedChange={onSelectionChange} 
+          className="h-5 w-5"
         />
-        <label htmlFor={`venue-${name}`} className="flex-1 ml-2 font-medium cursor-pointer">{name}</label>
+        <Label htmlFor={id} className="flex-1 font-medium text-lg cursor-pointer">{name}</Label>
       </div>
       
-      <div className="ml-6">
-        <p className="text-sm">Kapasitas: {capacity} pax</p>
-        <p className="font-medium text-sm">Rp {price.toLocaleString()}</p>
+      <div className="ml-8 space-y-2">
+        <p className="text-sm text-muted-foreground">Kapasitas: {capacity} pax</p>
+        <p className="font-medium">Rp {price.toLocaleString()}</p>
         
-        <ul className="mt-2 space-y-1">
+        <div className="flex flex-wrap gap-2 mt-2">
           {features.map((feature, index) => (
-            <li key={index} className="text-xs flex items-center">
-              <span className="mr-2">•</span>
+            <span 
+              key={index} 
+              className="inline-block text-xs bg-secondary px-2 py-1 rounded-full"
+            >
               {feature}
-            </li>
+            </span>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
