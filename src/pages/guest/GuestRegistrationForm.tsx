@@ -93,7 +93,7 @@ const GuestRegistrationForm = () => {
           <CostCalculationForm form={form} totalCost={totalCost} discountedCost={discountedCost} remainingBalance={remainingBalance} calculationSummary={calculationSummary} />
           
           {/* Notes and Order Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-3xl">
             
             
             <div>
