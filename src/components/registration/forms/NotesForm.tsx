@@ -31,6 +31,7 @@ const NotesForm: React.FC<NotesFormProps> = ({ form }) => {
                   placeholder="Tambahkan catatan khusus untuk pemesanan ini" 
                   {...field}
                   rows={4}
+                  className="resize-none"
                 />
               </FormControl>
               <FormMessage />
