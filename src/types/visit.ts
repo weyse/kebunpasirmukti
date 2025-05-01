@@ -1,3 +1,4 @@
+
 export type PaymentStatus = 'lunas' | 'belum_lunas';
 
 export type Visit = {

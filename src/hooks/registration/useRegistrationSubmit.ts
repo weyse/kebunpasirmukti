@@ -15,7 +15,8 @@ export const useRegistrationSubmit = (
   selectedPackage: string,
   totalCost: number,
   discountedCost: number,
-  extraBedCounts: Record<string, number>
+  extraBedCounts: Record<string, number>,
+  nightsCount: number = 1
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,8 +40,8 @@ export const useRegistrationSubmit = (
       const visitDateForDB = formValues.visit_date ? formValues.visit_date.toISOString().split('T')[0] : null;
       const paymentDateForDB = formValues.payment_date ? formValues.payment_date.toISOString().split('T')[0] : null;
       
-      // Calculate extra bed cost for inclusion in submission
-      const extraBedCost = Object.values(extraBedCounts).reduce((sum, count) => sum + (count * 160000), 0);
+      // Calculate extra bed cost for inclusion in submission (accounting for nights count)
+      const extraBedCost = Object.values(extraBedCounts).reduce((sum, count) => sum + (count * 160000 * nightsCount), 0);
       
       // Prepare data for submission
       const submissionData = {
@@ -63,7 +64,8 @@ export const useRegistrationSubmit = (
         payment_date: paymentDateForDB,
         bank_name: formValues.bank_name || '',
         payment_status: dbPaymentStatus,
-        extra_bed_cost: extraBedCost
+        extra_bed_cost: extraBedCost,
+        nights_count: nightsCount
       };
 
       let registrationId;

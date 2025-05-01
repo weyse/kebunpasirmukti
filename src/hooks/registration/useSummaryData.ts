@@ -9,15 +9,16 @@ export const useSummaryData = (
   extraBedCounts: Record<string, number>,
   totalCost: number,
   discountedCost: number,
-  remainingBalance: number
+  remainingBalance: number,
+  nightsCount: number = 1
 ) => {
   // Prepare summary data for the order summary component
   const getSummaryData = () => {
     const values = form.getValues();
     
-    // Calculate extra bed cost for summary
+    // Calculate extra bed cost for summary (accounting for nights count)
     const totalExtraBedCost = Object.values(extraBedCounts).reduce(
-      (sum, count) => sum + (count * EXTRA_BED_PRICE), 0
+      (sum, count) => sum + (count * EXTRA_BED_PRICE * nightsCount), 0
     );
     
     const basicInfo = [
@@ -26,6 +27,14 @@ export const useSummaryData = (
       { label: 'Tanggal Kunjungan', value: values.visit_date ? format(values.visit_date, 'dd MMM yyyy') : '-' },
       { label: 'Jumlah Peserta', value: `${Number(values.adult_count) + Number(values.children_count) + Number(values.teacher_count)}` }
     ];
+    
+    // Add nights count if more than 1
+    if (nightsCount > 1) {
+      basicInfo.push({ 
+        label: 'Jumlah Malam', 
+        value: `${nightsCount}`
+      });
+    }
     
     // Add extra bed info if any
     if (totalExtraBedCost > 0) {

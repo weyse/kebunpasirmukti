@@ -26,7 +26,8 @@ export const useCostCalculation = (
   selectedVenues: string[],
   packages: any[],
   accommodations: any[],
-  venues: any[]
+  venues: any[],
+  nightsCount: number = 1
 ) => {
   const [totalCost, setTotalCost] = useState(0);
   const [discountedCost, setDiscountedCost] = useState(0);
@@ -63,7 +64,8 @@ export const useCostCalculation = (
     extraBedCounts,
     selectedVenues,
     packages,
-    venues
+    venues,
+    nightsCount
   ]);
 
   const calculateCosts = () => {
@@ -90,15 +92,15 @@ export const useCostCalculation = (
     const childrenDiscountAmount = (discountPercentage / 100) * regularChildrenCost;
     const discountedChildrenCost = regularChildrenCost - childrenDiscountAmount;
     
-    // Calculate accommodations cost
+    // Calculate accommodations cost (accounting for nights count)
     const accommodationCost = Object.entries(accommodationCounts).reduce((sum, [id, count]) => {
       const accommodation = accommodations.find(a => a.id === id);
-      return sum + (accommodation ? accommodation.price * count : 0);
+      return sum + (accommodation ? accommodation.price * count * nightsCount : 0);
     }, 0);
     
-    // Calculate extra bed cost
+    // Calculate extra bed cost (accounting for nights count)
     const extraBedCost = Object.entries(extraBedCounts).reduce((sum, [id, count]) => {
-      return sum + (count * EXTRA_BED_PRICE);
+      return sum + (count * EXTRA_BED_PRICE * nightsCount);
     }, 0);
     
     // Calculate venue cost

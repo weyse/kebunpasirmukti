@@ -15,6 +15,7 @@ interface AccommodationCardProps {
   extraBedCount: number;
   onCountChange: (count: number) => void;
   onExtraBedChange: (count: number) => void;
+  nightsCount?: number;
 }
 
 const EXTRA_BED_PRICE = 160000;
@@ -28,7 +29,8 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
   count,
   extraBedCount,
   onCountChange,
-  onExtraBedChange
+  onExtraBedChange,
+  nightsCount = 1
 }) => {
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
@@ -40,9 +42,12 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
     onExtraBedChange(isNaN(value) ? 0 : Math.min(value, count * 2));
   };
 
+  // Calculate price per night (original price provided is already for all nights)
+  const pricePerNight = price / nightsCount;
+
   // Calculate total price including extra beds
   const roomPrice = price * count;
-  const extraBedPrice = EXTRA_BED_PRICE * extraBedCount;
+  const extraBedPrice = EXTRA_BED_PRICE * extraBedCount * nightsCount;
   const totalPrice = roomPrice + extraBedPrice;
 
   return (
@@ -52,7 +57,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
       </div>
       
       <div>
-        <p className="font-medium">Rp {price.toLocaleString()} × 1 malam = Rp {price.toLocaleString()}</p>
+        <p className="font-medium">Rp {pricePerNight.toLocaleString()} × {nightsCount} malam = Rp {price.toLocaleString()}</p>
         <p className="text-sm text-muted-foreground">{details}</p>
       </div>
       
@@ -86,7 +91,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
               <div className="flex items-center gap-2">
                 <BedDouble className="h-4 w-4" />
                 <label htmlFor={`extra-bed-${name}`} className="text-sm font-medium">
-                  Extra Bed (Rp {EXTRA_BED_PRICE.toLocaleString()}/bed):
+                  Extra Bed (Rp {EXTRA_BED_PRICE.toLocaleString()}/bed × {nightsCount} malam):
                 </label>
               </div>
               <Input
@@ -102,7 +107,7 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
             
             {extraBedCount > 0 && (
               <div className="text-sm text-right text-green-600">
-                Extra Bed: {extraBedCount} × Rp {EXTRA_BED_PRICE.toLocaleString()} = Rp {extraBedPrice.toLocaleString()}
+                Extra Bed: {extraBedCount} × Rp {EXTRA_BED_PRICE.toLocaleString()} × {nightsCount} malam = Rp {extraBedPrice.toLocaleString()}
               </div>
             )}
             
