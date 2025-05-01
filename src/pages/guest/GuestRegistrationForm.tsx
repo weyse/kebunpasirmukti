@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -13,12 +12,14 @@ import VenueSelectionForm from '@/components/registration/forms/VenueSelectionFo
 import CostCalculationForm from '@/components/registration/forms/CostCalculationForm';
 import NotesForm from '@/components/registration/forms/NotesForm';
 import OrderSummary from '@/components/registration/OrderSummary';
-
 const GuestRegistrationForm = () => {
   const navigate = useNavigate();
-  const { id: editId } = useParams<{ id: string; }>();
+  const {
+    id: editId
+  } = useParams<{
+    id: string;
+  }>();
   const [nightsCount, setNightsCount] = useState(1);
-  
   const {
     form,
     isSubmitting,
@@ -41,11 +42,10 @@ const GuestRegistrationForm = () => {
     handleVenueChange,
     handleSubmit,
     getSummaryData
-  } = useGuestRegistration({ 
+  } = useGuestRegistration({
     editId,
-    nightsCount 
+    nightsCount
   });
-  
   const onSubmit = async (values: any) => {
     try {
       // Include nights count in the submission
@@ -53,7 +53,7 @@ const GuestRegistrationForm = () => {
         ...values,
         nights_count: nightsCount
       });
-      
+
       // Navigate back to list on success
       if (registrationId) {
         navigate('/guest-registration');
@@ -63,7 +63,6 @@ const GuestRegistrationForm = () => {
       console.error("Failed to submit form:", error);
     }
   };
-
   return <div className="space-y-8">
       <div className="flex items-center space-x-2">
         <Button variant="ghost" size="sm" onClick={() => navigate('/guest-registration')}>
@@ -85,15 +84,7 @@ const GuestRegistrationForm = () => {
           <PackageSelectionForm packages={packages} selectedPackage={selectedPackage} onPackageChange={handlePackageChange} />
           
           {/* Accommodation Section */}
-          <AccommodationSelectionForm 
-            accommodations={accommodations} 
-            accommodationCounts={accommodationCounts} 
-            extraBedCounts={extraBedCounts} 
-            onAccommodationChange={handleAccommodationChange} 
-            onExtraBedChange={handleExtraBedChange}
-            nightsCount={nightsCount}
-            onNightsCountChange={setNightsCount}
-          />
+          <AccommodationSelectionForm accommodations={accommodations} accommodationCounts={accommodationCounts} extraBedCounts={extraBedCounts} onAccommodationChange={handleAccommodationChange} onExtraBedChange={handleExtraBedChange} nightsCount={nightsCount} onNightsCountChange={setNightsCount} />
           
           {/* Venue Section */}
           <VenueSelectionForm venues={venues} selectedVenues={selectedVenues} onVenueChange={handleVenueChange} />
@@ -103,9 +94,7 @@ const GuestRegistrationForm = () => {
           
           {/* Notes and Order Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-full">
-            <div className="md:col-span-2">
-              <NotesForm form={form} />
-            </div>
+            
             
             <div>
               <OrderSummary basicInfo={getSummaryData().basicInfo} paymentInfo={getSummaryData().paymentInfo} costCalculation={getSummaryData().costCalculation} />
@@ -124,5 +113,4 @@ const GuestRegistrationForm = () => {
       </Form>
     </div>;
 };
-
 export default GuestRegistrationForm;
