@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CalendarCheck, Users, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardMetrics } from '@/hooks/dashboard/useDashboardMetrics';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { VisitStatsChart } from '@/components/dashboard/VisitStatsChart';
 import { UpcomingVisits } from '@/components/dashboard/UpcomingVisits';
@@ -11,7 +11,7 @@ import { formatCurrency } from '@/components/dashboard/DashboardUtils';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { metrics, isLoading } = useDashboardData();
+  const { metrics, isLoading } = useDashboardMetrics();
 
   return (
     <div className="space-y-6">

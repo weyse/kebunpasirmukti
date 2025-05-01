@@ -19,21 +19,40 @@ export type Visit = {
   down_payment?: number;
 };
 
+// For dashboard data processing
+export type VisitData = {
+  id: string;
+  institution_name: string;
+  visit_date: string;
+  adult_count?: number;
+  children_count?: number;
+  teacher_count?: number;
+  total_cost?: number;
+  payment_status?: PaymentStatus;
+  order_id?: string;
+};
+
 // Dashboard types
 export type DashboardMetrics = {
   totalVisits: number;
   totalVisitors: number;
   totalRevenue: number;
-  monthlyGrowth: {
-    visits: number;
-    visitors: number;
-    revenue: number;
-  };
+  monthlyGrowth: MonthlyGrowthData;
   monthlyVisits: {
     name: string;
     visitors: number;
   }[];
   upcomingVisits: UpcomingVisit[];
+};
+
+export type MonthlyGrowthData = {
+  visits: number;
+  visitors: number;
+  revenue: number;
+  monthlyVisits: {
+    name: string;
+    visitors: number;
+  }[];
 };
 
 export type MonthlyVisitData = {
