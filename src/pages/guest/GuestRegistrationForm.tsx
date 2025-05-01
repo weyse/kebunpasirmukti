@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -13,10 +12,13 @@ import VenueSelectionForm from '@/components/registration/forms/VenueSelectionFo
 import CostCalculationForm from '@/components/registration/forms/CostCalculationForm';
 import NotesForm from '@/components/registration/forms/NotesForm';
 import OrderSummary from '@/components/registration/OrderSummary';
-
 const GuestRegistrationForm = () => {
   const navigate = useNavigate();
-  const { id: editId } = useParams<{ id: string }>();
+  const {
+    id: editId
+  } = useParams<{
+    id: string;
+  }>();
   const {
     form,
     isSubmitting,
@@ -39,8 +41,9 @@ const GuestRegistrationForm = () => {
     handleVenueChange,
     handleSubmit,
     getSummaryData
-  } = useGuestRegistration({ editId });
-
+  } = useGuestRegistration({
+    editId
+  });
   const onSubmit = async (values: any) => {
     try {
       const registrationId = await handleSubmit(values);
@@ -53,15 +56,9 @@ const GuestRegistrationForm = () => {
       console.error("Failed to submit form:", error);
     }
   };
-
-  return (
-    <div className="space-y-8">
+  return <div className="space-y-8">
       <div className="flex items-center space-x-2">
-        <Button 
-          variant="ghost" 
-          size="sm"
-          onClick={() => navigate('/guest-registration')}
-        >
+        <Button variant="ghost" size="sm" onClick={() => navigate('/guest-registration')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
@@ -74,78 +71,39 @@ const GuestRegistrationForm = () => {
           <BasicInformationForm form={form} />
           
           {/* Class Selection */}
-          <ClassSelectionForm 
-            selectedClasses={selectedClasses}
-            onClassChange={handleClassChange}
-            classOptions={classOptions}
-          />
+          <ClassSelectionForm selectedClasses={selectedClasses} onClassChange={handleClassChange} classOptions={classOptions} />
           
           {/* Package Selection */}
-          <PackageSelectionForm
-            packages={packages}
-            selectedPackage={selectedPackage}
-            onPackageChange={handlePackageChange}
-          />
+          <PackageSelectionForm packages={packages} selectedPackage={selectedPackage} onPackageChange={handlePackageChange} />
           
           {/* Accommodation Section */}
-          <AccommodationSelectionForm
-            accommodations={accommodations}
-            accommodationCounts={accommodationCounts}
-            extraBedCounts={extraBedCounts}
-            onAccommodationChange={handleAccommodationChange}
-            onExtraBedChange={handleExtraBedChange}
-          />
+          <AccommodationSelectionForm accommodations={accommodations} accommodationCounts={accommodationCounts} extraBedCounts={extraBedCounts} onAccommodationChange={handleAccommodationChange} onExtraBedChange={handleExtraBedChange} />
           
           {/* Venue Section */}
-          <VenueSelectionForm
-            venues={venues}
-            selectedVenues={selectedVenues}
-            onVenueChange={handleVenueChange}
-          />
+          <VenueSelectionForm venues={venues} selectedVenues={selectedVenues} onVenueChange={handleVenueChange} />
           
           {/* Payment Information */}
-          <CostCalculationForm
-            form={form}
-            totalCost={totalCost}
-            discountedCost={discountedCost}
-            remainingBalance={remainingBalance}
-            calculationSummary={calculationSummary}
-          />
+          <CostCalculationForm form={form} totalCost={totalCost} discountedCost={discountedCost} remainingBalance={remainingBalance} calculationSummary={calculationSummary} />
           
           {/* Notes and Order Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2">
-              <NotesForm form={form} />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-full">
+            
             
             <div>
-              <OrderSummary
-                basicInfo={getSummaryData().basicInfo}
-                paymentInfo={getSummaryData().paymentInfo}
-                costCalculation={getSummaryData().costCalculation}
-              />
+              <OrderSummary basicInfo={getSummaryData().basicInfo} paymentInfo={getSummaryData().paymentInfo} costCalculation={getSummaryData().costCalculation} />
             </div>
           </div>
           
           <div className="flex justify-end space-x-4">
-            <Button 
-              type="button" 
-              variant="outline"
-              onClick={() => navigate('/guest-registration')}
-            >
+            <Button type="button" variant="outline" onClick={() => navigate('/guest-registration')}>
               Batal
             </Button>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-            >
+            <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Menyimpan...' : 'Simpan'}
             </Button>
           </div>
         </form>
       </Form>
-    </div>
-  );
+    </div>;
 };
-
 export default GuestRegistrationForm;
