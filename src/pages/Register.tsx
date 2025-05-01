@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,34 +27,47 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define the form schema
-const loginFormSchema = z.object({
+const registerFormSchema = z.object({
+  fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
   email: z.string().email('Email tidak valid').min(1, 'Email harus diisi'),
   password: z.string().min(6, 'Password minimal 6 karakter'),
+  confirmPassword: z.string().min(6, 'Password minimal 6 karakter'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Password tidak cocok",
+  path: ["confirmPassword"],
 });
 
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize form
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-    resolver: zodResolver(loginFormSchema),
+  const form = useForm<z.infer<typeof registerFormSchema>>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
+      fullName: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
   });
 
   // Form submission handler
-  const onSubmit = async (values: z.infer<typeof loginFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof registerFormSchema>) => {
     setIsLoading(true);
     
     try {
-      // Authenticate with Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Register with Supabase
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          data: {
+            full_name: values.fullName,
+          },
+        },
       });
       
       if (error) {
@@ -62,16 +75,17 @@ const Login = () => {
       }
       
       toast({
-        title: 'Login berhasil',
-        description: 'Selamat datang kembali!',
+        title: 'Pendaftaran berhasil',
+        description: 'Silahkan cek email Anda untuk konfirmasi.',
       });
       
-      navigate('/');
+      // Redirect to login page after successful registration
+      navigate('/login');
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('Registration error:', error);
       toast({
-        title: 'Login gagal',
-        description: error.message || 'Username atau password salah',
+        title: 'Pendaftaran gagal',
+        description: error.message || 'Terjadi kesalahan saat pendaftaran',
         variant: 'destructive',
       });
     } finally {
@@ -92,16 +106,33 @@ const Login = () => {
               </div>
             </div>
             <CardTitle className="text-2xl font-semibold tracking-tight">
-              Login Admin Pasirmukti
+              Buat Akun Baru
             </CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
-              Masukkan email dan password untuk melanjutkan
+              Lengkapi form berikut untuk mendaftar
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama Lengkap</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input placeholder="Nama lengkap" className="pl-10" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="email"
@@ -157,28 +188,60 @@ const Login = () => {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Konfirmasi Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            className="pl-10"
+                            {...field}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-full"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                            <span className="sr-only">
+                              {showConfirmPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                            </span>
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <Button 
                   type="submit" 
                   className="w-full bg-pasirmukti-500 hover:bg-pasirmukti-600" 
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Loading...' : 'Login'}
+                  {isLoading ? 'Loading...' : 'Daftar'}
                 </Button>
               </form>
             </Form>
-
-            <div className="mt-4 text-center text-sm">
-              <Link to="/forgot-password" className="text-pasirmukti-600 hover:underline">
-                Lupa password?
-              </Link>
-            </div>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-4 border-t pt-4">
             <div className="text-center text-sm">
-              <span className="text-muted-foreground">Belum punya akun? </span>
-              <Link to="/register" className="text-pasirmukti-600 hover:underline">
-                Daftar
+              <span className="text-muted-foreground">Sudah punya akun? </span>
+              <Link to="/login" className="text-pasirmukti-600 hover:underline">
+                Login
               </Link>
             </div>
           </CardFooter>
@@ -188,4 +251,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

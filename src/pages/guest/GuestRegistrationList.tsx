@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Search, ArrowUpDown, Filter, Eye, Edit, Trash, CalendarCheck, Loader2 } from 'lucide-react';
+import { Search, ArrowUpDown, Filter, Eye, Edit, Trash, CalendarCheck, Loader2, Plus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define guest data types
@@ -49,7 +49,6 @@ type Guest = {
   responsible_person: string;
   institution_name: string;
   phone_number: string;
-  email?: string;
   total_visitors: number;
   visit_type: string;
   package_type: string;
@@ -125,11 +124,10 @@ const GuestRegistrationList = () => {
         // Process the data to match our Guest type
         const processedGuests = data.map(guest => ({
           id: guest.id,
-          order_id: guest.order_id,
+          order_id: guest.order_id || '',
           responsible_person: guest.responsible_person,
           institution_name: guest.institution_name,
           phone_number: guest.phone_number,
-          email: guest.email || '',
           total_visitors: (guest.adult_count || 0) + (guest.children_count || 0) + (guest.teacher_count || 0),
           visit_type: guest.visit_type,
           package_type: guest.package_type,
@@ -226,7 +224,8 @@ const GuestRegistrationList = () => {
           className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
           onClick={() => navigate('/guest-registration/new')}
         >
-          + Registrasi Baru
+          <Plus className="mr-2 h-4 w-4" />
+          Registrasi Baru
         </Button>
       </div>
 
@@ -325,7 +324,7 @@ const GuestRegistrationList = () => {
               ) : (
                 filteredGuests.map((guest) => (
                   <TableRow key={guest.id}>
-                    <TableCell className="font-medium">{guest.order_id}</TableCell>
+                    <TableCell className="font-medium">{guest.order_id || '-'}</TableCell>
                     <TableCell>{guest.institution_name}</TableCell>
                     <TableCell>{guest.responsible_person}</TableCell>
                     <TableCell>
@@ -375,7 +374,7 @@ const GuestRegistrationList = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => navigate(`/guest-registration/${guest.id}`)}
+                            onClick={() => navigate(`/guest-registration/view/${guest.id}`)}
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Lihat Detail

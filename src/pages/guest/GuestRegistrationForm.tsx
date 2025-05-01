@@ -45,11 +45,10 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import {
-  Checkbox,
-  CheckboxIndicator,
+  Checkbox
 } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 // Define form schema
@@ -82,7 +81,9 @@ const formSchema = z.object({
   
   // Payment
   paymentMethod: z.string().min(1, 'Metode pembayaran harus dipilih'),
-  paymentStatus: z.string().min(1, 'Status pembayaran harus dipilih'),
+  paymentStatus: z.enum(['belum_lunas', 'lunas'], {
+    required_error: 'Status pembayaran harus dipilih',
+  }),
   downPayment: z.string().optional().refine((val) => !val || (!isNaN(parseFloat(val)) && parseFloat(val) >= 0), {
     message: 'Nilai harus berupa angka positif',
   }),
@@ -115,6 +116,22 @@ const activityTypes = [
   { value: 'lainnya', label: 'Lainnya' },
 ];
 
+// Convert string to enum type
+const visitTypeToEnum = (visitType: string): "wisata_edukasi" | "outbound" | "camping" | "field_trip" | "penelitian" | "lainnya" => {
+  if (["wisata_edukasi", "outbound", "camping", "field_trip", "penelitian", "lainnya"].includes(visitType)) {
+    return visitType as "wisata_edukasi" | "outbound" | "camping" | "field_trip" | "penelitian" | "lainnya";
+  }
+  return "lainnya"; // Default fallback
+};
+
+// Convert string to class type enum
+const classTypeToEnum = (classType: string): "kb_tk" | "sd_1_2" | "sd_3_4" | "sd_5_6" | "smp" | "sma" | "umum_a" | "umum_b" | "abk" => {
+  if (["kb_tk", "sd_1_2", "sd_3_4", "sd_5_6", "smp", "sma", "umum_a", "umum_b", "abk"].includes(classType)) {
+    return classType as "kb_tk" | "sd_1_2" | "sd_3_4" | "sd_5_6" | "smp" | "sma" | "umum_a" | "umum_b" | "abk";
+  }
+  return "umum_a"; // Default fallback
+};
+
 // Define component
 const GuestRegistrationForm = () => {
   const navigate = useNavigate();
@@ -126,6 +143,7 @@ const GuestRegistrationForm = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [packages, setPackages] = useState<any[]>([]);
   const [calculatedCost, setCalculatedCost] = useState<number>(0);
+  const [currentTab, setCurrentTab] = useState('info');
   
   // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -274,6 +292,16 @@ const GuestRegistrationForm = () => {
     }
   };
 
+  // Function to navigate to next tab
+  const goToNextTab = (currentTab: string) => {
+    const tabOrder = ['info', 'participants', 'activity', 'payment', 'summary'];
+    const currentIndex = tabOrder.indexOf(currentTab);
+    
+    if (currentIndex < tabOrder.length - 1) {
+      setCurrentTab(tabOrder[currentIndex + 1]);
+    }
+  };
+
   // Handle form submission
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -289,7 +317,7 @@ const GuestRegistrationForm = () => {
         adult_count: parseInt(values.adultCount),
         children_count: parseInt(values.childrenCount),
         teacher_count: parseInt(values.teacherCount),
-        visit_type: values.activityType,
+        visit_type: visitTypeToEnum(values.activityType),
         package_type: values.packageType,
         notes: values.notes,
         total_cost: calculatedCost,
@@ -334,7 +362,7 @@ const GuestRegistrationForm = () => {
       if (selectedClasses.length > 0) {
         const classData = selectedClasses.map(classType => ({
           registration_id: registrationId,
-          class_type: classType,
+          class_type: classTypeToEnum(classType),
         }));
         
         const { error: classError } = await supabase
@@ -387,7 +415,7 @@ const GuestRegistrationForm = () => {
         </h1>
       </div>
 
-      <Tabs defaultValue="info" className="w-full">
+      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
         <TabsList className="grid w-full md:w-auto grid-cols-3 md:grid-cols-5 mb-4">
           <TabsTrigger value="info">Informasi Dasar</TabsTrigger>
           <TabsTrigger value="participants">Peserta</TabsTrigger>
@@ -503,6 +531,16 @@ const GuestRegistrationForm = () => {
                       )}
                     />
                   </div>
+
+                  <div className="flex justify-end mt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => goToNextTab('info')}
+                      className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
+                    >
+                      Lanjutkan
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="participants" className="space-y-6">
@@ -578,6 +616,23 @@ const GuestRegistrationForm = () => {
                         </div>
                       ))}
                     </div>
+                  </div>
+
+                  <div className="flex justify-between mt-4">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCurrentTab('info')}
+                    >
+                      Kembali
+                    </Button>
+                    <Button 
+                      type="button"
+                      onClick={() => goToNextTab('participants')}
+                      className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
+                    >
+                      Lanjutkan
+                    </Button>
                   </div>
                 </TabsContent>
 
@@ -684,6 +739,23 @@ const GuestRegistrationForm = () => {
                       </FormItem>
                     )}
                   />
+
+                  <div className="flex justify-between mt-4">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCurrentTab('participants')}
+                    >
+                      Kembali
+                    </Button>
+                    <Button 
+                      type="button"
+                      onClick={() => goToNextTab('activity')}
+                      className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
+                    >
+                      Lanjutkan
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="payment" className="space-y-6">
@@ -819,6 +891,23 @@ const GuestRegistrationForm = () => {
                       </div>
                     </div>
                   </div>
+
+                  <div className="flex justify-between mt-4">
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => setCurrentTab('activity')}
+                    >
+                      Kembali
+                    </Button>
+                    <Button 
+                      type="button"
+                      onClick={() => goToNextTab('payment')}
+                      className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
+                    >
+                      Lanjutkan
+                    </Button>
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="summary" className="space-y-6">
@@ -882,22 +971,26 @@ const GuestRegistrationForm = () => {
                 </TabsContent>
               </CardContent>
 
-              <CardFooter className="flex justify-end space-x-4 pt-6 border-t">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => navigate('/guest-registration')}
-                >
-                  Batal
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={isLoading}
-                  className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
-                >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isEditMode ? 'Perbarui Registrasi' : 'Simpan Registrasi'}
-                </Button>
+              <CardFooter className="flex justify-between space-x-4 pt-6 border-t">
+                {currentTab === 'summary' && (
+                  <>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setCurrentTab('payment')}
+                    >
+                      Kembali
+                    </Button>
+                    <Button 
+                      type="submit"
+                      disabled={isLoading}
+                      className="bg-pasirmukti-500 hover:bg-pasirmukti-600"
+                    >
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isEditMode ? 'Perbarui Registrasi' : 'Simpan Registrasi'}
+                    </Button>
+                  </>
+                )}
               </CardFooter>
             </Card>
           </form>
