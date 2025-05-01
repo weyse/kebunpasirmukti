@@ -22,10 +22,18 @@ export type Visit = {
 // Dashboard types
 export type DashboardMetrics = {
   totalVisits: number;
-  upcomingVisits: number;
+  totalVisitors: number;
   totalRevenue: number;
-  completedPayments: number;
-  pendingPayments: number;
+  monthlyGrowth: {
+    visits: number;
+    visitors: number;
+    revenue: number;
+  };
+  monthlyVisits: {
+    name: string;
+    visitors: number;
+  }[];
+  upcomingVisits: UpcomingVisit[];
 };
 
 export type MonthlyVisitData = {
@@ -35,7 +43,7 @@ export type MonthlyVisitData = {
 
 export type UpcomingVisit = {
   id: string;
-  institution_name: string;
-  visit_date: string;
-  total_visitors: number;
+  name: string;
+  date: string;
+  count: number;
 };

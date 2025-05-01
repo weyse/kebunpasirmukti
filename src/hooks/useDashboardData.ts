@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { format, isBefore, isAfter, parseISO, startOfMonth, endOfMonth, addMonths, subMonths } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
-import { DashboardMetrics, MonthlyVisitData, UpcomingVisit } from '@/types/visit';
+import { DashboardMetrics, UpcomingVisit } from '@/types/visit';
 import { toast } from 'sonner';
 
 export const useDashboardData = () => {
@@ -16,7 +16,7 @@ export const useDashboardData = () => {
       revenue: 0,
     },
     monthlyVisits: [],
-    upcomingVisits: [],
+    upcomingVisits: []
   });
   
   const [isLoading, setIsLoading] = useState(true);
@@ -111,7 +111,7 @@ export const useDashboardData = () => {
           : 0;
         
         // Get upcoming visits
-        const upcomingVisits = allVisits
+        const upcomingVisits: UpcomingVisit[] = allVisits
           .filter(visit => isAfter(parseISO(visit.visit_date), now))
           .sort((a, b) => new Date(a.visit_date).getTime() - new Date(b.visit_date).getTime())
           .slice(0, 3)
@@ -137,7 +137,7 @@ export const useDashboardData = () => {
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        toast('Error loading dashboard data');
+        toast.error('Error loading dashboard data');
       } finally {
         setIsLoading(false);
       }
