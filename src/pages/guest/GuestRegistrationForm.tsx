@@ -1,10 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
+import { Calendar, ArrowLeft } from 'lucide-react';
+
 import { DatePicker } from "@/components/ui/date-picker";
 import {
   Form,
@@ -21,34 +23,116 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
+import ClassSelectionGroup from '@/components/registration/ClassSelectionGroup';
+import PackageSelectionCard from '@/components/registration/PackageSelectionCard';
+import AccommodationCard from '@/components/registration/AccommodationCard';
+import VenueCard from '@/components/registration/VenueCard';
+import OrderSummary from '@/components/registration/OrderSummary';
 
-// Define type for visit_type to match database enum
+// Define types to match database enum
 type VisitType = 'wisata_edukasi' | 'outbound' | 'camping' | 'field_trip' | 'penelitian' | 'lainnya';
 type PaymentStatus = 'belum_lunas' | 'lunas';
-type PackageType = 'HEMAT' | 'REGULER' | 'LENGKAP';
+type PackageType = string;
+
+// Define class options for selection
+const classOptions = [
+  { id: 'kb_tk', label: 'KB/TK' },
+  { id: 'sd_1_2', label: 'SD Kelas 1 & 2' },
+  { id: 'sd_3_4', label: 'SD Kelas 3 & 4' },
+  { id: 'sd_5_6', label: 'SD Kelas 5 & 6' },
+  { id: 'smp', label: 'SMP' },
+  { id: 'sma', label: 'SMA' },
+  { id: 'umum_a', label: 'Umum A' },
+  { id: 'umum_b', label: 'Umum B' },
+  { id: 'abk', label: 'ABK' },
+  { id: 'htm', label: 'HTM' },
+];
+
+// Define package options
+const packageOptions = [
+  { id: 'edukatif_agropintar', label: 'PAKET EDUKATIF AGROPINTAR' },
+  { id: 'agro_junior', label: 'PAKET AGRO JUNIOR' },
+  { id: 'kemping', label: 'PAKET KEMPING' },
+  { id: 'funtastic', label: 'PAKET FUNTASTIC' },
+  { id: 'ekstrakurikuler', label: 'PAKET EKSTRAKURIKULER' },
+  { id: 'ceria', label: 'PAKET CERIA' },
+  { id: 'lansia', label: 'PAKET LANSIA 60+' },
+  { id: 'corporate_outbound', label: 'PAKET CORPORATE OUTBOUND' },
+  { id: 'seminar_sehari', label: 'PAKET SEMINAR SEHARI' },
+  { id: 'seminar_inap', label: 'PAKET SEMINAR INAP' },
+];
+
+// Define accommodations data
+const accommodations = [
+  {
+    id: 'pondok_kopel',
+    name: 'Pondok Kopel',
+    price: 1250000,
+    details: 'Kamar AC 5 org, shower/toilet indoor.',
+    capacity: 8,
+    features: ['Semangka 1', 'Semangka 2', 'Sirsak 1', 'Sirsak 2', 'Salak 1', 'Salak 2', 'Srikaya 1', 'Srikaya 2']
+  },
+  {
+    id: 'pondok_nangka',
+    name: 'Pondok Nangka',
+    price: 1750000,
+    details: 'Kamar AC 10 org, shower/toilet komunal.',
+    capacity: 6,
+    features: ['Nangka 1', 'Nangka 2', 'Nangka 3', 'Nangka 4', 'Nangka 5', 'Nangka 6']
+  },
+  {
+    id: 'pondok_manggis',
+    name: 'Pondok Manggis Bawah',
+    price: 3700000,
+    details: 'Kamar AC 20 org, shower/toilet komunal.',
+    capacity: 4,
+    features: []
+  },
+  {
+    id: 'pondok_duku',
+    name: 'Pondok Duku',
+    price: 1575000,
+    details: '2 kamar AC, 5 org, shower/toilet indoor.',
+    capacity: 2,
+    features: []
+  },
+];
+
+// Define venue data
+const venues = [
+  {
+    id: 'saung_gardena',
+    name: 'Saung Gardena',
+    capacity: 100,
+    price: 2660000,
+    features: ['Toilet (WC)', 'Halaman Luas', 'Podium 2.2 m', 'Meja 2', 'Kursi kayu', 'Listrik 2000 watt', 'Terpal 10x5 m (2 buah)', 'Kebersihan']
+  },
+  {
+    id: 'saung_cempaka',
+    name: 'Saung Cempaka',
+    capacity: 300,
+    price: 6000000,
+    features: ['Mushollah', 'Toilet (WC)', 'Podium 2.5 m', 'Meja 2', 'Kursi 100', 'Listrik 2000 watt', 'Terpal 10x5 m (2 buah)', 'Kebersihan']
+  },
+  {
+    id: 'saung_tribun',
+    name: 'Saung Tribun 1 (S. Padi & Panggung)',
+    capacity: 300,
+    price: 6650000,
+    features: ['Toilet (WC)', 'Panggung', 'Mushollah', 'Halaman luas', 'Meja 2', 'Listrik 2000 watt', 'Terpal 10x5 m (1 buah)', 'Kebersihan']
+  },
+  {
+    id: 'saung_kecapi',
+    name: 'Saung Kecapi (Inc. Lapangan Futsal)',
+    capacity: 80,
+    price: 1995000,
+    features: ['Toilet (WC)', 'Mushollah', 'Podium 2.2 m', 'Meja 2', 'Listrik 2000 watt', 'Terpal 10x5 m (1 buah)', 'Kebersihan']
+  },
+];
 
 const formSchema = z.object({
   responsible_person: z.string().min(2, {
@@ -63,7 +147,9 @@ const formSchema = z.object({
   address: z.string().min(10, {
     message: "Alamat harus diisi minimal 10 karakter.",
   }),
-  visit_date: z.date(),
+  visit_date: z.date({
+    required_error: "Tanggal kunjungan harus dipilih.",
+  }),
   adult_count: z.string().refine((value) => {
     const num = Number(value);
     return !isNaN(num) && num >= 0;
@@ -82,12 +168,6 @@ const formSchema = z.object({
   }, {
     message: "Jumlah guru harus berupa angka dan tidak boleh negatif.",
   }),
-  visit_type: z.enum(['INSTANSI', 'UMUM'], {
-    required_error: "Tipe kunjungan harus dipilih.",
-  }),
-  package_type: z.enum(['HEMAT', 'REGULER', 'LENGKAP'], {
-    required_error: "Tipe paket harus dipilih.",
-  }),
   notes: z.string().optional(),
   document_url: z.string().optional(),
   discount_percentage: z.string().optional(),
@@ -101,26 +181,15 @@ const GuestRegistrationForm = () => {
   const navigate = useNavigate();
   const { id: editId } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    responsible_person: '',
-    institution_name: '',
-    phone_number: '',
-    address: '',
-    visit_date: new Date(),
-    adult_count: '0',
-    children_count: '0',
-    teacher_count: '0',
-    visit_type: 'INSTANSI' as 'INSTANSI' | 'UMUM',
-    package_type: 'HEMAT' as PackageType,
-    notes: '',
-    document_url: '',
-    discount_percentage: '',
-    down_payment: '',
-    payment_date: null as Date | null,
-    bank_name: '',
-    payment_status: false,
-  });
-  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
+  const [selectedPackage, setSelectedPackage] = useState<string>('');
+  const [accommodationCounts, setAccommodationCounts] = useState<Record<string, number>>(
+    accommodations.reduce((acc, item) => ({ ...acc, [item.id]: 0 }), {})
+  );
+  const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
+  const [totalCost, setTotalCost] = useState(0);
+  const [discountedCost, setDiscountedCost] = useState(0);
+  const [remainingBalance, setRemainingBalance] = useState(0);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -133,8 +202,6 @@ const GuestRegistrationForm = () => {
       adult_count: "0",
       children_count: "0",
       teacher_count: "0",
-      visit_type: "INSTANSI",
-      package_type: "HEMAT",
       notes: "",
       document_url: "",
       discount_percentage: "0",
@@ -145,11 +212,31 @@ const GuestRegistrationForm = () => {
     },
   });
 
+  // Get form values for cost calculation
+  const watchDiscount = form.watch("discount_percentage");
+  const watchDownPayment = form.watch("down_payment");
+  const watchAdultCount = form.watch("adult_count");
+  const watchChildrenCount = form.watch("children_count");
+  const watchTeacherCount = form.watch("teacher_count");
+
   useEffect(() => {
     if (editId) {
       fetchGuestRegistration(editId);
     }
   }, [editId]);
+
+  useEffect(() => {
+    calculateCosts();
+  }, [
+    watchAdultCount,
+    watchChildrenCount, 
+    watchTeacherCount,
+    watchDiscount,
+    watchDownPayment,
+    selectedPackage,
+    accommodationCounts,
+    selectedVenues
+  ]);
 
   const fetchGuestRegistration = async (id: string) => {
     try {
@@ -171,35 +258,18 @@ const GuestRegistrationForm = () => {
         // Convert payment_status enum to boolean
         const paymentStatusBool = data.payment_status === 'lunas';
 
-        // Map database visit_type to form values
-        const formVisitType = data.visit_type === 'wisata_edukasi' ? 'INSTANSI' : 'UMUM';
-        
-        // Ensure package_type matches allowed values
-        const packageType = ['HEMAT', 'REGULER', 'LENGKAP'].includes(data.package_type) 
-          ? data.package_type as PackageType 
-          : 'HEMAT';
+        // Fetch classes if any
+        const { data: classesData } = await supabase
+          .from('guest_classes')
+          .select('class_type')
+          .eq('registration_id', id);
+          
+        if (classesData) {
+          const classes = classesData.map(c => c.class_type);
+          setSelectedClasses(classes);
+        }
 
-        setFormData({
-          responsible_person: data.responsible_person || '',
-          institution_name: data.institution_name || '',
-          phone_number: data.phone_number || '',
-          address: data.address || '',
-          visit_date: formattedVisitDate,
-          adult_count: String(data.adult_count) || '0',
-          children_count: String(data.children_count) || '0',
-          teacher_count: String(data.teacher_count) || '0',
-          visit_type: formVisitType as 'INSTANSI' | 'UMUM',
-          package_type: packageType,
-          notes: data.notes || '',
-          document_url: data.document_url || '',
-          discount_percentage: String(data.discount_percentage) || '0',
-          down_payment: String(data.down_payment) || '0',
-          payment_date: formattedPaymentDate,
-          bank_name: data.bank_name || '',
-          payment_status: paymentStatusBool,
-        });
-
-        // Update form default values
+        // Update form values
         form.reset({
           responsible_person: data.responsible_person || '',
           institution_name: data.institution_name || '',
@@ -209,8 +279,6 @@ const GuestRegistrationForm = () => {
           adult_count: String(data.adult_count) || '0',
           children_count: String(data.children_count) || '0',
           teacher_count: String(data.teacher_count) || '0',
-          visit_type: formVisitType as 'INSTANSI' | 'UMUM',
-          package_type: packageType,
           notes: data.notes || '',
           document_url: data.document_url || '',
           discount_percentage: String(data.discount_percentage) || '0',
@@ -220,7 +288,12 @@ const GuestRegistrationForm = () => {
           payment_status: paymentStatusBool,
         });
         
-        setIsPaymentConfirmed(paymentStatusBool);
+        // Set package type
+        if (data.package_type) {
+          setSelectedPackage(data.package_type);
+        }
+
+        // TODO: Fetch accommodation and venue data if needed
       }
     } catch (error: any) {
       toast({
@@ -231,110 +304,172 @@ const GuestRegistrationForm = () => {
     }
   };
 
-  const packageCosts = {
-    HEMAT: 5000,
-    REGULER: 7500,
-    LENGKAP: 10000,
+  const calculateCosts = () => {
+    // Calculate participant costs based on selected package
+    const adultCount = Number(form.getValues("adult_count")) || 0;
+    const childrenCount = Number(form.getValues("children_count")) || 0;
+    const teacherCount = Number(form.getValues("teacher_count")) || 0;
+    
+    // Base price per person (could come from package selection)
+    const adultPrice = 100000;
+    const childrenPrice = 80000;
+    const teacherPrice = 50000;
+    
+    // Calculate accommodations cost
+    const accommodationCost = Object.entries(accommodationCounts).reduce((sum, [id, count]) => {
+      const accommodation = accommodations.find(a => a.id === id);
+      return sum + (accommodation ? accommodation.price * count : 0);
+    }, 0);
+    
+    // Calculate venue cost
+    const venueCost = selectedVenues.reduce((sum, venueId) => {
+      const venue = venues.find(v => v.id === venueId);
+      return sum + (venue ? venue.price : 0);
+    }, 0);
+    
+    // Calculate participants cost
+    const participantsCost = (adultCount * adultPrice) + (childrenCount * childrenPrice) + (teacherCount * teacherPrice);
+    
+    // Calculate total cost
+    const total = participantsCost + accommodationCost + venueCost;
+    setTotalCost(total);
+    
+    // Apply discount
+    const discountPercentage = Number(form.getValues("discount_percentage")) || 0;
+    const discountAmount = (discountPercentage / 100) * total;
+    const withDiscount = total - discountAmount;
+    setDiscountedCost(withDiscount);
+    
+    // Calculate remaining balance
+    const downPayment = Number(form.getValues("down_payment")) || 0;
+    setRemainingBalance(withDiscount - downPayment);
   };
 
-  const calculatePackageCost = () => {
-    const baseCost = packageCosts[formData.package_type as keyof typeof packageCosts] || 0;
-    const totalGuests = Number(formData.adult_count) + Number(formData.children_count) + Number(formData.teacher_count);
-    return baseCost * totalGuests;
+  const handleClassChange = (classes: string[]) => {
+    setSelectedClasses(classes);
   };
 
-  const calculateFinalCost = () => {
-    const basePackageCost = calculatePackageCost();
-    const discount = Number(formData.discount_percentage) || 0;
-    const discountAmount = (discount / 100) * basePackageCost;
-    return basePackageCost - discountAmount;
+  const handlePackageChange = (packageId: string) => {
+    setSelectedPackage(packageId === selectedPackage ? '' : packageId);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  const handleAccommodationChange = (id: string, count: number) => {
+    setAccommodationCounts(prev => ({
+      ...prev,
+      [id]: count
+    }));
   };
 
-  const handleDateChange = (name: string, date: Date | undefined) => {
-    if (date) {
-      setFormData(prev => ({ ...prev, [name]: date }));
+  const handleVenueChange = (id: string, selected: boolean) => {
+    if (selected) {
+      setSelectedVenues(prev => [...prev, id]);
+    } else {
+      setSelectedVenues(prev => prev.filter(venueId => venueId !== id));
     }
   };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({ ...prev, [name]: checked }));
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (formValues: z.infer<typeof formSchema>) => {
     try {
       setIsSubmitting(true);
       
       // Calculate total guests
-      const totalGuests = Number(formData.adult_count) + Number(formData.children_count) + Number(formData.teacher_count);
-      
-      // Calculate costs
-      const basePackageCost = calculatePackageCost();
-      const totalCost = basePackageCost;
-      const discountedCost = calculateFinalCost();
+      const totalGuests = Number(formValues.adult_count) + Number(formValues.children_count) + Number(formValues.teacher_count);
       
       // Map the boolean payment_status to the expected enum values
-      const dbPaymentStatus: PaymentStatus = formData.payment_status ? 'lunas' : 'belum_lunas';
+      const dbPaymentStatus: PaymentStatus = formValues.payment_status ? 'lunas' : 'belum_lunas';
       
-      // Map form visit_type to DB visit_type
-      const dbVisitType: VisitType = formData.visit_type === 'INSTANSI' ? 'wisata_edukasi' : 'lainnya';
+      // Map visit type based on class selection
+      const dbVisitType: VisitType = selectedClasses.includes('kb_tk') || 
+                                     selectedClasses.includes('sd_1_2') || 
+                                     selectedClasses.includes('sd_3_4') || 
+                                     selectedClasses.includes('sd_5_6') || 
+                                     selectedClasses.includes('smp') || 
+                                     selectedClasses.includes('sma')
+                                     ? 'wisata_edukasi' 
+                                     : 'lainnya';
       
       // Format visit_date and payment_date to ISO string format for database
-      const visitDateForDB = formData.visit_date ? formData.visit_date.toISOString().split('T')[0] : null;
-      const paymentDateForDB = formData.payment_date ? formData.payment_date.toISOString().split('T')[0] : null;
+      const visitDateForDB = formValues.visit_date ? formValues.visit_date.toISOString().split('T')[0] : null;
+      const paymentDateForDB = formValues.payment_date ? formValues.payment_date.toISOString().split('T')[0] : null;
       
       // Prepare data for submission
       const submissionData = {
-        responsible_person: formData.responsible_person,
-        institution_name: formData.institution_name,
-        phone_number: formData.phone_number,
-        address: formData.address,
+        responsible_person: formValues.responsible_person,
+        institution_name: formValues.institution_name,
+        phone_number: formValues.phone_number,
+        address: formValues.address,
         visit_date: visitDateForDB,
-        adult_count: Number(formData.adult_count),
-        children_count: Number(formData.children_count),
-        teacher_count: Number(formData.teacher_count),
+        adult_count: Number(formValues.adult_count),
+        children_count: Number(formValues.children_count),
+        teacher_count: Number(formValues.teacher_count),
         visit_type: dbVisitType,
-        package_type: formData.package_type,
-        notes: formData.notes || '',
-        document_url: formData.document_url || '',
+        package_type: selectedPackage || 'HEMAT',  // Default to HEMAT if none selected
+        notes: formValues.notes || '',
+        document_url: formValues.document_url || '',
         total_cost: totalCost,
-        discount_percentage: Number(formData.discount_percentage || 0),
+        discount_percentage: Number(formValues.discount_percentage || 0),
         discounted_cost: discountedCost,
-        down_payment: Number(formData.down_payment || 0),
+        down_payment: Number(formValues.down_payment || 0),
         payment_date: paymentDateForDB,
-        bank_name: formData.bank_name || '',
+        bank_name: formValues.bank_name || '',
         payment_status: dbPaymentStatus
       };
 
-      let result;
+      let registrationId;
+      
       if (editId) {
         // Update existing record
-        result = await supabase
+        const { data: updatedData, error } = await supabase
           .from('guest_registrations')
           .update(submissionData)
           .eq('id', editId)
           .select();
+        
+        if (error) throw new Error(error.message);
+        registrationId = editId;
       } else {
-        // For new records, we don't need to include order_id as it's generated by the database
-        result = await supabase
+        // Insert new record - don't try to set order_id as it's generated by DB trigger
+        const { data: insertedData, error } = await supabase
           .from('guest_registrations')
           .insert(submissionData)
           .select();
+        
+        if (error) throw new Error(error.message);
+        if (insertedData && insertedData.length > 0) {
+          registrationId = insertedData[0].id;
+        }
       }
-
-      if (result.error) {
-        throw new Error(result.error.message);
+      
+      // If we have a registration ID, save the selected classes
+      if (registrationId && selectedClasses.length > 0) {
+        // First delete any existing classes for this registration
+        if (editId) {
+          await supabase
+            .from('guest_classes')
+            .delete()
+            .eq('registration_id', registrationId);
+        }
+        
+        // Then insert the new classes
+        const classInserts = selectedClasses.map(classType => ({
+          registration_id: registrationId,
+          class_type: classType
+        }));
+        
+        const { error: classError } = await supabase
+          .from('guest_classes')
+          .insert(classInserts);
+        
+        if (classError) throw new Error(classError.message);
       }
-
+      
+      // TODO: Save accommodation and venue selections similarly
+      
       toast({
         title: "Success!",
         description: editId ? "Guest registration updated successfully." : "Guest registration created successfully.",
       });
+      
       navigate('/guest-registration');
     } catch (error: any) {
       toast({
@@ -347,342 +482,421 @@ const GuestRegistrationForm = () => {
     }
   };
 
+  // Prepare summary data for the order summary component
+  const getSummaryData = () => {
+    const values = form.getValues();
+    
+    const basicInfo = [
+      { label: 'PIC', value: values.responsible_person || '-' },
+      { label: 'Institusi', value: values.institution_name || '-' },
+      { label: 'Tanggal Kunjungan', value: values.visit_date ? format(values.visit_date, 'dd MMM yyyy') : '-' },
+      { label: 'Jumlah Peserta', value: `${Number(values.adult_count) + Number(values.children_count) + Number(values.teacher_count)}` }
+    ];
+    
+    const paymentInfo = [];
+    if (values.bank_name) {
+      paymentInfo.push({ label: 'Bank', value: values.bank_name });
+    }
+    if (values.payment_date) {
+      paymentInfo.push({ label: 'Tanggal Pembayaran', value: format(values.payment_date, 'dd MMM yyyy') });
+    }
+    
+    return {
+      basicInfo,
+      paymentInfo,
+      costCalculation: {
+        baseTotal: totalCost,
+        discountedTotal: discountedCost,
+        remaining: remainingBalance
+      }
+    };
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{editId ? 'Edit' : 'Create'} Guest Registration</CardTitle>
-        <CardDescription>Form untuk {editId ? 'mengubah' : 'membuat'} data registrasi tamu.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="responsible_person"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Penanggung Jawab</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nama Lengkap" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="institution_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Instansi</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nama Instansi" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phone_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nomor Telepon</FormLabel>
-                  <FormControl>
-                    <Input placeholder="08xxxxxxxxxx" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Alamat</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Alamat Lengkap" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="visit_date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Tanggal Kunjungan</FormLabel>
-                  <FormControl>
-                    <DatePicker
-                      date={field.value}
-                      onSelect={(date) => {
-                        field.onChange(date);
-                        handleDateChange("visit_date", date);
-                      }}
-                      defaultMonth={formData.visit_date}
-                      mode="single"
-                      captionLayout="dropdown"
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Pilih tanggal kunjungan.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex gap-4">
-              <FormField
-                control={form.control}
-                name="adult_count"
-                render={({ field }) => (
-                  <FormItem className="w-1/3">
-                    <FormLabel>Jumlah Dewasa</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange(e);
-                      }} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+    <div className="space-y-8">
+      <div className="flex items-center space-x-2">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={() => navigate('/guest-registration')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <h2 className="text-2xl font-bold">{editId ? 'Edit' : 'New'} Guest Event Order</h2>
+      </div>
+      
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+          {/* Basic Information */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="responsible_person"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nama PIC</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nama Lengkap" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone_number"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telepon/HP</FormLabel>
+                      <FormControl>
+                        <Input placeholder="08xxxxxxxxxx" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="institution_name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sekolah/Instansi</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nama Instansi" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alamat</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Alamat Lengkap" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="mt-6">
+                <FormField
+                  control={form.control}
+                  name="visit_date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tanggal Kunjungan</FormLabel>
+                      <FormControl>
+                        <DatePicker
+                          date={field.value}
+                          onSelect={(date) => field.onChange(date)}
+                          defaultMonth={field.value}
+                          placeholder="Pilih tanggal kunjungan"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="mt-6">
+                <p className="text-base font-medium mb-3">Jumlah Peserta</p>
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="children_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Anak</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="adult_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Dewasa (Rp 100.000/orang)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="teacher_count"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Guru (Rp 50.000/orang)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Class Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pilihan Kelas yang Berkunjung</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ClassSelectionGroup
+                title=""
+                options={classOptions}
+                selectedClasses={selectedClasses}
+                onClassChange={handleClassChange}
               />
-              <FormField
-                control={form.control}
-                name="children_count"
-                render={({ field }) => (
-                  <FormItem className="w-1/3">
-                    <FormLabel>Jumlah Anak-anak</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange(e);
-                      }} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="teacher_count"
-                render={({ field }) => (
-                  <FormItem className="w-1/3">
-                    <FormLabel>Jumlah Guru</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange(e);
-                      }} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            </CardContent>
+          </Card>
+          
+          {/* Package Selection */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pilihan Paket</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {packageOptions.map(pkg => (
+                  <PackageSelectionCard
+                    key={pkg.id}
+                    id={pkg.id}
+                    title={pkg.label}
+                    checked={selectedPackage === pkg.id}
+                    onCheckedChange={() => handlePackageChange(pkg.id)}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Accommodation Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Jumlah Malam Menginap</CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Harga yang ditampilkan adalah per malam × 1 malam
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {accommodations.map(accommodation => (
+                  <AccommodationCard
+                    key={accommodation.id}
+                    name={accommodation.name}
+                    price={accommodation.price}
+                    details={accommodation.details}
+                    capacity={accommodation.capacity}
+                    features={accommodation.features}
+                    count={accommodationCounts[accommodation.id]}
+                    onCountChange={(count) => handleAccommodationChange(accommodation.id, count)}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Venue Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Pilihan Venue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {venues.map(venue => (
+                  <VenueCard
+                    key={venue.id}
+                    name={venue.name}
+                    capacity={venue.capacity}
+                    price={venue.price}
+                    features={venue.features}
+                    selected={selectedVenues.includes(venue.id)}
+                    onSelectionChange={(selected) => handleVenueChange(venue.id, selected)}
+                  />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Payment Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Perhitungan Biaya</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between">
+                  <span>Total Biaya</span>
+                  <span className="font-medium">Rp {totalCost.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Total Setelah Diskon</span>
+                  <span className="font-medium">Rp {discountedCost.toLocaleString()}</span>
+                </div>
+                <Separator className="my-2" />
+                <div className="flex justify-between">
+                  <span className="font-semibold">Sisa Yang Harus Dibayar</span>
+                  <span className="font-bold">Rp {remainingBalance.toLocaleString()}</span>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <FormField
+                  control={form.control}
+                  name="discount_percentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Diskon Paket Anak (%)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} min="0" max="100" />
+                      </FormControl>
+                      <FormMessage />
+                      <div className="text-right text-sm">
+                        <span className="text-muted-foreground">Potongan Diskon: </span>
+                        <span className="font-medium text-red-500">
+                          Rp {((Number(field.value) / 100) * totalCost).toLocaleString()}
+                        </span>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div>
+                <h3 className="font-medium mb-4">Informasi Pembayaran</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="down_payment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Down Payment (DP)</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} min="0" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bank_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bank Transfer</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Pilih Bank" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="bca">Bank Central Asia (BCA)</SelectItem>
+                            <SelectItem value="bni">Bank Negara Indonesia (BNI)</SelectItem>
+                            <SelectItem value="bri">Bank Rakyat Indonesia (BRI)</SelectItem>
+                            <SelectItem value="mandiri">Bank Mandiri</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="payment_date"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Tanggal Pembayaran DP</FormLabel>
+                        <FormControl>
+                          <DatePicker
+                            date={field.value}
+                            onSelect={(date) => field.onChange(date)}
+                            placeholder="Pilih tanggal pembayaran"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Order Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <FormField
+                    control={form.control}
+                    name="notes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Tambahkan catatan khusus untuk pemesanan ini" 
+                            {...field}
+                            rows={4}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div>
+              <OrderSummary
+                basicInfo={getSummaryData().basicInfo}
+                paymentInfo={getSummaryData().paymentInfo}
+                costCalculation={getSummaryData().costCalculation}
               />
             </div>
-            <FormField
-              control={form.control}
-              name="visit_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipe Kunjungan</FormLabel>
-                  <Select onValueChange={(value) => {
-                    field.onChange(value);
-                    setFormData(prev => ({ ...prev, visit_type: value as 'INSTANSI' | 'UMUM' }));
-                  }} defaultValue={formData.visit_type}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih tipe kunjungan" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="INSTANSI">Instansi</SelectItem>
-                      <SelectItem value="UMUM">Umum</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="package_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipe Paket</FormLabel>
-                  <Select onValueChange={(value) => {
-                    field.onChange(value);
-                    setFormData(prev => ({ ...prev, package_type: value as PackageType }));
-                  }} defaultValue={formData.package_type}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih tipe paket" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="HEMAT">Hemat</SelectItem>
-                      <SelectItem value="REGULER">Reguler</SelectItem>
-                      <SelectItem value="LENGKAP">Lengkap</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Catatan</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Catatan Tambahan" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="document_url"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL Dokumen</FormLabel>
-                  <FormControl>
-                    <Input type="url" placeholder="URL Dokumen" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex gap-4">
-              <FormField
-                control={form.control}
-                name="discount_percentage"
-                render={({ field }) => (
-                  <FormItem className="w-1/2">
-                    <FormLabel>Diskon (%)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange(e);
-                      }} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="down_payment"
-                render={({ field }) => (
-                  <FormItem className="w-1/2">
-                    <FormLabel>Uang Muka</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} onChange={(e) => {
-                        field.onChange(e);
-                        handleInputChange(e);
-                      }} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="payment_date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>Tanggal Pembayaran</FormLabel>
-                  <FormControl>
-                    <DatePicker
-                      date={field.value}
-                      onSelect={(date) => {
-                        field.onChange(date);
-                        handleDateChange("payment_date", date);
-                      }}
-                      defaultMonth={formData.payment_date || undefined}
-                      mode="single"
-                      captionLayout="dropdown"
-                      disabled={!formData.payment_status}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Pilih tanggal pembayaran.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="bank_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nama Bank</FormLabel>
-                  <FormControl>
-                    <Input type="text" placeholder="Nama Bank" {...field} onChange={(e) => {
-                      field.onChange(e);
-                      handleInputChange(e);
-                    }} disabled={!formData.payment_status} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="payment_status"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-md border px-3 py-2">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Pembayaran Lunas</FormLabel>
-                    <FormDescription>
-                      Centang jika pembayaran sudah lunas.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={(checked) => {
-                        field.onChange(checked);
-                        const isChecked = !!checked;
-                        handleCheckboxChange({ target: { name: 'payment_status', checked: isChecked } } as any);
-                      }}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Submit'}
+          </div>
+          
+          <div className="flex justify-end space-x-4">
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => navigate('/guest-registration')}
+            >
+              Batal
             </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Menyimpan...' : 'Simpan'}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
 
