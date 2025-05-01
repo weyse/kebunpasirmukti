@@ -2,17 +2,28 @@
 import React from 'react';
 import { FileText, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { exportAllVisitsToExcel } from '@/utils/exportHelpers';
+import { exportAllVisitsToExcel, exportVisitToExcel } from '@/utils/exportHelpers';
 import { Visit } from '@/types/visit';
 import { toast } from 'sonner';
 
 interface VisitExportButtonsProps {
   filteredVisits?: Visit[];
+  singleVisit?: Visit;
+  showSingleExport?: boolean;
 }
 
-export const VisitExportButtons: React.FC<VisitExportButtonsProps> = ({ filteredVisits = [] }) => {
+export const VisitExportButtons: React.FC<VisitExportButtonsProps> = ({ 
+  filteredVisits = [], 
+  singleVisit,
+  showSingleExport = false 
+}) => {
   // Export data
   const handleExcelExport = () => {
+    if (showSingleExport && singleVisit) {
+      exportVisitToExcel(singleVisit);
+      return;
+    }
+    
     if (filteredVisits.length === 0) {
       toast('Tidak ada data untuk diekspor');
       return;
@@ -35,7 +46,7 @@ export const VisitExportButtons: React.FC<VisitExportButtonsProps> = ({ filtered
       </Button>
       <Button variant="outline" onClick={handleExcelExport}>
         <FileSpreadsheet className="mr-2 h-4 w-4" />
-        Export Excel
+        Export {showSingleExport ? 'Invoice' : 'Excel'}
       </Button>
     </div>
   );

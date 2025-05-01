@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { exportVisitToExcel } from '@/utils/exportHelpers';
 
 // Define guest data types
 type PaymentStatus = 'belum_lunas' | 'lunas';
@@ -40,6 +41,13 @@ type Guest = {
   visit_date: string;
   payment_status: PaymentStatus;
   created_at: string;
+  adult_count?: number;
+  children_count?: number;
+  teacher_count?: number;
+  total_cost?: number;
+  discount_percentage?: number;
+  discounted_cost?: number;
+  down_payment?: number;
 };
 
 interface GuestTableProps {
@@ -95,30 +103,28 @@ export function GuestTable({
     return packageLabels[type] || type;
   };
 
-  const exportToExcel = (guest: Guest) => {
-    // Create a worksheet from the single guest data
-    const worksheet = XLSX.utils.json_to_sheet([{
-      ID: guest.order_id,
-      'Institusi': guest.institution_name,
-      'Penanggung Jawab': guest.responsible_person,
-      'Tanggal Kunjungan': format(new Date(guest.visit_date), 'dd MMM yyyy'),
-      'Jenis Kegiatan': getActivityLabel(guest.visit_type),
-      'Paket': getPackageLabel(guest.package_type),
-      'Jumlah Peserta': guest.total_visitors,
-      'Status Pembayaran': guest.payment_status === 'lunas' ? 'Lunas' : 'Belum Lunas'
-    }]);
+  const handleExportToExcel = (guest: Guest) => {
+    // Convert guest to Visit type
+    const visit = {
+      id: guest.id,
+      order_id: guest.order_id,
+      institution_name: guest.institution_name,
+      responsible_person: guest.responsible_person,
+      visit_type: guest.visit_type,
+      visit_date: guest.visit_date,
+      payment_status: guest.payment_status,
+      total_visitors: guest.total_visitors,
+      adult_count: guest.adult_count,
+      children_count: guest.children_count,
+      teacher_count: guest.teacher_count,
+      total_cost: guest.total_cost,
+      discount_percentage: guest.discount_percentage,
+      discounted_cost: guest.discounted_cost,
+      down_payment: guest.down_payment
+    };
     
-    // Create a workbook
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Tamu');
-    
-    // Generate Excel file and trigger download
-    XLSX.writeFile(workbook, `registrasi-${guest.order_id || guest.id}.xlsx`);
-    
-    toast({
-      title: 'Export berhasil',
-      description: 'Data telah diunduh sebagai file Excel'
-    });
+    // Export the invoice using the new function
+    exportVisitToExcel(visit);
   };
 
   return (
@@ -234,10 +240,10 @@ export function GuestTable({
                         Check-In
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => exportToExcel(guest)}
+                        onClick={() => handleExportToExcel(guest)}
                       >
                         <Download className="mr-2 h-4 w-4" />
-                        Export Excel
+                        Export Invoice
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive focus:text-destructive"
