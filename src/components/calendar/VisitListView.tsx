@@ -1,6 +1,6 @@
 
 import { format, parseISO } from 'date-fns';
-import { ChevronRight, Eye, PenLine } from 'lucide-react';
+import { ChevronRight, Eye, Home, MapPin, PenLine } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Visit } from '@/types/visit';
 import { CalendarPermission } from '@/types/calendarPermission';
@@ -27,6 +27,19 @@ export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: Vi
     e.stopPropagation(); // Prevent triggering the parent onClick
     navigate(`/guest-registration/${canEdit ? 'edit' : 'view'}/${visit.id}`);
   };
+
+  // Helper functions to check if visit has rooms or venues
+  const hasRooms = (visit: Visit) => {
+    return visit.rooms_json && 
+      visit.rooms_json.accommodation_counts && 
+      Object.values(visit.rooms_json.accommodation_counts).some(count => (count as number) > 0);
+  };
+  
+  const hasVenues = (visit: Visit) => {
+    return visit.venues_json && 
+      visit.venues_json.selected_venues && 
+      visit.venues_json.selected_venues.length > 0;
+  };
   
   return (
     <div className="space-y-4">
@@ -50,6 +63,16 @@ export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: Vi
                 <span className="text-sm text-muted-foreground">
                   {visit.total_visitors} pengunjung
                 </span>
+                {hasRooms(visit) && (
+                  <Badge variant="outline" className="flex items-center gap-1 border-amber-500 text-amber-500 px-1">
+                    <Home className="h-3 w-3" />
+                  </Badge>
+                )}
+                {hasVenues(visit) && (
+                  <Badge variant="outline" className="flex items-center gap-1 border-blue-500 text-blue-500 px-1">
+                    <MapPin className="h-3 w-3" />
+                  </Badge>
+                )}
               </div>
             </div>
           </div>

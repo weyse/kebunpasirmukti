@@ -18,6 +18,8 @@ export type Visit = {
   discounted_cost?: number;
   down_payment?: number;
   nights_count?: number; // Number of nights staying
+  rooms_json?: any; // Room selection information
+  venues_json?: any; // Venue selection information
 };
 
 export type ChartPeriod = 'day' | 'week' | 'month' | 'year';
