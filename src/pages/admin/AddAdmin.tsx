@@ -55,13 +55,14 @@ export default function AddAdmin() {
     setIsLoading(true);
     
     try {
-      // First, create the user in Supabase Auth
-      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
+      // Step 1: Create the user in Supabase Auth
+      const { data: userData, error: userError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
-        email_confirm: true,
-        user_metadata: {
-          full_name: values.fullName,
+        options: {
+          data: {
+            full_name: values.fullName,
+          },
         },
       });
       
@@ -70,22 +71,22 @@ export default function AddAdmin() {
       }
       
       if (!userData || !userData.user) {
-        throw new Error('Failed to create user');
+        throw new Error('Gagal membuat pengguna');
       }
       
-      // Then, update the role to admin
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .update({ role: 'admin' })
-        .eq('user_id', userData.user.id);
-        
+      // Step 2: Call the add_admin_role function to assign admin role
+      const { error: roleError } = await supabase.rpc(
+        'add_admin_role', 
+        { user_id_param: userData.user.id }
+      );
+      
       if (roleError) {
         throw roleError;
       }
       
       toast({
-        title: 'Admin created',
-        description: `${values.email} has been added as an admin`,
+        title: 'Admin berhasil dibuat',
+        description: `${values.email} telah ditambahkan sebagai admin`,
       });
       
       form.reset();
@@ -97,7 +98,7 @@ export default function AddAdmin() {
       console.error('Error creating admin:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create admin user',
+        description: error.message || 'Gagal membuat pengguna admin',
         variant: 'destructive',
       });
     } finally {
@@ -108,9 +109,9 @@ export default function AddAdmin() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Add New Admin</h1>
+        <h1 className="text-3xl font-bold">Tambah Admin Baru</h1>
         <Button variant="outline" onClick={() => navigate('/admin/users')}>
-          Back to Users
+          Kembali ke Daftar Pengguna
         </Button>
       </div>
       
@@ -118,10 +119,10 @@ export default function AddAdmin() {
         <CardHeader className="space-y-1">
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-pasirmukti-500" />
-            <CardTitle className="text-xl">Create New Admin Account</CardTitle>
+            <CardTitle className="text-xl">Buat Akun Admin Baru</CardTitle>
           </div>
           <CardDescription>
-            Add a new admin user who will have full access to the system
+            Tambahkan pengguna admin baru yang akan memiliki akses penuh ke sistem
           </CardDescription>
         </CardHeader>
         
@@ -133,9 +134,9 @@ export default function AddAdmin() {
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>Nama Lengkap</FormLabel>
                     <FormControl>
-                      <Input placeholder="Full name" {...field} />
+                      <Input placeholder="Nama lengkap" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -175,7 +176,7 @@ export default function AddAdmin() {
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>Konfirmasi Password</FormLabel>
                     <FormControl>
                       <Input placeholder="••••••••" type="password" {...field} />
                     </FormControl>
@@ -190,14 +191,14 @@ export default function AddAdmin() {
                 disabled={isLoading}
               >
                 <UserPlus className="mr-2 h-4 w-4" />
-                {isLoading ? 'Creating...' : 'Create Admin Account'}
+                {isLoading ? 'Membuat...' : 'Buat Akun Admin'}
               </Button>
             </form>
           </Form>
         </CardContent>
         
         <CardFooter className="bg-muted/50 text-sm text-muted-foreground">
-          <p>New admin users will have full access to all system features</p>
+          <p>Pengguna admin baru akan memiliki akses penuh ke semua fitur sistem</p>
         </CardFooter>
       </Card>
     </div>
