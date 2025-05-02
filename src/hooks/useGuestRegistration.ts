@@ -21,6 +21,12 @@ interface UseGuestRegistrationProps {
   nightsCount?: number;
 }
 
+// Define an interface for the package data structure
+interface PackagesJsonData {
+  selected_packages?: string[];
+  package_participants?: PackageParticipants;
+}
+
 export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegistrationProps = {}) => {
   // Custom hooks
   const form = useGuestRegistrationForm();
@@ -137,10 +143,20 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         // Handle packages_json data if available
         if (registrationData.packages_json) {
           try {
-            const packagesData = registrationData.packages_json;
+            // Safely parse the packages_json data and ensure it's an object
+            let packagesData: PackagesJsonData = {};
+            
+            if (typeof registrationData.packages_json === 'string') {
+              // If it's a string, try to parse it as JSON
+              packagesData = JSON.parse(registrationData.packages_json);
+            } else if (typeof registrationData.packages_json === 'object' && registrationData.packages_json !== null) {
+              // If it's already an object, use it directly
+              packagesData = registrationData.packages_json as PackagesJsonData;
+            }
+            
             console.log('Loading packages data:', packagesData);
             
-            // Process selected packages first
+            // Process selected packages first if they exist and are an array
             if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
               // Select each package
               packagesData.selected_packages.forEach((packageId: string) => {
@@ -148,9 +164,11 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
               });
             }
             
-            // Then set the participant allocations
-            if (packagesData.package_participants && typeof packagesData.package_participants === 'object') {
-              setPackageParticipants(packagesData.package_participants);
+            // Then set the participant allocations if they exist and are an object
+            if (packagesData.package_participants && 
+                typeof packagesData.package_participants === 'object' &&
+                packagesData.package_participants !== null) {
+              setPackageParticipants(packagesData.package_participants as PackageParticipants);
             }
           } catch (error) {
             console.error('Error parsing packages_json data:', error);
