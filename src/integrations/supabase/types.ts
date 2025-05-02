@@ -257,6 +257,7 @@ export type Database = {
       }
       venues: {
         Row: {
+          capacity: number
           cost: number
           id: string
           registration_id: string
@@ -264,6 +265,7 @@ export type Database = {
           venue_type: string
         }
         Insert: {
+          capacity?: number
           cost?: number
           id?: string
           registration_id: string
@@ -271,6 +273,7 @@ export type Database = {
           venue_type: string
         }
         Update: {
+          capacity?: number
           cost?: number
           id?: string
           registration_id?: string

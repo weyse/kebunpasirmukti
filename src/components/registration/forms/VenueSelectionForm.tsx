@@ -25,7 +25,7 @@ const VenueSelectionForm: React.FC<VenueSelectionFormProps> = ({
   onVenueChange
 }) => {
   const [filter, setFilter] = useState("");
-  const [sort, setSort] = useState<"name" | "capacity" | "price">("name");
+  const [sort, setSort] = useState<"name" | "price">("name");
 
   // Filter venues based on search input
   const filteredVenues = venues.filter(venue => 
@@ -35,7 +35,6 @@ const VenueSelectionForm: React.FC<VenueSelectionFormProps> = ({
 
   // Sort venues based on selected sort option
   const sortedVenues = [...filteredVenues].sort((a, b) => {
-    if (sort === "capacity") return b.capacity - a.capacity;
     if (sort === "price") return a.price - b.price;
     return a.name.localeCompare(b.name);
   });
@@ -58,14 +57,13 @@ const VenueSelectionForm: React.FC<VenueSelectionFormProps> = ({
           <div className="w-full md:w-48">
             <Select
               value={sort}
-              onValueChange={(value) => setSort(value as "name" | "capacity" | "price")}
+              onValueChange={(value) => setSort(value as "name" | "price")}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Urutkan berdasarkan" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="name">Nama</SelectItem>
-                <SelectItem value="capacity">Kapasitas (tinggi ke rendah)</SelectItem>
                 <SelectItem value="price">Harga (rendah ke tinggi)</SelectItem>
               </SelectContent>
             </Select>
