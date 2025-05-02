@@ -14,6 +14,16 @@ export const calculatePackageCosts = (
   let totalTeacherCost = 0;
   let totalFreeTeachersCount = 0;
   
+  if (!selectedPackages || !packageParticipants || !packages || selectedPackages.length === 0) {
+    return {
+      totalAdultCost: 0,
+      totalChildrenCost: 0,
+      totalTeacherCost: 0,
+      totalFreeTeachersCount: 0,
+      packageBreakdown: []
+    };
+  }
+  
   const packageBreakdown = selectedPackages
     .map(packageId => {
       const packageData = packages.find(pkg => pkg.id === packageId);
@@ -58,11 +68,11 @@ export const calculatePackageCosts = (
 
 // Calculate accommodation costs
 export const calculateAccommodationCost = (
-  accommodationCounts: Record<string, number>,
-  accommodations: any[],
+  accommodationCounts: Record<string, number> | undefined,
+  accommodations: any[] | undefined,
   nightsCount: number
 ) => {
-  if (!accommodationCounts || Object.keys(accommodationCounts).length === 0) {
+  if (!accommodationCounts || !accommodations || Object.keys(accommodationCounts).length === 0) {
     return 0;
   }
   
@@ -74,7 +84,7 @@ export const calculateAccommodationCost = (
 
 // Calculate extra bed cost
 export const calculateExtraBedCost = (
-  extraBedCounts: Record<string, number>,
+  extraBedCounts: Record<string, number> | undefined,
   nightsCount: number
 ) => {
   if (!extraBedCounts || Object.keys(extraBedCounts).length === 0) {
@@ -88,10 +98,10 @@ export const calculateExtraBedCost = (
 
 // Calculate venue cost
 export const calculateVenueCost = (
-  selectedVenues: string[],
-  venues: any[]
+  selectedVenues: string[] | undefined,
+  venues: any[] | undefined
 ) => {
-  if (!selectedVenues || selectedVenues.length === 0) {
+  if (!selectedVenues || !venues || selectedVenues.length === 0) {
     return 0;
   }
   
