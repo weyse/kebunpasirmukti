@@ -42,11 +42,20 @@ export default function SetupAdmin() {
     setLoading(true);
     
     try {
-      // Update the current user's role to admin
+      // Use a direct INSERT approach instead of UPDATE to avoid RLS recursion
+      // First, delete any existing role for this user
+      await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', user.id);
+        
+      // Then insert a new record with admin role
       const { error } = await supabase
         .from('user_roles')
-        .update({ role: 'admin' })
-        .eq('user_id', user.id);
+        .insert({ 
+          user_id: user.id, 
+          role: 'admin' 
+        });
         
       if (error) {
         throw error;
