@@ -3,22 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { ClassType } from '../../types/registrationTypes';
 import { PackageParticipants } from '../useSelectionState';
+import { RoomsJsonData, VenuesJsonData } from '@/types/visit';
 
 // Define the package data structure
 export interface PackagesJsonData {
   selected_packages?: string[];
   package_participants?: PackageParticipants;
-}
-
-// Define the rooms data structure
-export interface RoomsJsonData {
-  accommodation_counts?: Record<string, number>;
-  extra_bed_counts?: Record<string, number>;
-}
-
-// Define the venues data structure
-export interface VenuesJsonData {
-  selected_venues?: string[];
 }
 
 export const fetchGuestRegistration = async (id: string) => {

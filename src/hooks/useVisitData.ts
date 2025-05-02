@@ -1,166 +1,172 @@
 
-import { useState, useEffect } from 'react';
-import { Visit } from '@/types/visit';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { Visit, RoomsJsonData, VenuesJsonData } from '@/types/visit';
+
+// Helper to safely parse JSON data
+const safeParseJson = (jsonData: any, defaultValue: any) => {
+  if (!jsonData) return defaultValue;
+  
+  if (typeof jsonData === 'string') {
+    try {
+      return JSON.parse(jsonData);
+    } catch (err) {
+      console.error('Error parsing JSON data:', err);
+      return defaultValue;
+    }
+  }
+  
+  if (typeof jsonData === 'object') {
+    return jsonData;
+  }
+  
+  return defaultValue;
+};
 
 export const useVisitData = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [selectedActivityType, setSelectedActivityType] = useState<string | null>(null);
   const [visits, setVisits] = useState<Visit[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [visitsPerPage] = useState(10);
-  const [sortField, setSortField] = useState<string>('visit_date');
-  const [sortDirection, setSortDirection] = useState<string>('desc');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [selectedActivityType, setSelectedActivityType] = useState('');
   const [visitToDelete, setVisitToDelete] = useState<Visit | null>(null);
-  
-  // Fetch visits from Supabase
-  useEffect(() => {
-    const fetchVisits = async () => {
-      setIsLoading(true);
-      
-      try {
-        const { data, error } = await supabase
-          .from('guest_registrations')
-          .select('id, order_id, institution_name, responsible_person, visit_type, visit_date, payment_status, adult_count, children_count, teacher_count, total_cost, discount_percentage, discounted_cost, down_payment, rooms_json, venues_json')
-          .order(sortField, { ascending: sortDirection === 'asc' });
-          
-        if (error) {
-          throw error;
-        }
-        
-        if (data) {
-          // Transform data to match the Visit type
-          const transformedVisits: Visit[] = data.map(item => ({
-            id: item.id,
-            order_id: item.order_id || 'N/A',
-            institution_name: item.institution_name,
-            responsible_person: item.responsible_person,
-            total_visitors: (item.adult_count || 0) + (item.children_count || 0) + (item.teacher_count || 0),
-            adult_count: item.adult_count || 0,
-            children_count: item.children_count || 0,
-            teacher_count: item.teacher_count || 0,
-            visit_type: item.visit_type,
-            visit_date: item.visit_date,
-            payment_status: item.payment_status,
-            total_cost: item.total_cost,
-            discount_percentage: item.discount_percentage,
-            discounted_cost: item.discounted_cost,
-            down_payment: item.down_payment,
-            rooms_json: item.rooms_json,
-            venues_json: item.venues_json
-          }));
-          
-          setVisits(transformedVisits);
-        }
-      } catch (error) {
-        console.error('Error fetching visits:', error);
-        toast({
-          title: "Error",
-          description: "Gagal memuat data kunjungan",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchVisits();
-  }, [sortField, sortDirection]);
-  
-  // Filter visits based on search and filters
-  const filteredVisits = visits.filter((visit) => {
-    const matchesSearch =
-      visit.responsible_person.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.institution_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      visit.order_id.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = selectedStatus === 'all' || !selectedStatus ? true : visit.payment_status === selectedStatus;
-    const matchesActivity = selectedActivityType === 'all' || !selectedActivityType ? true : visit.visit_type === selectedActivityType;
-    
-    return matchesSearch && matchesStatus && matchesActivity;
-  });
+  const [sortField, setSortField] = useState('visit_date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // Handle sorting
+  useEffect(() => {
+    fetchVisits();
+  }, []);
+
+  const fetchVisits = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('guest_registrations')
+        .select('*')
+        .order('visit_date', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      // Process the data to ensure proper typing
+      const processedVisits: Visit[] = data.map(visit => ({
+        ...visit,
+        // Parse rooms_json safely, ensure it matches RoomsJsonData interface
+        rooms_json: safeParseJson(visit.rooms_json, { 
+          accommodation_counts: {},
+          extra_bed_counts: {} 
+        }) as RoomsJsonData,
+        
+        // Parse venues_json safely, ensure it matches VenuesJsonData interface
+        venues_json: safeParseJson(visit.venues_json, { 
+          selected_venues: [] 
+        }) as VenuesJsonData
+      }));
+
+      setVisits(processedVisits);
+    } catch (error) {
+      console.error("Error fetching visits:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filter visits based on search term and filters
+  const filteredVisits = useMemo(() => {
+    return visits.filter(visit => {
+      const matchesSearch = searchTerm === '' ||
+        visit.institution_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visit.responsible_person?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        visit.order_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesStatus = selectedStatus === '' || visit.payment_status === selectedStatus;
+      
+      const matchesActivity = selectedActivityType === '' || visit.visit_type === selectedActivityType;
+      
+      return matchesSearch && matchesStatus && matchesActivity;
+    });
+  }, [visits, searchTerm, selectedStatus, selectedActivityType]);
+
+  // Add sorting functionality
+  const sortedVisits = useMemo(() => {
+    return [...filteredVisits].sort((a, b) => {
+      let valueA = a[sortField as keyof Visit] || '';
+      let valueB = b[sortField as keyof Visit] || '';
+      
+      if (typeof valueA === 'string' && typeof valueB === 'string') {
+        return sortDirection === 'asc'
+          ? valueA.localeCompare(valueB)
+          : valueB.localeCompare(valueA);
+      } else {
+        valueA = valueA || 0;
+        valueB = valueB || 0;
+        return sortDirection === 'asc' ? Number(valueA) - Number(valueB) : Number(valueB) - Number(valueA);
+      }
+    });
+  }, [filteredVisits, sortField, sortDirection]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedVisits.length / itemsPerPage);
+  const paginatedVisits = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return sortedVisits.slice(startIndex, startIndex + itemsPerPage);
+  }, [sortedVisits, currentPage]);
+
   const handleSort = (field: string) => {
-    if (sortField === field) {
-      // Toggle direction if clicking the same field
+    if (field === sortField) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      // Default to ascending for new field
       setSortField(field);
       setSortDirection('asc');
     }
   };
 
-  // Handle visit deletion
   const handleDeleteVisit = async () => {
     if (!visitToDelete) return;
     
     try {
-      setIsLoading(true);
-      
       const { error } = await supabase
         .from('guest_registrations')
         .delete()
         .eq('id', visitToDelete.id);
+
+      if (error) throw error;
       
-      if (error) {
-        throw error;
-      }
-      
-      // Update local state
-      setVisits(visits.filter((visit) => visit.id !== visitToDelete.id));
-      
-      toast({
-        title: "Berhasil",
-        description: "Data kunjungan berhasil dihapus",
-      });
-    } catch (error: any) {
-      console.error('Error deleting visit:', error);
-      toast({
-        title: "Error",
-        description: "Gagal menghapus data kunjungan: " + error.message,
-        variant: "destructive",
-      });
-    } finally {
+      setVisits(visits.filter(visit => visit.id !== visitToDelete.id));
       setVisitToDelete(null);
-      setIsLoading(false);
+    } catch (error) {
+      console.error("Error deleting visit:", error);
     }
   };
 
-  // Pagination logic
-  const indexOfLastVisit = currentPage * visitsPerPage;
-  const indexOfFirstVisit = indexOfLastVisit - visitsPerPage;
-  const currentVisits = filteredVisits.slice(indexOfFirstVisit, indexOfLastVisit);
-  const totalPages = Math.ceil(filteredVisits.length / visitsPerPage);
-  
-  // Change page
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const resetFilters = () => {
+    setSearchTerm('');
+    setSelectedStatus('');
+    setSelectedActivityType('');
+  };
+
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
+
   const prevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  // Reset filters
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedStatus(null);
-    setSelectedActivityType(null);
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
   };
 
   return {
-    visits,
-    filteredVisits,
-    currentVisits,
+    visits: paginatedVisits,
+    filteredVisits: sortedVisits,
     isLoading,
     searchTerm,
     selectedStatus,
@@ -170,16 +176,15 @@ export const useVisitData = () => {
     sortDirection,
     currentPage,
     totalPages,
-    visitsPerPage,
     setSearchTerm,
     setSelectedStatus,
     setSelectedActivityType,
     setVisitToDelete,
     handleSort,
     handleDeleteVisit,
-    resetFilters,
-    paginate,
     nextPage,
-    prevPage
+    prevPage,
+    paginate,
+    resetFilters
   };
 };
