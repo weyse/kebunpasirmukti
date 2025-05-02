@@ -25,7 +25,7 @@ interface UseGuestRegistrationProps {
 export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegistrationProps = {}) => {
   // Custom hooks
   const form = useGuestRegistrationForm();
-  const { packages, accommodations, venues, fetchGuestRegistration } = useRegistrationData();
+  const { packages, accommodations, venues } = useRegistrationData();
   
   const {
     selectedClasses,

@@ -53,6 +53,10 @@ const GuestRegistrationForm = () => {
   
   const onSubmit = async (values: any) => {
     try {
+      console.log('Submitting form with values:', values);
+      console.log('Selected venues:', selectedVenues);
+      console.log('Accommodation counts:', accommodationCounts);
+      
       // Include nights count in the submission
       const registrationId = await handleSubmit({
         ...values,

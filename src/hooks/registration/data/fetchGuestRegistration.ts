@@ -94,6 +94,12 @@ export const fetchGuestRegistration = async (id: string) => {
       }
     }
 
+    console.log('Loaded data from database:', {
+      registrationData: data,
+      roomsData,
+      venuesData
+    });
+
     return { 
       registrationData: data, 
       classes, 
