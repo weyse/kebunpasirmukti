@@ -29,13 +29,15 @@ import { supabase } from '@/integrations/supabase/client';
 // Define the form schema
 const registerFormSchema = z.object({
   fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
-  email: z.string().email('Email tidak valid').min(1, 'Email harus diisi'),
+  email: z.string().email('Format email tidak valid').min(1, 'Email harus diisi'),
   password: z.string().min(6, 'Password minimal 6 karakter'),
   confirmPassword: z.string().min(6, 'Password minimal 6 karakter'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Password tidak cocok",
   path: ["confirmPassword"],
 });
+
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 const Register = () => {
   const navigate = useNavigate();
@@ -44,7 +46,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Initialize form
-  const form = useForm<z.infer<typeof registerFormSchema>>({
+  const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
       fullName: '',
@@ -55,10 +57,12 @@ const Register = () => {
   });
 
   // Form submission handler
-  const onSubmit = async (values: z.infer<typeof registerFormSchema>) => {
+  const onSubmit = async (values: RegisterFormValues) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting to register with:", values.email);
+      
       // Register with Supabase
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
@@ -71,8 +75,11 @@ const Register = () => {
       });
       
       if (error) {
+        console.error("Registration error:", error);
         throw error;
       }
+      
+      console.log("Registration successful:", data);
       
       toast({
         title: 'Pendaftaran berhasil',
@@ -82,10 +89,22 @@ const Register = () => {
       // Redirect to login page after successful registration
       navigate('/login');
     } catch (error: any) {
-      console.error('Registration error:', error);
+      console.error('Registration error details:', error);
+      
+      let errorMessage = 'Terjadi kesalahan saat pendaftaran';
+      
+      // Handle specific error messages from Supabase
+      if (error.message) {
+        if (error.message.includes('already exists')) {
+          errorMessage = 'Email tersebut sudah digunakan';
+        } else if (error.message.includes('format')) {
+          errorMessage = 'Format email tidak valid';
+        }
+      }
+      
       toast({
         title: 'Pendaftaran gagal',
-        description: error.message || 'Terjadi kesalahan saat pendaftaran',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -142,7 +161,19 @@ const Register = () => {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input placeholder="nama@email.com" className="pl-10" {...field} />
+                          <Input 
+                            placeholder="nama@email.com" 
+                            className="pl-10" 
+                            type="email"
+                            {...field} 
+                            onChange={(e) => {
+                              field.onChange(e);
+                              // Reset email validation error if user is typing
+                              if (form.formState.errors.email) {
+                                form.clearErrors('email');
+                              }
+                            }}
+                          />
                         </div>
                       </FormControl>
                       <FormMessage />
@@ -231,7 +262,7 @@ const Register = () => {
                   className="w-full bg-pasirmukti-500 hover:bg-pasirmukti-600" 
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Loading...' : 'Daftar'}
+                  {isLoading ? 'Memproses...' : 'Daftar'}
                 </Button>
               </form>
             </Form>

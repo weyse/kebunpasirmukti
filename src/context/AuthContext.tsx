@@ -49,18 +49,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       const authError = error as AuthError;
       console.error("Login error:", authError);
+      
+      let errorMessage = "Username atau password salah";
+      if (authError.message.includes("Email not confirmed")) {
+        errorMessage = "Email belum dikonfirmasi, silakan periksa kotak masuk email Anda";
+      }
+      
       toast({
         title: "Login gagal",
-        description: authError.message || "Username atau password salah",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
     }
   };
 
-  // Signup function
+  // Signup function with improved error handling
   const signup = async (email: string, password: string, fullName: string) => {
     try {
+      console.log("Attempting to register with:", email);
+      
       const { error } = await supabase.auth.signUp({
         email,
         password,
@@ -72,6 +80,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
+        console.error("Signup error:", error);
         throw error;
       }
 
@@ -83,10 +92,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       navigate("/login");
     } catch (error) {
       const authError = error as AuthError;
-      console.error("Signup error:", authError);
+      console.error("Signup error details:", authError);
+      
+      let errorMessage = 'Terjadi kesalahan saat pendaftaran';
+      
+      // Handle specific error messages from Supabase
+      if (authError.message) {
+        if (authError.message.includes('already exists')) {
+          errorMessage = 'Email tersebut sudah digunakan';
+        } else if (authError.message.includes('format') || authError.message.includes('invalid')) {
+          errorMessage = 'Format email tidak valid';
+        }
+      }
+      
       toast({
         title: "Pendaftaran gagal",
-        description: authError.message || "Terjadi kesalahan saat pendaftaran",
+        description: errorMessage,
         variant: "destructive",
       });
       throw error;
