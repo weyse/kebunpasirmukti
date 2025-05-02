@@ -44,22 +44,27 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     setSelectedClasses(classes);
   };
 
-  const handlePackageChange = (packageId: string) => {
+  // Modified to not reset participants when re-selecting packages during loading
+  const handlePackageChange = (packageId: string, isInitialLoad?: boolean) => {
     setSelectedPackages(prevSelected => {
       // Toggle package selection
       if (prevSelected.includes(packageId)) {
         // If removing a package, also clear its participant allocations
-        const updatedParticipants = { ...packageParticipants };
-        delete updatedParticipants[packageId];
-        setPackageParticipants(updatedParticipants);
+        if (!isInitialLoad) {
+          const updatedParticipants = { ...packageParticipants };
+          delete updatedParticipants[packageId];
+          setPackageParticipants(updatedParticipants);
+        }
         
         return prevSelected.filter(id => id !== packageId);
       } else {
-        // Initialize empty participant allocations for the new package
-        setPackageParticipants(prev => ({
-          ...prev,
-          [packageId]: { adults: 0, children: 0, teachers: 0, free_teachers: 0 }
-        }));
+        // Only initialize empty participant allocations if not during initial loading
+        if (!isInitialLoad && !packageParticipants[packageId]) {
+          setPackageParticipants(prev => ({
+            ...prev,
+            [packageId]: { adults: 0, children: 0, teachers: 0, free_teachers: 0 }
+          }));
+        }
         
         return [...prevSelected, packageId];
       }
@@ -116,6 +121,11 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     setPackageParticipants(participants);
   };
 
+  // Function to set selected packages directly without toggling
+  const setAllSelectedPackages = (packages: string[]) => {
+    setSelectedPackages(packages);
+  };
+
   return {
     selectedClasses,
     selectedPackages,
@@ -130,6 +140,7 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
-    setPackageParticipants: setAllPackageParticipants
+    setPackageParticipants: setAllPackageParticipants,
+    setSelectedPackages: setAllSelectedPackages
   };
 };

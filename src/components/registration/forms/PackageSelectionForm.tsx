@@ -1,5 +1,5 @@
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import PackageSelectionCard from '@/components/registration/PackageSelectionCard';
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -37,6 +37,14 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
   totalTeachers,
   totalFreeTeachers
 }) => {
+  // Debug: Log when component renders with new props
+  useEffect(() => {
+    console.log('PackageSelectionForm rendered with:', { 
+      selectedPackages, 
+      packageParticipants
+    });
+  }, [selectedPackages, packageParticipants]);
+
   // Calculate allocated participants
   const allocatedCounts = useMemo(() => {
     const result = {
@@ -141,6 +149,7 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {packages.map(pkg => {
             const isSelected = selectedPackages.includes(pkg.id);
+            // Ensure we have participant data for this package
             const participants = packageParticipants[pkg.id] || { adults: 0, children: 0, teachers: 0, free_teachers: 0 };
             
             return (
@@ -152,10 +161,10 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
                 price={pkg.price_per_adult}
                 checked={isSelected}
                 onCheckedChange={() => onPackageChange(pkg.id)}
-                adults={participants.adults || 0}
-                children={participants.children || 0}
-                teachers={participants.teachers || 0}
-                free_teachers={participants.free_teachers || 0}
+                adults={participants.adults}
+                children={participants.children}
+                teachers={participants.teachers}
+                free_teachers={participants.free_teachers}
                 onParticipantChange={(type, count) => handleParticipantChange(pkg.id, type, count)}
                 maxAdults={isSelected ? participants.adults + remainingParticipants.adults : totalAdults}
                 maxChildren={isSelected ? participants.children + remainingParticipants.children : totalChildren}

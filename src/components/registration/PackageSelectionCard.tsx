@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,15 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
   maxTeachers = Infinity,
   maxFreeTeachers = Infinity
 }) => {
+  // Debug: Log when component renders with new props
+  useEffect(() => {
+    if (checked) {
+      console.log(`PackageSelectionCard ${id} rendered with:`, { 
+        checked, adults, children, teachers, free_teachers 
+      });
+    }
+  }, [id, checked, adults, children, teachers, free_teachers]);
+
   const handleInputChange = (type: 'adults' | 'children' | 'teachers' | 'free_teachers', value: string) => {
     // Convert to number and ensure it's not negative
     const numValue = Math.max(0, parseInt(value) || 0);

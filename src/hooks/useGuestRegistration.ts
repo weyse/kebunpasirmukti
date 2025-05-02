@@ -41,7 +41,8 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
-    setPackageParticipants
+    setPackageParticipants,
+    setSelectedPackages
   } = useSelectionState();
   
   const { totalCost, discountedCost, remainingBalance, calculationSummary } = useCostCalculation(
@@ -131,25 +132,16 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         // Set selected classes
         handleClassChange(classes);
         
-        // First, clear any existing package selections to prevent interference
-        const initialSelectedPackages = [...selectedPackages];
-        initialSelectedPackages.forEach(pkg => handlePackageChange(pkg));
-        
-        // Handle packages data
-        if (packagesData) {
+        // Handle packages data - IMPROVED LOADING PROCESS
+        if (packagesData && packagesData.selected_packages && packagesData.package_participants) {
           console.log('Loading packages data:', packagesData);
           
-          // Process selected packages
-          if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
-            packagesData.selected_packages.forEach(packageId => {
-              handlePackageChange(packageId);
-            });
-          }
+          // Important: First set the package participants data before selecting packages
+          // This ensures participant data isn't reset during package selection
+          setPackageParticipants(packagesData.package_participants);
           
-          // Set the package participants
-          if (packagesData.package_participants) {
-            setPackageParticipants(packagesData.package_participants);
-          }
+          // Then set the selected packages directly without toggling
+          setSelectedPackages(packagesData.selected_packages);
         }
         // For legacy data that only has package_type
         else if (registrationData.package_type) {
