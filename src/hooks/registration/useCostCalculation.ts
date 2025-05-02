@@ -46,8 +46,8 @@ export const useCostCalculation = (
   });
 
   // Watch form values for cost calculation
-  const watchDiscount = form.watch("discount_percentage");
-  const watchDownPayment = form.watch("down_payment");
+  const watchDiscount = form.watch("discount_percentage") || 0;
+  const watchDownPayment = form.watch("down_payment") || 0;
 
   useEffect(() => {
     calculateCosts();
@@ -67,7 +67,7 @@ export const useCostCalculation = (
   const calculateCosts = () => {
     // Make sure we have all required data
     if (!packages || packages.length === 0) {
-      console.warn("No packages available for cost calculation");
+      console.log("No packages available for cost calculation");
       return;
     }
     
@@ -93,13 +93,13 @@ export const useCostCalculation = (
     const accommodationCost = calculateAccommodationCost(
       accommodationCounts || {}, 
       accommodations || [], 
-      nightsCount || 1
+      Number(nightsCount) || 1
     );
     
     // Calculate extra bed cost (accounting for nights count)
     const extraBedCost = calculateExtraBedCost(
       extraBedCounts || {}, 
-      nightsCount || 1
+      Number(nightsCount) || 1
     );
     
     // Calculate venue cost

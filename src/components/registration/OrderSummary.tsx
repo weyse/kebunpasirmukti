@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, MapPin } from 'lucide-react';
@@ -23,6 +24,11 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   roomsInfo = [],
   venuesInfo = []
 }) => {
+  // Ensure all values are valid numbers
+  const safeBaseTotal = isNaN(costCalculation.baseTotal) ? 0 : costCalculation.baseTotal;
+  const safeDiscountedTotal = isNaN(costCalculation.discountedTotal) ? 0 : costCalculation.discountedTotal;
+  const safeRemaining = isNaN(costCalculation.remaining) ? 0 : costCalculation.remaining;
+  
   return (
     <Card>
       <CardHeader>
@@ -49,15 +55,20 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               Akomodasi
             </h3>
             <div className="space-y-1">
-              {roomsInfo.map((room, index) => (
-                <div key={index} className="flex justify-between">
-                  <span className="text-muted-foreground">{room.name}:</span>
-                  <span>
-                    {room.count} kamar
-                    {room.price ? ` (Rp ${room.price.toLocaleString()})` : ''}
-                  </span>
-                </div>
-              ))}
+              {roomsInfo.map((room, index) => {
+                // Ensure room price is a valid number
+                const safePrice = isNaN(room.price || 0) ? 0 : room.price || 0;
+                
+                return (
+                  <div key={index} className="flex justify-between">
+                    <span className="text-muted-foreground">{room.name}:</span>
+                    <span>
+                      {room.count} kamar
+                      {safePrice ? ` (Rp ${safePrice.toLocaleString()})` : ''}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -70,12 +81,17 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               Venue
             </h3>
             <div className="space-y-1">
-              {venuesInfo.map((venue, index) => (
-                <div key={index} className="flex justify-between">
-                  <span className="text-muted-foreground">{venue.name}:</span>
-                  <span>{venue.price ? `Rp ${venue.price.toLocaleString()}` : 'Dipilih'}</span>
-                </div>
-              ))}
+              {venuesInfo.map((venue, index) => {
+                // Ensure venue price is a valid number
+                const safePrice = isNaN(venue.price || 0) ? 0 : venue.price || 0;
+                
+                return (
+                  <div key={index} className="flex justify-between">
+                    <span className="text-muted-foreground">{venue.name}:</span>
+                    <span>{safePrice ? `Rp ${safePrice.toLocaleString()}` : 'Dipilih'}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -99,21 +115,21 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="space-y-1">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Biaya Dasar:</span>
-              <span>Rp {costCalculation.baseTotal.toLocaleString()}</span>
+              <span>Rp {safeBaseTotal.toLocaleString()}</span>
             </div>
-            {costCalculation.baseTotal !== costCalculation.discountedTotal && (
+            {safeBaseTotal !== safeDiscountedTotal && (
               <div className="flex justify-between text-green-600">
                 <span>Diskon untuk Anak-anak:</span>
-                <span>- Rp {(costCalculation.baseTotal - costCalculation.discountedTotal).toLocaleString()}</span>
+                <span>- Rp {(safeBaseTotal - safeDiscountedTotal).toLocaleString()}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Setelah Diskon:</span>
-              <span>Rp {costCalculation.discountedTotal.toLocaleString()}</span>
+              <span>Rp {safeDiscountedTotal.toLocaleString()}</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Sisa yang Harus Dibayar:</span>
-              <span>Rp {costCalculation.remaining.toLocaleString()}</span>
+              <span>Rp {safeRemaining.toLocaleString()}</span>
             </div>
           </div>
         </div>

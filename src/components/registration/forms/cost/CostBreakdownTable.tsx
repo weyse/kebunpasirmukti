@@ -17,6 +17,18 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
   // Safe check to ensure we have valid data
   const hasPackages = calculationSummary?.packageBreakdown && calculationSummary.packageBreakdown.length > 0;
   
+  // Ensure all values are numbers
+  const safeAdultCost = isNaN(calculationSummary.adultCost) ? 0 : calculationSummary.adultCost;
+  const safeChildrenCost = isNaN(calculationSummary.childrenCost) ? 0 : calculationSummary.childrenCost;
+  const safeChildrenDiscountAmount = isNaN(calculationSummary.childrenDiscountAmount) ? 0 : calculationSummary.childrenDiscountAmount;
+  const safeTeacherCost = isNaN(calculationSummary.teacherCost) ? 0 : calculationSummary.teacherCost;
+  const safeAccommodationCost = isNaN(calculationSummary.accommodationCost) ? 0 : calculationSummary.accommodationCost;
+  const safeExtraBedCost = isNaN(calculationSummary.extraBedCost) ? 0 : calculationSummary.extraBedCost;
+  const safeVenueCost = isNaN(calculationSummary.venueCost) ? 0 : calculationSummary.venueCost;
+  const safeFreeTeachersCount = isNaN(calculationSummary.freeTeachersCount) ? 0 : calculationSummary.freeTeachersCount;
+  const safeDiscountedCost = isNaN(discountedCost) ? 0 : discountedCost;
+  const safeDiscountPercentage = isNaN(discountPercentage) ? 0 : discountPercentage;
+  
   return (
     <div className="mt-4">
       <h3 className="font-medium mb-2">Ringkasan Perhitungan</h3>
@@ -37,16 +49,24 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {calculationSummary.packageBreakdown.map((pkg, index) => (
-                <TableRow key={index}>
-                  <TableCell>{pkg.packageName || `Paket ${index + 1}`}</TableCell>
-                  <TableCell>{pkg.adults} (Rp {pkg.adultCost.toLocaleString()})</TableCell>
-                  <TableCell>{pkg.children} (Rp {pkg.childrenCost.toLocaleString()})</TableCell>
-                  <TableCell>{pkg.teachers} (Rp {pkg.teacherCost.toLocaleString()})</TableCell>
-                  <TableCell>{pkg.free_teachers} (Rp 0)</TableCell>
-                  <TableCell className="text-right font-medium">Rp {pkg.total.toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
+              {calculationSummary.packageBreakdown.map((pkg, index) => {
+                // Ensure all values are numbers
+                const adultCost = isNaN(pkg.adultCost) ? 0 : pkg.adultCost;
+                const childrenCost = isNaN(pkg.childrenCost) ? 0 : pkg.childrenCost;
+                const teacherCost = isNaN(pkg.teacherCost) ? 0 : pkg.teacherCost;
+                const total = isNaN(pkg.total) ? 0 : pkg.total;
+                
+                return (
+                  <TableRow key={index}>
+                    <TableCell>{pkg.packageName || `Paket ${index + 1}`}</TableCell>
+                    <TableCell>{pkg.adults} (Rp {adultCost.toLocaleString()})</TableCell>
+                    <TableCell>{pkg.children} (Rp {childrenCost.toLocaleString()})</TableCell>
+                    <TableCell>{pkg.teachers} (Rp {teacherCost.toLocaleString()})</TableCell>
+                    <TableCell>{pkg.free_teachers} (Rp 0)</TableCell>
+                    <TableCell className="text-right font-medium">Rp {total.toLocaleString()}</TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -63,24 +83,24 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
         <TableBody>
           <TableRow>
             <TableCell>Dewasa</TableCell>
-            <TableCell className="text-right">Rp {calculationSummary.adultCost.toLocaleString()}</TableCell>
+            <TableCell className="text-right">Rp {safeAdultCost.toLocaleString()}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>
               Anak-anak
-              {calculationSummary.childrenDiscountAmount > 0 && (
+              {safeChildrenDiscountAmount > 0 && (
                 <span className="block text-xs text-green-600">
-                  Diskon {discountPercentage}% (- Rp {calculationSummary.childrenDiscountAmount.toLocaleString()})
+                  Diskon {safeDiscountPercentage}% (- Rp {safeChildrenDiscountAmount.toLocaleString()})
                 </span>
               )}
             </TableCell>
             <TableCell className="text-right">
-              <span className={calculationSummary.childrenDiscountAmount > 0 ? "line-through text-muted-foreground" : ""}>
-                Rp {calculationSummary.childrenCost.toLocaleString()}
+              <span className={safeChildrenDiscountAmount > 0 ? "line-through text-muted-foreground" : ""}>
+                Rp {safeChildrenCost.toLocaleString()}
               </span>
-              {calculationSummary.childrenDiscountAmount > 0 && (
+              {safeChildrenDiscountAmount > 0 && (
                 <span className="block font-medium text-green-600">
-                  Rp {(calculationSummary.childrenCost - calculationSummary.childrenDiscountAmount).toLocaleString()}
+                  Rp {(safeChildrenCost - safeChildrenDiscountAmount).toLocaleString()}
                 </span>
               )}
             </TableCell>
@@ -88,35 +108,35 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
           <TableRow>
             <TableCell>
               Guru
-              {calculationSummary.freeTeachersCount > 0 && (
+              {safeFreeTeachersCount > 0 && (
                 <span className="block text-xs text-muted-foreground">
-                  (+ {calculationSummary.freeTeachersCount} Guru Free of Charge)
+                  (+ {safeFreeTeachersCount} Guru Free of Charge)
                 </span>
               )}
             </TableCell>
-            <TableCell className="text-right">Rp {calculationSummary.teacherCost.toLocaleString()}</TableCell>
+            <TableCell className="text-right">Rp {safeTeacherCost.toLocaleString()}</TableCell>
           </TableRow>
-          {calculationSummary.accommodationCost > 0 && (
+          {safeAccommodationCost > 0 && (
             <TableRow>
               <TableCell>Akomodasi</TableCell>
-              <TableCell className="text-right">Rp {calculationSummary.accommodationCost.toLocaleString()}</TableCell>
+              <TableCell className="text-right">Rp {safeAccommodationCost.toLocaleString()}</TableCell>
             </TableRow>
           )}
-          {calculationSummary.extraBedCost > 0 && (
+          {safeExtraBedCost > 0 && (
             <TableRow>
               <TableCell>Extra Bed</TableCell>
-              <TableCell className="text-right">Rp {calculationSummary.extraBedCost.toLocaleString()}</TableCell>
+              <TableCell className="text-right">Rp {safeExtraBedCost.toLocaleString()}</TableCell>
             </TableRow>
           )}
-          {calculationSummary.venueCost > 0 && (
+          {safeVenueCost > 0 && (
             <TableRow>
               <TableCell>Venue</TableCell>
-              <TableCell className="text-right">Rp {calculationSummary.venueCost.toLocaleString()}</TableCell>
+              <TableCell className="text-right">Rp {safeVenueCost.toLocaleString()}</TableCell>
             </TableRow>
           )}
           <TableRow className="border-t-2">
             <TableCell className="font-medium">TOTAL</TableCell>
-            <TableCell className="text-right font-bold">Rp {discountedCost.toLocaleString()}</TableCell>
+            <TableCell className="text-right font-bold">Rp {safeDiscountedCost.toLocaleString()}</TableCell>
           </TableRow>
         </TableBody>
       </Table>

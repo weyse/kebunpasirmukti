@@ -31,27 +31,37 @@ export const calculatePackageCosts = (
       
       const participants = packageParticipants[packageId];
       
+      // Ensure all values are valid numbers with fallbacks to 0
+      const adults = Number(participants?.adults) || 0;
+      const children = Number(participants?.children) || 0;
+      const teachers = Number(participants?.teachers) || 0;
+      const free_teachers = Number(participants?.free_teachers) || 0;
+      
+      const pricePerAdult = Number(packageData?.price_per_adult) || 0;
+      const pricePerChild = Number(packageData?.price_per_child) || 0;
+      const pricePerTeacher = Number(packageData?.price_per_teacher) || 0;
+      
       // Calculate costs for each participant type in this package
-      const adultCost = participants.adults * packageData.price_per_adult;
-      const childrenCost = participants.children * packageData.price_per_child;
-      const teacherCost = participants.teachers * packageData.price_per_teacher;
+      const adultCost = adults * pricePerAdult;
+      const childrenCost = children * pricePerChild;
+      const teacherCost = teachers * pricePerTeacher;
       
       // Add to totals
       totalAdultCost += adultCost;
       totalChildrenCost += childrenCost;
       totalTeacherCost += teacherCost;
-      totalFreeTeachersCount += participants.free_teachers || 0; // Added fallback for undefined
+      totalFreeTeachersCount += free_teachers;
       
       return {
         packageId,
-        packageName: packageData.name,
-        adults: participants.adults,
+        packageName: packageData.name || `Package ${packageId.substring(0, 8)}`,
+        adults,
         adultCost,
-        children: participants.children,
+        children,
         childrenCost,
-        teachers: participants.teachers,
+        teachers,
         teacherCost,
-        free_teachers: participants.free_teachers || 0, // Added fallback for undefined
+        free_teachers,
         total: adultCost + childrenCost + teacherCost
       };
     })
@@ -76,9 +86,14 @@ export const calculateAccommodationCost = (
     return 0;
   }
   
+  // Ensure nights count is a valid number
+  const validNightsCount = Number(nightsCount) || 1;
+  
   return Object.entries(accommodationCounts).reduce((sum, [id, count]) => {
     const accommodation = accommodations.find(a => a.id === id);
-    return sum + (accommodation ? accommodation.price_per_night * count * nightsCount : 0);
+    const validCount = Number(count) || 0;
+    const pricePerNight = accommodation ? Number(accommodation.price_per_night) || 0 : 0;
+    return sum + (pricePerNight * validCount * validNightsCount);
   }, 0);
 };
 
@@ -91,8 +106,12 @@ export const calculateExtraBedCost = (
     return 0;
   }
   
+  // Ensure nights count is a valid number
+  const validNightsCount = Number(nightsCount) || 1;
+  
   return Object.entries(extraBedCounts).reduce((sum, [_, count]) => {
-    return sum + (count * EXTRA_BED_PRICE * nightsCount);
+    const validCount = Number(count) || 0;
+    return sum + (validCount * EXTRA_BED_PRICE * validNightsCount);
   }, 0);
 };
 
@@ -107,6 +126,7 @@ export const calculateVenueCost = (
   
   return selectedVenues.reduce((sum, venueId) => {
     const venue = venues.find(v => v.id === venueId);
-    return sum + (venue ? venue.price : 0);
+    const venuePrice = venue ? Number(venue.price) || 0 : 0;
+    return sum + venuePrice;
   }, 0);
 };

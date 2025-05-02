@@ -11,40 +11,44 @@ export const prepareBasicInfo = (
   nightsCount: number,
   totalExtraBedCost: number
 ): SummaryItem[] => {
-  // Calculate total participants
-  const totalParticipants = Number(values.adult_count) + 
-                           Number(values.children_count) + 
-                           Number(values.teacher_count) + 
-                           Number(values.free_of_charge_teacher_count);
+  // Calculate total participants with null/NaN checks
+  const adultCount = Number(values.adult_count) || 0;
+  const childrenCount = Number(values.children_count) || 0;
+  const teacherCount = Number(values.teacher_count) || 0;
+  const freeTeacherCount = Number(values.free_of_charge_teacher_count) || 0;
+  
+  const totalParticipants = adultCount + childrenCount + teacherCount + freeTeacherCount;
   
   // Show teachers breakdown if we have free teachers
-  const teacherBreakdown = Number(values.free_of_charge_teacher_count) > 0 
-    ? `${Number(values.teacher_count)} berbayar, ${Number(values.free_of_charge_teacher_count)} free` 
-    : `${Number(values.teacher_count)}`;
+  const teacherBreakdown = freeTeacherCount > 0 
+    ? `${teacherCount} berbayar, ${freeTeacherCount} free` 
+    : `${teacherCount}`;
   
   const basicInfo = [
     { label: 'PIC', value: values.responsible_person || '-' },
     { label: 'Institusi', value: values.institution_name || '-' },
-    { label: 'Tanggal Kunjungan', value: values.visit_date ? format(values.visit_date, 'dd MMM yyyy') : '-' },
+    { label: 'Tanggal Kunjungan', value: values.visit_date ? format(new Date(values.visit_date), 'dd MMM yyyy') : '-' },
     { label: 'Jumlah Peserta', value: `${totalParticipants}` },
-    { label: 'Dewasa', value: `${values.adult_count}` },
-    { label: 'Anak-anak', value: `${values.children_count}` },
+    { label: 'Dewasa', value: `${adultCount}` },
+    { label: 'Anak-anak', value: `${childrenCount}` },
     { label: 'Guru', value: teacherBreakdown }
   ];
   
   // Add nights count if more than 1
-  if (nightsCount > 1) {
+  const validNightsCount = Number(nightsCount) || 1;
+  if (validNightsCount > 1) {
     basicInfo.push({ 
       label: 'Jumlah Malam', 
-      value: `${nightsCount}`
+      value: `${validNightsCount}`
     });
   }
   
   // Add extra bed info if any
   if (totalExtraBedCost > 0) {
+    const totalExtraBeds = Object.values(extraBedCounts || {}).reduce((sum, count) => sum + (Number(count) || 0), 0);
     basicInfo.push({ 
       label: 'Extra Bed', 
-      value: `${Object.values(extraBedCounts).reduce((sum, count) => sum + count, 0)} (Rp ${totalExtraBedCost.toLocaleString()})` 
+      value: `${totalExtraBeds} (Rp ${totalExtraBedCost.toLocaleString()})` 
     });
   }
   
@@ -62,7 +66,7 @@ export const preparePaymentInfo = (values: FormSchema): SummaryItem[] => {
   if (values.payment_date) {
     paymentInfo.push({ 
       label: 'Tanggal Pembayaran', 
-      value: format(values.payment_date, 'dd MMM yyyy') 
+      value: format(new Date(values.payment_date), 'dd MMM yyyy') 
     });
   }
   
@@ -75,14 +79,21 @@ export const prepareRoomsInfo = (
   accommodations: any[],
   nightsCount: number
 ): RoomVenueItem[] => {
-  return Object.entries(accommodationCounts)
-    .filter(([_, count]) => count > 0)
+  // Ensure nights count is a valid number
+  const validNightsCount = Number(nightsCount) || 1;
+  
+  return Object.entries(accommodationCounts || {})
+    .filter(([_, count]) => Number(count) > 0)
     .map(([id, count]) => {
       const room = accommodations.find(a => a.id === id);
+      const validCount = Number(count) || 0;
+      const pricePerNight = room ? Number(room.price_per_night) || 0 : 0;
+      const totalPrice = pricePerNight * validCount * validNightsCount;
+      
       return {
-        name: room ? room.room_type : `Kamar ${id}`,
-        count: count,
-        price: room ? room.price_per_night * count * nightsCount : undefined
+        name: room ? (room.room_type || `Kamar ${id.substring(0, 8)}`) : `Kamar ${id.substring(0, 8)}`,
+        count: validCount,
+        price: totalPrice
       };
     });
 };
@@ -92,11 +103,13 @@ export const prepareVenuesInfo = (
   selectedVenues: string[],
   venues: any[]
 ): RoomVenueItem[] => {
-  return selectedVenues.map(venueId => {
+  return (selectedVenues || []).map(venueId => {
     const venue = venues.find(v => v.id === venueId);
+    const venuePrice = venue ? Number(venue.price) || 0 : 0;
+    
     return {
-      name: venue ? venue.name : `Venue ${venueId}`,
-      price: venue ? venue.price : undefined
+      name: venue ? (venue.name || `Venue ${venueId.substring(0, 8)}`) : `Venue ${venueId.substring(0, 8)}`,
+      price: venuePrice
     };
   });
 };
@@ -106,7 +119,10 @@ export const calculateTotalExtraBedCost = (
   extraBedCounts: Record<string, number>,
   nightsCount: number
 ): number => {
-  return Object.values(extraBedCounts).reduce(
-    (sum, count) => sum + (count * EXTRA_BED_PRICE * nightsCount), 0
+  // Ensure nights count is a valid number
+  const validNightsCount = Number(nightsCount) || 1;
+  
+  return Object.values(extraBedCounts || {}).reduce(
+    (sum, count) => sum + ((Number(count) || 0) * EXTRA_BED_PRICE * validNightsCount), 0
   );
 };

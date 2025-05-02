@@ -39,14 +39,20 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
   maxTeachers = Infinity,
   maxFreeTeachers = Infinity
 }) => {
+  // Ensure we have valid values
+  const safeAdults = isNaN(adults) ? 0 : adults;
+  const safeChildren = isNaN(children) ? 0 : children;
+  const safeTeachers = isNaN(teachers) ? 0 : teachers;
+  const safeFreeTeachers = isNaN(free_teachers) ? 0 : free_teachers;
+  
   // Debug: Log when component renders with new props
   useEffect(() => {
     if (checked) {
       console.log(`PackageSelectionCard ${id} rendered with:`, { 
-        checked, adults, children, teachers, free_teachers 
+        checked, adults: safeAdults, children: safeChildren, teachers: safeTeachers, free_teachers: safeFreeTeachers 
       });
     }
-  }, [id, checked, adults, children, teachers, free_teachers]);
+  }, [id, checked, safeAdults, safeChildren, safeTeachers, safeFreeTeachers]);
 
   const handleInputChange = (type: 'adults' | 'children' | 'teachers' | 'free_teachers', value: string) => {
     // Convert to number and ensure it's not negative
@@ -82,7 +88,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
       )}
       
       {price !== undefined && (
-        <p className="ml-8 font-medium">Rp {price.toLocaleString()}</p>
+        <p className="ml-8 font-medium">Rp {(isNaN(price) ? 0 : price).toLocaleString()}</p>
       )}
       
       {checked && (
@@ -97,7 +103,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 type="number"
                 min="0"
                 max={maxAdults}
-                value={adults}
+                value={safeAdults}
                 onChange={(e) => handleInputChange('adults', e.target.value)}
                 className="h-8 text-sm"
               />
@@ -111,7 +117,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 type="number"
                 min="0"
                 max={maxChildren}
-                value={children}
+                value={safeChildren}
                 onChange={(e) => handleInputChange('children', e.target.value)}
                 className="h-8 text-sm"
               />
@@ -125,7 +131,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 type="number"
                 min="0"
                 max={maxTeachers}
-                value={teachers}
+                value={safeTeachers}
                 onChange={(e) => handleInputChange('teachers', e.target.value)}
                 className="h-8 text-sm"
               />
@@ -139,7 +145,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 type="number"
                 min="0"
                 max={maxFreeTeachers}
-                value={free_teachers}
+                value={safeFreeTeachers}
                 onChange={(e) => handleInputChange('free_teachers', e.target.value)}
                 className="h-8 text-sm"
               />
