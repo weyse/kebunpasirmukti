@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Visit } from '@/types/visit';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 
 export const useVisitData = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +55,11 @@ export const useVisitData = () => {
         }
       } catch (error) {
         console.error('Error fetching visits:', error);
-        toast('Error fetching visits');
+        toast({
+          title: "Error",
+          description: "Gagal memuat data kunjungan",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -91,27 +95,37 @@ export const useVisitData = () => {
 
   // Handle visit deletion
   const handleDeleteVisit = async () => {
-    if (visitToDelete) {
-      try {
-        const { error } = await supabase
-          .from('guest_registrations')
-          .delete()
-          .eq('id', visitToDelete.id);
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Update local state
-        setVisits(visits.filter((visit) => visit.id !== visitToDelete.id));
-        
-        toast('Data kunjungan berhasil dihapus');
-        
-        setVisitToDelete(null);
-      } catch (error) {
-        console.error('Error deleting visit:', error);
-        toast('Gagal menghapus data kunjungan');
+    if (!visitToDelete) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const { error } = await supabase
+        .from('guest_registrations')
+        .delete()
+        .eq('id', visitToDelete.id);
+      
+      if (error) {
+        throw error;
       }
+      
+      // Update local state
+      setVisits(visits.filter((visit) => visit.id !== visitToDelete.id));
+      
+      toast({
+        title: "Berhasil",
+        description: "Data kunjungan berhasil dihapus",
+      });
+    } catch (error: any) {
+      console.error('Error deleting visit:', error);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus data kunjungan: " + error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setVisitToDelete(null);
+      setIsLoading(false);
     }
   };
 

@@ -31,13 +31,17 @@ export function DeleteGuestDialog({
           <AlertDialogTitle>Konfirmasi Hapus Data</AlertDialogTitle>
           <AlertDialogDescription>
             Apakah Anda yakin ingin menghapus data registrasi ini?
-            <div className="mt-4 p-4 border rounded-md bg-muted">
-              <p><strong>ID:</strong> {guestToDelete?.order_id}</p>
-              <p><strong>Institusi:</strong> {guestToDelete?.institution_name}</p>
-              <p><strong>Tanggal:</strong> {guestToDelete && format(new Date(guestToDelete.visit_date), 'dd MMM yyyy')}</p>
-            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
+        
+        {guestToDelete && (
+          <div className="mt-4 p-4 border rounded-md bg-muted">
+            <p><strong>ID:</strong> {guestToDelete.order_id}</p>
+            <p><strong>Institusi:</strong> {guestToDelete.institution_name}</p>
+            <p><strong>Tanggal:</strong> {format(new Date(guestToDelete.visit_date), 'dd MMM yyyy')}</p>
+          </div>
+        )}
+        
         <AlertDialogFooter>
           <AlertDialogCancel>Batal</AlertDialogCancel>
           <AlertDialogAction onClick={handleDeleteGuest}>
