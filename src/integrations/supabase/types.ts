@@ -281,9 +281,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_admin_role: {
+        Args: { user_id_param: string }
+        Returns: undefined
+      }
       has_role: {
         Args: { requested_role: Database["public"]["Enums"]["user_role"] }
         Returns: boolean
+      }
+      remove_user_role: {
+        Args: { user_id_param: string }
+        Returns: undefined
       }
     }
     Enums: {
