@@ -3,8 +3,6 @@ import React from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Plus, Minus } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface PackageSelectionCardProps {
   id: string;
@@ -37,20 +35,15 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
   maxChildren = Infinity,
   maxTeachers = Infinity
 }) => {
-  const handleIncrement = (type: 'adults' | 'children' | 'teachers') => {
-    const currentValue = type === 'adults' ? adults : type === 'children' ? children : teachers;
-    const maxValue = type === 'adults' ? maxAdults : type === 'children' ? maxChildren : maxTeachers;
+  const handleInputChange = (type: 'adults' | 'children' | 'teachers', value: string) => {
+    // Convert to number and ensure it's not negative
+    const numValue = Math.max(0, parseInt(value) || 0);
     
-    if (currentValue < maxValue) {
-      onParticipantChange(type, currentValue + 1);
-    }
-  };
-
-  const handleDecrement = (type: 'adults' | 'children' | 'teachers') => {
-    const currentValue = type === 'adults' ? adults : type === 'children' ? children : teachers;
-    if (currentValue > 0) {
-      onParticipantChange(type, currentValue - 1);
-    }
+    // Ensure the value doesn't exceed the maximum
+    const maxValue = type === 'adults' ? maxAdults : type === 'children' ? maxChildren : maxTeachers;
+    const validValue = Math.min(numValue, maxValue);
+    
+    onParticipantChange(type, validValue);
   };
 
   return (
@@ -77,90 +70,47 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
         <div className="mt-4 space-y-2 border-t pt-3">
           <h4 className="text-sm font-medium mb-2">Jumlah Peserta</h4>
           
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Dewasa:</span>
-            <div className="flex items-center space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => handleDecrement('adults')}
-                disabled={adults <= 0}
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-              
-              <span className="w-8 text-center">{adults}</span>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => handleIncrement('adults')}
-                disabled={adults >= maxAdults}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor={`${id}-adults`} className="text-xs">Dewasa:</Label>
+              <Input
+                id={`${id}-adults`}
+                type="number"
+                min="0"
+                max={maxAdults}
+                value={adults}
+                onChange={(e) => handleInputChange('adults', e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="text-xs text-muted-foreground">Max: {maxAdults}</div>
             </div>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Anak-anak:</span>
-            <div className="flex items-center space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => handleDecrement('children')}
-                disabled={children <= 0}
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-              
-              <span className="w-8 text-center">{children}</span>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => handleIncrement('children')}
-                disabled={children >= maxChildren}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
+            
+            <div className="space-y-1">
+              <Label htmlFor={`${id}-children`} className="text-xs">Anak-anak:</Label>
+              <Input
+                id={`${id}-children`}
+                type="number"
+                min="0"
+                max={maxChildren}
+                value={children}
+                onChange={(e) => handleInputChange('children', e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="text-xs text-muted-foreground">Max: {maxChildren}</div>
             </div>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-sm">Guru:</span>
-            <div className="flex items-center space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => handleDecrement('teachers')}
-                disabled={teachers <= 0}
-              >
-                <Minus className="h-3 w-3" />
-              </Button>
-              
-              <span className="w-8 text-center">{teachers}</span>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                className="h-6 w-6"
-                onClick={() => handleIncrement('teachers')}
-                disabled={teachers >= maxTeachers}
-              >
-                <Plus className="h-3 w-3" />
-              </Button>
+            
+            <div className="space-y-1">
+              <Label htmlFor={`${id}-teachers`} className="text-xs">Guru:</Label>
+              <Input
+                id={`${id}-teachers`}
+                type="number"
+                min="0"
+                max={maxTeachers}
+                value={teachers}
+                onChange={(e) => handleInputChange('teachers', e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="text-xs text-muted-foreground">Max: {maxTeachers}</div>
             </div>
           </div>
         </div>

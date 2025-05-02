@@ -43,11 +43,14 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
       teachers: 0
     };
     
-    Object.values(packageParticipants).forEach(counts => {
-      result.adults += counts.adults;
-      result.children += counts.children;
-      result.teachers += counts.teachers;
-    });
+    // Ensure packageParticipants is an object before using Object.values
+    if (packageParticipants && typeof packageParticipants === 'object') {
+      Object.values(packageParticipants).forEach(counts => {
+        result.adults += counts.adults;
+        result.children += counts.children;
+        result.teachers += counts.teachers;
+      });
+    }
     
     return result;
   }, [packageParticipants]);
