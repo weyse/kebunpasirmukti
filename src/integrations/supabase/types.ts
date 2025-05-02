@@ -255,41 +255,6 @@ export type Database = {
         }
         Relationships: []
       }
-      venues: {
-        Row: {
-          capacity: number
-          cost: number
-          id: string
-          registration_id: string
-          venue_name: string
-          venue_type: string
-        }
-        Insert: {
-          capacity?: number
-          cost?: number
-          id?: string
-          registration_id: string
-          venue_name: string
-          venue_type: string
-        }
-        Update: {
-          capacity?: number
-          cost?: number
-          id?: string
-          registration_id?: string
-          venue_name?: string
-          venue_type?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "venues_registration_id_fkey"
-            columns: ["registration_id"]
-            isOneToOne: false
-            referencedRelation: "guest_registrations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       [_ in never]: never

@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Halaman Tidak Ditemukan - Pasirmukti</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f9fafb;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: #111827;
+      }
+      .container {
+        max-width: 500px;
+        padding: 2rem;
+        text-align: center;
+      }
+      h1 {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: #6b7280;
+        margin: 0.5rem 0 1.5rem;
+      }
+      .button {
+        display: inline-flex;
+        align-items: center;
+        background-color: #78350F;
+        color: white;
+        padding: 0.5rem 1.2rem;
+        border-radius: 0.375rem;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s;
+      }
+      .button:hover {
+        background-color: #92400E;
+      }
+    </style>
+    <script>
+      window.onload = function() {
+        // Redirect to the home page with a timeout to show this page briefly
+        setTimeout(function() {
+          window.location.href = "/";
+        }, 1500);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>404</h1>
+      <p>Halaman tidak ditemukan</p>
+      <p>Anda akan dialihkan ke halaman utama...</p>
+      <a href="/" class="button">Kembali ke Beranda</a>
+    </div>
+  </body>
+</html>

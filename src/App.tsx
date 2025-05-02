@@ -47,6 +47,18 @@ function App() {
     };
   }, []);
 
+  // Handle Vercel redeployments by checking if we have a 404 path with hash
+  useEffect(() => {
+    const path = window.location.pathname;
+    const hash = window.location.hash;
+    
+    // If we have a hash and are on a path that looks like a 404 error
+    if (hash && (path.includes('404') || path.includes('not-found'))) {
+      // Strip off the hash and navigate to the root
+      window.history.replaceState(null, document.title, '/');
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -75,7 +87,7 @@ function App() {
           <Route path="check-in/:id" element={<GuestRegistrationForm />} />
         </Route>
         
-        {/* 404 Route */}
+        {/* 404 Route - this must be last */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
