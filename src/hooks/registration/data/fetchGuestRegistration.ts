@@ -11,6 +11,8 @@ export interface PackagesJsonData {
   package_participants?: PackageParticipants;
 }
 
+export type { RoomsJsonData, VenuesJsonData };
+
 export const fetchGuestRegistration = async (id: string) => {
   try {
     const { data, error } = await supabase
