@@ -61,17 +61,40 @@ export const useVisitData = () => {
           Number(visit.free_of_charge_teacher_count || 0)
         );
         
-        return {
+        // Create a properly typed Visit object
+        const typedVisit: Visit = {
           ...visit,
-          total_visitors: visit.total_visitors || totalVisitors,
-          rooms_json: safeParseJson(visit.rooms_json, { 
-            accommodation_counts: {},
-            extra_bed_counts: {} 
-          }) as RoomsJsonData,
-          venues_json: safeParseJson(visit.venues_json, { 
-            selected_venues: [] 
-          }) as VenuesJsonData
+          id: visit.id,
+          order_id: visit.order_id || '',
+          institution_name: visit.institution_name || '',
+          responsible_person: visit.responsible_person || '',
+          visit_type: visit.visit_type || 'wisata_edukasi',
+          visit_date: visit.visit_date || '',
+          payment_status: visit.payment_status || 'belum_lunas',
+          total_visitors: totalVisitors
         };
+
+        // Add optional properties if they exist
+        if (visit.total_cost !== undefined) typedVisit.total_cost = visit.total_cost;
+        if (visit.discount_percentage !== undefined) typedVisit.discount_percentage = visit.discount_percentage;
+        if (visit.discounted_cost !== undefined) typedVisit.discounted_cost = visit.discounted_cost;
+        if (visit.down_payment !== undefined) typedVisit.down_payment = visit.down_payment;
+        if (visit.adult_count !== undefined) typedVisit.adult_count = visit.adult_count;
+        if (visit.children_count !== undefined) typedVisit.children_count = visit.children_count;
+        if (visit.teacher_count !== undefined) typedVisit.teacher_count = visit.teacher_count;
+        if (visit.nights_count !== undefined) typedVisit.nights_count = visit.nights_count;
+
+        // Parse JSON fields
+        typedVisit.rooms_json = safeParseJson(visit.rooms_json, { 
+          accommodation_counts: {},
+          extra_bed_counts: {} 
+        }) as RoomsJsonData;
+        
+        typedVisit.venues_json = safeParseJson(visit.venues_json, { 
+          selected_venues: [] 
+        }) as VenuesJsonData;
+
+        return typedVisit;
       });
 
       setVisits(processedVisits);

@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { CalendarCheck, Home, ListOrdered, LogOut, Settings, Shield } from 'lucide-react';
+import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield } from 'lucide-react';
 import { 
   Sidebar as SidebarComponent, 
   SidebarContent, 
@@ -46,6 +45,11 @@ export function Sidebar() {
       name: 'Daftar Kunjungan',
       path: '/visit-list',
       icon: ListOrdered
+    },
+    {
+      name: 'Registrasi Baru',
+      path: '/guest-registration/new',
+      icon: UserPlus
     }
   ];
   

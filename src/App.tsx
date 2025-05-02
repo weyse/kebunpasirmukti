@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import VisitList from './pages/VisitList';
 import CalendarView from './pages/CalendarView';
 import GuestRegistrationList from './pages/guest/GuestRegistrationList';
+import GuestRegistrationForm from './pages/guest/GuestRegistrationForm';
 import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -110,6 +111,26 @@ function App() {
             <Route path="guest-registration" element={
               <ProtectedRoute requiresAdmin={true}>
                 <GuestRegistrationList />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/new" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/edit/:id" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/view/:id" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="check-in/:id" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
               </ProtectedRoute>
             } />
             
