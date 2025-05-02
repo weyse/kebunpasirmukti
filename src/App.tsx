@@ -12,8 +12,13 @@ import NotFound from './pages/NotFound';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
+import Forbidden from './pages/Forbidden';
+import UserManagement from './pages/admin/UserManagement';
+import AddAdmin from './pages/admin/AddAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -69,28 +74,75 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        {/* Auth Routes */}
-        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-        <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
-        <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPassword />} />
-        
-        {/* Protected Routes */}
-        <Route path="/" element={user ? <AppLayout /> : <Navigate to="/login" />}>
-          <Route index element={<Dashboard />} />
-          <Route path="visit-list" element={<VisitList />} />
-          <Route path="calendar" element={<CalendarView />} />
-          <Route path="guest-registration" element={<GuestRegistrationList />} />
-          <Route path="guest-registration/new" element={<GuestRegistrationForm />} />
-          <Route path="guest-registration/edit/:id" element={<GuestRegistrationForm />} />
-          <Route path="guest-registration/view/:id" element={<GuestRegistrationForm />} />
-          <Route path="check-in/:id" element={<GuestRegistrationForm />} />
-        </Route>
-        
-        {/* 404 Route - this must be last */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
+      <AuthProvider>
+        <Routes>
+          {/* Auth Routes */}
+          <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+          <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+          <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPassword />} />
+          <Route path="/forbidden" element={<Forbidden />} />
+          
+          {/* Protected Routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Dashboard />} />
+            
+            {/* Routes accessible by all authenticated users */}
+            <Route path="calendar" element={<CalendarView />} />
+            
+            {/* Admin-only routes */}
+            <Route path="visit-list" element={
+              <ProtectedRoute requiredRole="admin">
+                <VisitList />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration" element={
+              <ProtectedRoute requiredRole="admin">
+                <GuestRegistrationList />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/new" element={
+              <ProtectedRoute requiredRole="admin">
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/edit/:id" element={
+              <ProtectedRoute requiredRole="admin">
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/view/:id" element={
+              <ProtectedRoute requiredRole="admin">
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="check-in/:id" element={
+              <ProtectedRoute requiredRole="admin">
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin management routes */}
+            <Route path="admin/users" element={
+              <ProtectedRoute requiredRole="admin">
+                <UserManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="admin/add-admin" element={
+              <ProtectedRoute requiredRole="admin">
+                <AddAdmin />
+              </ProtectedRoute>
+            } />
+          </Route>
+          
+          {/* 404 Route - this must be last */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </AuthProvider>
     </Router>
   );
 }

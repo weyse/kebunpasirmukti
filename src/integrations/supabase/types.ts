@@ -255,12 +255,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: { requested_role: Database["public"]["Enums"]["user_role"] }
+        Returns: boolean
+      }
     }
     Enums: {
       class_type:
@@ -275,6 +299,7 @@ export type Database = {
         | "abk"
       payment_status: "belum_lunas" | "lunas"
       room_status: "available" | "occupied" | "maintenance"
+      user_role: "admin" | "guest"
       visit_type:
         | "wisata_edukasi"
         | "outbound"
@@ -410,6 +435,7 @@ export const Constants = {
       ],
       payment_status: ["belum_lunas", "lunas"],
       room_status: ["available", "occupied", "maintenance"],
+      user_role: ["admin", "guest"],
       visit_type: [
         "wisata_edukasi",
         "outbound",

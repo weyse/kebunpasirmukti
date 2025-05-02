@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { addMonths, subMonths, parseISO, format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardDescription } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { useCalendarData } from '@/hooks/useCalendarData';
 import { CalendarGrid } from '@/components/calendar/CalendarGrid';
 import { VisitListView } from '@/components/calendar/VisitListView';
 import { VisitDetailsDialog } from '@/components/calendar/VisitDetailsDialog';
+import { useAuth } from '@/context/AuthContext';
 
 const CalendarView = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -27,6 +28,14 @@ const CalendarView = () => {
   
   const { visits, isLoading } = useCalendarData();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
+
+  // If the user is not an admin, force view-only access level
+  useEffect(() => {
+    if (!isAdmin) {
+      setAccessLevel('view');
+    }
+  }, [isAdmin]);
 
   const handlePreviousMonth = () => {
     setCurrentMonth(subMonths(currentMonth, 1));
@@ -62,11 +71,14 @@ const CalendarView = () => {
   };
 
   const handleAccessLevelChange = (value: CalendarPermission) => {
-    setAccessLevel(value);
-    toast({
-      title: "Level Akses Diubah",
-      description: `Level akses kalender diubah ke ${getAccessLevelLabel(value)}`,
-    });
+    // Only allow admins to change access level
+    if (isAdmin) {
+      setAccessLevel(value);
+      toast({
+        title: "Level Akses Diubah",
+        description: `Level akses kalender diubah ke ${getAccessLevelLabel(value)}`,
+      });
+    }
   };
 
   const getAccessLevelLabel = (level: CalendarPermission): string => {
@@ -121,38 +133,41 @@ const CalendarView = () => {
         </Tabs>
       </div>
 
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-3">Level Akses</h3>
-        <RadioGroup value={accessLevel} onValueChange={handleAccessLevelChange as (value: string) => void} className="flex space-x-4">
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="view" id="view" />
-            <Label htmlFor="view" className="flex items-center">
-              <Eye className="h-4 w-4 mr-2" />
-              Lihat
-            </Label>
+      {/* Only show access level controls to admins */}
+      {isAdmin && (
+        <Card className="p-4">
+          <h3 className="text-lg font-semibold mb-3">Level Akses</h3>
+          <RadioGroup value={accessLevel} onValueChange={handleAccessLevelChange as (value: string) => void} className="flex space-x-4">
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="view" id="view" />
+              <Label htmlFor="view" className="flex items-center">
+                <Eye className="h-4 w-4 mr-2" />
+                Lihat
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="edit" id="edit" />
+              <Label htmlFor="edit" className="flex items-center">
+                <PenLine className="h-4 w-4 mr-2" />
+                Edit
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="admin" id="admin" />
+              <Label htmlFor="admin" className="flex items-center">
+                <Lock className="h-4 w-4 mr-2" />
+                Admin
+              </Label>
+            </div>
+          </RadioGroup>
+          <div className="mt-2">
+            <Badge className="bg-muted text-muted-foreground">
+              {getAccessLevelIcon(accessLevel)}
+              <span className="ml-1">{getAccessLevelLabel(accessLevel)}</span>
+            </Badge>
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="edit" id="edit" />
-            <Label htmlFor="edit" className="flex items-center">
-              <PenLine className="h-4 w-4 mr-2" />
-              Edit
-            </Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="admin" id="admin" />
-            <Label htmlFor="admin" className="flex items-center">
-              <Lock className="h-4 w-4 mr-2" />
-              Admin
-            </Label>
-          </div>
-        </RadioGroup>
-        <div className="mt-2">
-          <Badge className="bg-muted text-muted-foreground">
-            {getAccessLevelIcon(accessLevel)}
-            <span className="ml-1">{getAccessLevelLabel(accessLevel)}</span>
-          </Badge>
-        </div>
-      </Card>
+        </Card>
+      )}
 
       {isLoading ? (
         <Card className="w-full">
