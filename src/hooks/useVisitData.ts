@@ -61,6 +61,16 @@ export const useVisitData = () => {
           Number(visit.free_of_charge_teacher_count || 0)
         );
         
+        // Parse JSON fields first to ensure they have the correct type
+        const roomsJson = safeParseJson(visit.rooms_json, { 
+          accommodation_counts: {},
+          extra_bed_counts: {} 
+        });
+        
+        const venuesJson = safeParseJson(visit.venues_json, { 
+          selected_venues: [] 
+        });
+
         // Create a properly typed Visit object
         const typedVisit: Visit = {
           ...visit,
@@ -71,7 +81,10 @@ export const useVisitData = () => {
           visit_type: visit.visit_type || 'wisata_edukasi',
           visit_date: visit.visit_date || '',
           payment_status: visit.payment_status || 'belum_lunas',
-          total_visitors: totalVisitors
+          total_visitors: totalVisitors,
+          // Explicitly assign the parsed JSON with their correct types
+          rooms_json: roomsJson as RoomsJsonData,
+          venues_json: venuesJson as VenuesJsonData
         };
 
         // Add optional properties if they exist
@@ -83,16 +96,6 @@ export const useVisitData = () => {
         if (visit.children_count !== undefined) typedVisit.children_count = visit.children_count;
         if (visit.teacher_count !== undefined) typedVisit.teacher_count = visit.teacher_count;
         if (visit.nights_count !== undefined) typedVisit.nights_count = visit.nights_count;
-
-        // Parse JSON fields
-        typedVisit.rooms_json = safeParseJson(visit.rooms_json, { 
-          accommodation_counts: {},
-          extra_bed_counts: {} 
-        }) as RoomsJsonData;
-        
-        typedVisit.venues_json = safeParseJson(visit.venues_json, { 
-          selected_venues: [] 
-        }) as VenuesJsonData;
 
         return typedVisit;
       });
