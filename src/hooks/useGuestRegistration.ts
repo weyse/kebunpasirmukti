@@ -9,6 +9,7 @@ import { useRegistrationSubmit } from './registration/useRegistrationSubmit';
 import { useSelectionState, PackageParticipants } from './registration/useSelectionState';
 import { useSummaryData } from './registration/useSummaryData';
 import { ClassType, classOptions } from './types/registrationTypes';
+import { PackagesJsonData } from './registration/data/fetchGuestRegistration';
 
 // Re-export for backward compatibility
 export { EXTRA_BED_PRICE } from './registration/useCostCalculation';
@@ -19,12 +20,6 @@ export type { VisitType, PaymentStatus } from './registration/useRegistrationSub
 interface UseGuestRegistrationProps {
   editId?: string;
   nightsCount?: number;
-}
-
-// Define an interface for the package data structure
-interface PackagesJsonData {
-  selected_packages?: string[];
-  package_participants?: PackageParticipants;
 }
 
 export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegistrationProps = {}) => {
@@ -98,7 +93,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
   
   const loadGuestRegistration = async (id: string) => {
     try {
-      const { registrationData, classes } = await fetchGuestRegistration(id);
+      const { registrationData, classes, packagesData } = await fetchGuestRegistration(id);
       
       if (registrationData) {
         // Format the visit_date and payment_date if they exist
@@ -140,40 +135,22 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         const initialSelectedPackages = [...selectedPackages];
         initialSelectedPackages.forEach(pkg => handlePackageChange(pkg));
         
-        // Handle packages_json data if available
-        if (registrationData.packages_json) {
-          try {
-            // Safely parse the packages_json data and ensure it's an object
-            let packagesData: PackagesJsonData = {};
-            
-            if (typeof registrationData.packages_json === 'string') {
-              // If it's a string, try to parse it as JSON
-              packagesData = JSON.parse(registrationData.packages_json);
-            } else if (typeof registrationData.packages_json === 'object' && registrationData.packages_json !== null) {
-              // If it's already an object, use it directly
-              packagesData = registrationData.packages_json as PackagesJsonData;
-            }
-            
-            console.log('Loading packages data:', packagesData);
-            
-            // Process selected packages first if they exist and are an array
-            if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
-              // Select each package
-              packagesData.selected_packages.forEach((packageId: string) => {
-                handlePackageChange(packageId);
-              });
-            }
-            
-            // Then set the participant allocations if they exist and are an object
-            if (packagesData.package_participants && 
-                typeof packagesData.package_participants === 'object' &&
-                packagesData.package_participants !== null) {
-              setPackageParticipants(packagesData.package_participants as PackageParticipants);
-            }
-          } catch (error) {
-            console.error('Error parsing packages_json data:', error);
+        // Handle packages data
+        if (packagesData) {
+          console.log('Loading packages data:', packagesData);
+          
+          // Process selected packages
+          if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
+            packagesData.selected_packages.forEach(packageId => {
+              handlePackageChange(packageId);
+            });
           }
-        } 
+          
+          // Set the package participants
+          if (packagesData.package_participants) {
+            setPackageParticipants(packagesData.package_participants);
+          }
+        }
         // For legacy data that only has package_type
         else if (registrationData.package_type) {
           handlePackageChange(registrationData.package_type);

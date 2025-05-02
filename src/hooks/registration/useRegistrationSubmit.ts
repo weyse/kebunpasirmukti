@@ -46,10 +46,23 @@ export const useRegistrationSubmit = (
       // Calculate extra bed cost for inclusion in submission (accounting for nights count)
       const extraBedCost = Object.values(extraBedCounts).reduce((sum, count) => sum + (count * 160000 * nightsCount), 0);
       
+      // Clean up packageParticipants to only include selected packages
+      const cleanedPackageParticipants: PackageParticipants = {};
+      selectedPackages.forEach(packageId => {
+        if (packageParticipants[packageId]) {
+          cleanedPackageParticipants[packageId] = {
+            adults: packageParticipants[packageId].adults || 0,
+            children: packageParticipants[packageId].children || 0,
+            teachers: packageParticipants[packageId].teachers || 0,
+            free_teachers: packageParticipants[packageId].free_teachers || 0
+          };
+        }
+      });
+      
       // Prepare package participants JSON data
       const packagesData = {
         selected_packages: selectedPackages,
-        package_participants: packageParticipants
+        package_participants: cleanedPackageParticipants
       };
       
       // Prepare data for submission
