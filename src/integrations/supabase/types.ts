@@ -133,6 +133,7 @@ export type Database = {
           notes: string | null
           order_id: string
           package_type: string
+          packages_json: Json | null
           payment_date: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           phone_number: string
@@ -161,6 +162,7 @@ export type Database = {
           notes?: string | null
           order_id: string
           package_type: string
+          packages_json?: Json | null
           payment_date?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone_number: string
@@ -189,6 +191,7 @@ export type Database = {
           notes?: string | null
           order_id?: string
           package_type?: string
+          packages_json?: Json | null
           payment_date?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone_number?: string

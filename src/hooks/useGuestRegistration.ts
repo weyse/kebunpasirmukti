@@ -40,6 +40,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
+    setPackageParticipants
   } = useSelectionState();
   
   const { totalCost, discountedCost, remainingBalance, calculationSummary } = useCostCalculation(
@@ -134,7 +135,22 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
           handlePackageChange(registrationData.package_type);
         }
         
-        // TODO: Load package participants from database when available
+        // Load package participants from database if available
+        if (registrationData.packages_json) {
+          const packagesData = registrationData.packages_json as any;
+          
+          // Load selected packages
+          if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
+            packagesData.selected_packages.forEach((packageId: string) => {
+              handlePackageChange(packageId);
+            });
+          }
+          
+          // Load package participants
+          if (packagesData.package_participants) {
+            setPackageParticipants(packagesData.package_participants);
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load guest registration:", error);

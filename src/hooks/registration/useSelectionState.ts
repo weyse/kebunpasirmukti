@@ -125,5 +125,6 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
+    setPackageParticipants // Add this to allow direct setting of package participants
   };
 };

@@ -46,6 +46,12 @@ export const useRegistrationSubmit = (
       // Calculate extra bed cost for inclusion in submission (accounting for nights count)
       const extraBedCost = Object.values(extraBedCounts).reduce((sum, count) => sum + (count * 160000 * nightsCount), 0);
       
+      // Prepare package participants JSON data
+      const packagesData = {
+        selected_packages: selectedPackages,
+        package_participants: packageParticipants
+      };
+      
       // Prepare data for submission
       const submissionData = {
         responsible_person: formValues.responsible_person,
@@ -56,7 +62,7 @@ export const useRegistrationSubmit = (
         adult_count: Number(formValues.adult_count),
         children_count: Number(formValues.children_count),
         teacher_count: Number(formValues.teacher_count),
-        free_of_charge_teacher_count: Number(formValues.free_of_charge_teacher_count || 0), // Include free teachers
+        free_of_charge_teacher_count: Number(formValues.free_of_charge_teacher_count || 0),
         visit_type: dbVisitType,
         // We're still storing a single package_type for backward compatibility,
         // using the first selected package or null if none selected
@@ -72,12 +78,8 @@ export const useRegistrationSubmit = (
         payment_status: dbPaymentStatus,
         extra_bed_cost: extraBedCost,
         nights_count: nightsCount,
-        // Store package participants as JSON in notes field for now
-        // In a full implementation, this would be stored in a separate table
-        packages_json: JSON.stringify({
-          selected_packages: selectedPackages,
-          package_participants: packageParticipants
-        })
+        // Store package participants as JSON in the packages_json column
+        packages_json: packagesData
       };
 
       let registrationId;
@@ -131,8 +133,6 @@ export const useRegistrationSubmit = (
           if (classError) throw new Error(classError.message);
         }
       }
-      
-      // Future enhancement: Save package participants in a dedicated table
       
       toast({
         title: "Success!",
