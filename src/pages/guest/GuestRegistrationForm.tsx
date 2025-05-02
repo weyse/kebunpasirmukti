@@ -13,6 +13,7 @@ import VenueSelectionForm from '@/components/registration/forms/VenueSelectionFo
 import CostCalculationForm from '@/components/registration/forms/CostCalculationForm';
 import NotesForm from '@/components/registration/forms/NotesForm';
 import OrderSummary from '@/components/registration/OrderSummary';
+
 const GuestRegistrationForm = () => {
   const navigate = useNavigate();
   const {
@@ -47,6 +48,7 @@ const GuestRegistrationForm = () => {
     editId,
     nightsCount
   });
+  
   const onSubmit = async (values: any) => {
     try {
       // Include nights count in the submission
@@ -64,7 +66,9 @@ const GuestRegistrationForm = () => {
       console.error("Failed to submit form:", error);
     }
   };
-  return <div className="space-y-8">
+  
+  return (
+    <div className="space-y-8">
       <div className="flex items-center space-x-2">
         <Button variant="ghost" size="sm" onClick={() => navigate('/guest-registration')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -79,26 +83,58 @@ const GuestRegistrationForm = () => {
           <BasicInformationForm form={form} />
           
           {/* Class Selection */}
-          <ClassSelectionForm selectedClasses={selectedClasses} onClassChange={handleClassChange} classOptions={classOptions} />
+          <ClassSelectionForm 
+            selectedClasses={selectedClasses} 
+            onClassChange={handleClassChange} 
+            classOptions={classOptions} 
+          />
           
           {/* Package Selection */}
-          <PackageSelectionForm packages={packages} selectedPackage={selectedPackage} onPackageChange={handlePackageChange} />
+          <PackageSelectionForm 
+            packages={packages} 
+            selectedPackage={selectedPackage} 
+            onPackageChange={handlePackageChange} 
+          />
           
           {/* Accommodation Section */}
-          <AccommodationSelectionForm accommodations={accommodations} accommodationCounts={accommodationCounts} extraBedCounts={extraBedCounts} onAccommodationChange={handleAccommodationChange} onExtraBedChange={handleExtraBedChange} nightsCount={nightsCount} onNightsCountChange={setNightsCount} />
+          <AccommodationSelectionForm 
+            accommodations={accommodations} 
+            accommodationCounts={accommodationCounts} 
+            extraBedCounts={extraBedCounts} 
+            onAccommodationChange={handleAccommodationChange} 
+            onExtraBedChange={handleExtraBedChange} 
+            nightsCount={nightsCount} 
+            onNightsCountChange={setNightsCount} 
+          />
           
           {/* Venue Section */}
-          <VenueSelectionForm venues={venues} selectedVenues={selectedVenues} onVenueChange={handleVenueChange} />
+          <VenueSelectionForm 
+            venues={venues} 
+            selectedVenues={selectedVenues} 
+            onVenueChange={handleVenueChange} 
+          />
           
           {/* Payment Information */}
-          <CostCalculationForm form={form} totalCost={totalCost} discountedCost={discountedCost} remainingBalance={remainingBalance} calculationSummary={calculationSummary} />
+          <CostCalculationForm 
+            form={form} 
+            totalCost={totalCost} 
+            discountedCost={discountedCost} 
+            remainingBalance={remainingBalance} 
+            calculationSummary={calculationSummary} 
+          />
           
           {/* Notes and Order Summary */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-3xl">
-            
+            <div className="md:col-span-2">
+              <NotesForm form={form} />
+            </div>
             
             <div>
-              <OrderSummary basicInfo={getSummaryData().basicInfo} paymentInfo={getSummaryData().paymentInfo} costCalculation={getSummaryData().costCalculation} />
+              <OrderSummary 
+                basicInfo={getSummaryData().basicInfo} 
+                paymentInfo={getSummaryData().paymentInfo} 
+                costCalculation={getSummaryData().costCalculation} 
+              />
             </div>
           </div>
           
@@ -112,6 +148,8 @@ const GuestRegistrationForm = () => {
           </div>
         </form>
       </Form>
-    </div>;
+    </div>
+  );
 };
+
 export default GuestRegistrationForm;
