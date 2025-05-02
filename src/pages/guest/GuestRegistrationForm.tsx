@@ -26,7 +26,8 @@ const GuestRegistrationForm = () => {
     form,
     isSubmitting,
     selectedClasses,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     accommodationCounts,
     extraBedCounts,
     selectedVenues,
@@ -39,6 +40,7 @@ const GuestRegistrationForm = () => {
     venues,
     handleClassChange,
     handlePackageChange,
+    handlePackageParticipantsChange,
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
@@ -92,8 +94,13 @@ const GuestRegistrationForm = () => {
           {/* Package Selection */}
           <PackageSelectionForm 
             packages={packages} 
-            selectedPackage={selectedPackage} 
-            onPackageChange={handlePackageChange} 
+            selectedPackages={selectedPackages}
+            packageParticipants={packageParticipants}
+            onPackageChange={handlePackageChange}
+            onParticipantChange={handlePackageParticipantsChange}
+            totalAdults={Number(form.watch("adult_count")) || 0}
+            totalChildren={Number(form.watch("children_count")) || 0}
+            totalTeachers={Number(form.watch("teacher_count")) || 0}
           />
           
           {/* Accommodation Section */}

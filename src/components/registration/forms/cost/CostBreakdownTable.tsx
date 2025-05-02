@@ -17,6 +17,37 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
   return (
     <div className="mt-4">
       <h3 className="font-medium mb-2">Ringkasan Perhitungan</h3>
+      
+      {/* Package breakdown */}
+      {calculationSummary.packageBreakdown && calculationSummary.packageBreakdown.length > 0 && (
+        <div className="mb-4">
+          <h4 className="text-sm font-medium mb-2">Detail Paket</h4>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nama Paket</TableHead>
+                <TableHead>Dewasa</TableHead>
+                <TableHead>Anak</TableHead>
+                <TableHead>Guru</TableHead>
+                <TableHead className="text-right">Jumlah</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {calculationSummary.packageBreakdown.map((pkg, index) => (
+                <TableRow key={index}>
+                  <TableCell>{pkg.packageName}</TableCell>
+                  <TableCell>{pkg.adults} (Rp {pkg.adultCost.toLocaleString()})</TableCell>
+                  <TableCell>{pkg.children} (Rp {pkg.childrenCost.toLocaleString()})</TableCell>
+                  <TableCell>{pkg.teachers} (Rp {pkg.teacherCost.toLocaleString()})</TableCell>
+                  <TableCell className="text-right font-medium">Rp {pkg.total.toLocaleString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+      
+      {/* Overall summary */}
       <Table>
         <TableHeader>
           <TableRow>

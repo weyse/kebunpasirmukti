@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { FormSchema } from './useGuestRegistrationForm';
+import { PackageParticipants } from './useSelectionState';
 
 // Extra bed price constant
 export const EXTRA_BED_PRICE = 160000;
@@ -16,11 +17,23 @@ export interface CostCalculationSummary {
   venueCost: number;
   subtotal: number;
   finalTotal: number;
+  packageBreakdown: {
+    packageId: string;
+    packageName: string;
+    adults: number;
+    adultCost: number;
+    children: number;
+    childrenCost: number;
+    teachers: number;
+    teacherCost: number;
+    total: number;
+  }[];
 }
 
 export const useCostCalculation = (
   form: UseFormReturn<FormSchema>,
-  selectedPackage: string,
+  selectedPackages: string[],
+  packageParticipants: PackageParticipants,
   accommodationCounts: Record<string, number>,
   extraBedCounts: Record<string, number>,
   selectedVenues: string[],
@@ -41,25 +54,21 @@ export const useCostCalculation = (
     extraBedCost: 0,
     venueCost: 0,
     subtotal: 0,
-    finalTotal: 0
+    finalTotal: 0,
+    packageBreakdown: []
   });
 
   // Watch form values for cost calculation
   const watchDiscount = form.watch("discount_percentage");
   const watchDownPayment = form.watch("down_payment");
-  const watchAdultCount = form.watch("adult_count");
-  const watchChildrenCount = form.watch("children_count");
-  const watchTeacherCount = form.watch("teacher_count");
 
   useEffect(() => {
     calculateCosts();
   }, [
-    watchAdultCount,
-    watchChildrenCount, 
-    watchTeacherCount,
     watchDiscount,
     watchDownPayment,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     accommodationCounts,
     extraBedCounts,
     selectedVenues,
@@ -69,28 +78,44 @@ export const useCostCalculation = (
   ]);
 
   const calculateCosts = () => {
-    // Calculate participant costs based on selected package
-    const adultCount = Number(form.getValues("adult_count")) || 0;
-    const childrenCount = Number(form.getValues("children_count")) || 0;
-    const teacherCount = Number(form.getValues("teacher_count")) || 0;
+    // Calculate costs based on package participants allocation
+    let totalAdultCost = 0;
+    let totalChildrenCost = 0;
+    let totalTeacherCost = 0;
     
-    // Find the selected package and get its price
-    const selectedPackageData = packages.find(pkg => pkg.id === selectedPackage);
-    
-    // Base price per person
-    const adultPrice = selectedPackageData?.price_per_adult || 100000;
-    const childrenPrice = selectedPackageData?.price_per_child || 80000; 
-    const teacherPrice = selectedPackageData?.price_per_teacher || 50000;  
-    
-    // Calculate costs for each participant type
-    const adultCost = adultCount * adultPrice;
-    const regularChildrenCost = childrenCount * childrenPrice;
-    const teacherCost = teacherCount * teacherPrice;
+    const packageBreakdown = selectedPackages.map(packageId => {
+      const packageData = packages.find(pkg => pkg.id === packageId);
+      if (!packageData || !packageParticipants[packageId]) return null;
+      
+      const participants = packageParticipants[packageId];
+      
+      // Calculate costs for each participant type in this package
+      const adultCost = participants.adults * packageData.price_per_adult;
+      const childrenCost = participants.children * packageData.price_per_child;
+      const teacherCost = participants.teachers * packageData.price_per_teacher;
+      
+      // Add to totals
+      totalAdultCost += adultCost;
+      totalChildrenCost += childrenCost;
+      totalTeacherCost += teacherCost;
+      
+      return {
+        packageId,
+        packageName: packageData.name,
+        adults: participants.adults,
+        adultCost,
+        children: participants.children,
+        childrenCost,
+        teachers: participants.teachers,
+        teacherCost,
+        total: adultCost + childrenCost + teacherCost
+      };
+    }).filter(Boolean);
     
     // Apply discount ONLY to children's cost
     const discountPercentage = Number(form.getValues("discount_percentage")) || 0;
-    const childrenDiscountAmount = (discountPercentage / 100) * regularChildrenCost;
-    const discountedChildrenCost = regularChildrenCost - childrenDiscountAmount;
+    const childrenDiscountAmount = (discountPercentage / 100) * totalChildrenCost;
+    const discountedChildrenCost = totalChildrenCost - childrenDiscountAmount;
     
     // Calculate accommodations cost (accounting for nights count)
     const accommodationCost = Object.entries(accommodationCounts).reduce((sum, [id, count]) => {
@@ -110,8 +135,8 @@ export const useCostCalculation = (
     }, 0);
     
     // Calculate total cost with discount applied only to children
-    const subtotal = adultCost + regularChildrenCost + teacherCost + accommodationCost + extraBedCost + venueCost;
-    const total = adultCost + discountedChildrenCost + teacherCost + accommodationCost + extraBedCost + venueCost;
+    const subtotal = totalAdultCost + totalChildrenCost + totalTeacherCost + accommodationCost + extraBedCost + venueCost;
+    const total = totalAdultCost + discountedChildrenCost + totalTeacherCost + accommodationCost + extraBedCost + venueCost;
     
     setTotalCost(subtotal);
     setDiscountedCost(total);
@@ -122,15 +147,16 @@ export const useCostCalculation = (
     
     // Update calculation summary
     setCalculationSummary({
-      adultCost,
-      childrenCost: regularChildrenCost,
+      adultCost: totalAdultCost,
+      childrenCost: totalChildrenCost,
       childrenDiscountAmount,
-      teacherCost,
+      teacherCost: totalTeacherCost,
       accommodationCost,
       extraBedCost,
       venueCost,
       subtotal,
-      finalTotal: total
+      finalTotal: total,
+      packageBreakdown: packageBreakdown as any[]
     });
   };
 

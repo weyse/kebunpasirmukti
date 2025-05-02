@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FormSchema } from './useGuestRegistrationForm';
 import { ClassType } from '../types/registrationTypes';
+import { PackageParticipants } from './useSelectionState';
 
 export type PaymentStatus = 'belum_lunas' | 'lunas';
 export type VisitType = 'wisata_edukasi' | 'outbound' | 'camping' | 'field_trip' | 'penelitian' | 'lainnya';
@@ -12,7 +13,8 @@ export type VisitType = 'wisata_edukasi' | 'outbound' | 'camping' | 'field_trip'
 export const useRegistrationSubmit = (
   form: UseFormReturn<FormSchema>,
   selectedClasses: ClassType[],
-  selectedPackage: string,
+  selectedPackages: string[],
+  packageParticipants: PackageParticipants,
   totalCost: number,
   discountedCost: number,
   extraBedCounts: Record<string, number>,
@@ -54,7 +56,9 @@ export const useRegistrationSubmit = (
         children_count: Number(formValues.children_count),
         teacher_count: Number(formValues.teacher_count),
         visit_type: dbVisitType,
-        package_type: selectedPackage || null,
+        // We're still storing a single package_type for backward compatibility,
+        // using the first selected package or null if none selected
+        package_type: selectedPackages.length > 0 ? selectedPackages[0] : null,
         notes: formValues.notes || '',
         document_url: formValues.document_url || '',
         total_cost: totalCost,
@@ -65,7 +69,13 @@ export const useRegistrationSubmit = (
         bank_name: formValues.bank_name || '',
         payment_status: dbPaymentStatus,
         extra_bed_cost: extraBedCost,
-        nights_count: nightsCount
+        nights_count: nightsCount,
+        // Store package participants as JSON in notes field for now
+        // In a full implementation, this would be stored in a separate table
+        packages_json: JSON.stringify({
+          selected_packages: selectedPackages,
+          package_participants: packageParticipants
+        })
       };
 
       let registrationId;
@@ -120,7 +130,7 @@ export const useRegistrationSubmit = (
         }
       }
       
-      // TODO: Save accommodation and venue selections similarly
+      // Future enhancement: Save package participants in a dedicated table
       
       toast({
         title: "Success!",

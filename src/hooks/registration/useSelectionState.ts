@@ -2,9 +2,19 @@
 import { useState } from 'react';
 import { ClassType } from '../types/registrationTypes';
 
+// Define package participant structure
+export interface PackageParticipants {
+  [packageId: string]: {
+    adults: number;
+    children: number;
+    teachers: number;
+  }
+}
+
 export const useSelectionState = (initialAccommodations: any[] = []) => {
   const [selectedClasses, setSelectedClasses] = useState<ClassType[]>([]);
-  const [selectedPackage, setSelectedPackage] = useState<string>('');
+  const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
+  const [packageParticipants, setPackageParticipants] = useState<PackageParticipants>({});
   const [accommodationCounts, setAccommodationCounts] = useState<Record<string, number>>({});
   const [extraBedCounts, setExtraBedCounts] = useState<Record<string, number>>({});
   const [selectedVenues, setSelectedVenues] = useState<string[]>([]);
@@ -34,7 +44,37 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
   };
 
   const handlePackageChange = (packageId: string) => {
-    setSelectedPackage(packageId === selectedPackage ? '' : packageId);
+    setSelectedPackages(prevSelected => {
+      // Toggle package selection
+      if (prevSelected.includes(packageId)) {
+        // If removing a package, also clear its participant allocations
+        const updatedParticipants = { ...packageParticipants };
+        delete updatedParticipants[packageId];
+        setPackageParticipants(updatedParticipants);
+        
+        return prevSelected.filter(id => id !== packageId);
+      } else {
+        // Initialize empty participant allocations for the new package
+        setPackageParticipants(prev => ({
+          ...prev,
+          [packageId]: { adults: 0, children: 0, teachers: 0 }
+        }));
+        
+        return [...prevSelected, packageId];
+      }
+    });
+  };
+  
+  const handlePackageParticipantsChange = (packageId: string, type: 'adults' | 'children' | 'teachers', count: number) => {
+    if (count < 0) return; // Prevent negative values
+    
+    setPackageParticipants(prev => ({
+      ...prev,
+      [packageId]: {
+        ...prev[packageId],
+        [type]: count
+      }
+    }));
   };
 
   const handleAccommodationChange = (id: string, count: number) => {
@@ -72,13 +112,15 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
 
   return {
     selectedClasses,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     accommodationCounts,
     extraBedCounts,
     selectedVenues,
     initializeAccommodationCounts,
     handleClassChange,
     handlePackageChange,
+    handlePackageParticipantsChange,
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,

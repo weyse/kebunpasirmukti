@@ -6,14 +6,14 @@ import { useGuestRegistrationForm } from './registration/useGuestRegistrationFor
 import { useRegistrationData } from './registration/useRegistrationData';
 import { useCostCalculation } from './registration/useCostCalculation';
 import { useRegistrationSubmit } from './registration/useRegistrationSubmit';
-import { useSelectionState } from './registration/useSelectionState';
+import { useSelectionState, PackageParticipants } from './registration/useSelectionState';
 import { useSummaryData } from './registration/useSummaryData';
 import { ClassType, classOptions } from './types/registrationTypes';
 
 // Re-export for backward compatibility
 export { EXTRA_BED_PRICE } from './registration/useCostCalculation';
 export { classOptions };
-export type { ClassType };
+export type { ClassType, PackageParticipants };
 export type { VisitType, PaymentStatus } from './registration/useRegistrationSubmit';
 
 interface UseGuestRegistrationProps {
@@ -28,13 +28,15 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
   
   const {
     selectedClasses,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     accommodationCounts,
     extraBedCounts,
     selectedVenues,
     initializeAccommodationCounts,
     handleClassChange,
     handlePackageChange,
+    handlePackageParticipantsChange,
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
@@ -42,7 +44,8 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
   
   const { totalCost, discountedCost, remainingBalance, calculationSummary } = useCostCalculation(
     form,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     accommodationCounts,
     extraBedCounts,
     selectedVenues,
@@ -55,7 +58,8 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
   const { isSubmitting, handleSubmit } = useRegistrationSubmit(
     form,
     selectedClasses,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     totalCost,
     discountedCost,
     extraBedCounts,
@@ -124,6 +128,8 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         if (registrationData.package_type) {
           handlePackageChange(registrationData.package_type);
         }
+        
+        // TODO: Load package participants from database when available
       }
     } catch (error) {
       console.error("Failed to load guest registration:", error);
@@ -134,7 +140,8 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     form,
     isSubmitting,
     selectedClasses,
-    selectedPackage,
+    selectedPackages,
+    packageParticipants,
     accommodationCounts,
     extraBedCounts,
     selectedVenues,
@@ -147,6 +154,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     venues,
     handleClassChange,
     handlePackageChange,
+    handlePackageParticipantsChange,
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
