@@ -42,25 +42,22 @@ export default function SetupAdmin() {
     setLoading(true);
     
     try {
-      // First try to delete any existing role for this user if it exists
-      try {
-        await supabase
-          .from('user_roles')
-          .delete()
-          .eq('user_id', user.id);
-      } catch (deleteError) {
-        // Ignore delete errors, as the user might not have a role yet
-        console.log("No existing role to delete or delete failed:", deleteError);
+      // Use direct SQL execution to bypass RLS policies
+      // First delete any existing roles
+      const { error: deleteError } = await supabase.rpc('remove_user_role', {
+        user_id_param: user.id
+      });
+      
+      if (deleteError) {
+        console.error("Error removing existing role:", deleteError);
+        // Continue anyway to try the insert
       }
-        
-      // Now insert a new record with admin role
-      const { error: insertError } = await supabase
-        .from('user_roles')
-        .insert({ 
-          user_id: user.id, 
-          role: 'admin' 
-        });
-        
+      
+      // Then insert the admin role
+      const { error: insertError } = await supabase.rpc('add_admin_role', {
+        user_id_param: user.id
+      });
+      
       if (insertError) {
         throw insertError;
       }
