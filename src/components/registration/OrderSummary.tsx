@@ -1,10 +1,18 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Home, MapPin } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface SummaryItem {
   label: string;
   value: string;
+}
+
+interface RoomVenueItem {
+  name: string;
+  count?: number;
+  price?: number;
 }
 
 interface OrderSummaryProps {
@@ -15,12 +23,16 @@ interface OrderSummaryProps {
     discountedTotal: number;
     remaining: number;
   };
+  roomsInfo?: RoomVenueItem[];
+  venuesInfo?: RoomVenueItem[];
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({
   basicInfo,
   paymentInfo,
-  costCalculation
+  costCalculation,
+  roomsInfo = [],
+  venuesInfo = []
 }) => {
   return (
     <Card>
@@ -39,6 +51,45 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
             ))}
           </div>
         </div>
+
+        {/* Rooms info section */}
+        {roomsInfo.length > 0 && (
+          <div>
+            <h3 className="font-medium mb-2 flex items-center">
+              <Home className="h-4 w-4 mr-2" />
+              Akomodasi
+            </h3>
+            <div className="space-y-1">
+              {roomsInfo.map((room, index) => (
+                <div key={index} className="flex justify-between">
+                  <span className="text-muted-foreground">{room.name}:</span>
+                  <span>
+                    {room.count} kamar
+                    {room.price ? ` (Rp ${room.price.toLocaleString()})` : ''}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Venues info section */}
+        {venuesInfo.length > 0 && (
+          <div>
+            <h3 className="font-medium mb-2 flex items-center">
+              <MapPin className="h-4 w-4 mr-2" />
+              Venue
+            </h3>
+            <div className="space-y-1">
+              {venuesInfo.map((venue, index) => (
+                <div key={index} className="flex justify-between">
+                  <span className="text-muted-foreground">{venue.name}:</span>
+                  <span>{venue.price ? `Rp ${venue.price.toLocaleString()}` : 'Dipilih'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {paymentInfo.length > 0 && (
           <div>

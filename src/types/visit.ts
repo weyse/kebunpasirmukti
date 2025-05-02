@@ -1,6 +1,15 @@
 
 export type PaymentStatus = 'lunas' | 'belum_lunas';
 
+export interface RoomsJsonData {
+  accommodation_counts?: Record<string, number>;
+  extra_bed_counts?: Record<string, number>;
+}
+
+export interface VenuesJsonData {
+  selected_venues?: string[];
+}
+
 export type Visit = {
   id: string;
   order_id: string;
@@ -18,8 +27,8 @@ export type Visit = {
   discounted_cost?: number;
   down_payment?: number;
   nights_count?: number; // Number of nights staying
-  rooms_json?: any; // Room selection information
-  venues_json?: any; // Venue selection information
+  rooms_json?: RoomsJsonData; // Room selection information
+  venues_json?: VenuesJsonData; // Venue selection information
 };
 
 export type ChartPeriod = 'day' | 'week' | 'month' | 'year';

@@ -32,7 +32,7 @@ export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: Vi
   const hasRooms = (visit: Visit) => {
     return visit.rooms_json && 
       visit.rooms_json.accommodation_counts && 
-      Object.values(visit.rooms_json.accommodation_counts).some(count => (count as number) > 0);
+      Object.values(visit.rooms_json.accommodation_counts).some(count => Number(count) > 0);
   };
   
   const hasVenues = (visit: Visit) => {

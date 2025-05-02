@@ -10,7 +10,11 @@ export const useSummaryData = (
   totalCost: number,
   discountedCost: number,
   remainingBalance: number,
-  nightsCount: number = 1
+  nightsCount: number = 1,
+  accommodationCounts: Record<string, number> = {},
+  selectedVenues: string[] = [],
+  accommodations: any[] = [],
+  venues: any[] = []
 ) => {
   // Prepare summary data for the order summary component
   const getSummaryData = () => {
@@ -58,6 +62,27 @@ export const useSummaryData = (
       });
     }
     
+    // Prepare rooms info
+    const roomsInfo = Object.entries(accommodationCounts)
+      .filter(([id, count]) => count > 0)
+      .map(([id, count]) => {
+        const room = accommodations.find(a => a.id === id);
+        return {
+          name: room ? room.room_type : `Kamar ${id}`,
+          count: count,
+          price: room ? room.price_per_night * count * nightsCount : undefined
+        };
+      });
+
+    // Prepare venues info
+    const venuesInfo = selectedVenues.map(venueId => {
+      const venue = venues.find(v => v.id === venueId);
+      return {
+        name: venue ? venue.name : `Venue ${venueId}`,
+        price: venue ? venue.price : undefined
+      };
+    });
+    
     const paymentInfo = [];
     if (values.bank_name) {
       paymentInfo.push({ label: 'Bank', value: values.bank_name });
@@ -73,7 +98,9 @@ export const useSummaryData = (
         baseTotal: totalCost,
         discountedTotal: discountedCost,
         remaining: remainingBalance
-      }
+      },
+      roomsInfo,
+      venuesInfo
     };
   };
 

@@ -25,10 +25,10 @@ export function VisitTableRowItem({ visit, setVisitToDelete }: VisitTableRowItem
     }
   };
 
-  // Check if visit has rooms or venues
+  // Safe check for rooms or venues
   const hasRooms = visit.rooms_json && 
     visit.rooms_json.accommodation_counts && 
-    Object.values(visit.rooms_json.accommodation_counts).some(count => (count as number) > 0);
+    Object.values(visit.rooms_json.accommodation_counts).some(count => Number(count) > 0);
     
   const hasVenues = visit.venues_json && 
     visit.venues_json.selected_venues && 

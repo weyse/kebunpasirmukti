@@ -40,8 +40,9 @@ export const VisitDetailsDialog = ({
       return 0;
     }
     
+    // Safely sum the accommodation counts
     return Object.values(visit.rooms_json.accommodation_counts).reduce(
-      (sum, count) => sum + (count as number), 0
+      (sum, count) => sum + (Number(count) || 0), 0
     );
   };
   

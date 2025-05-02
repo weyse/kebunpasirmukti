@@ -80,7 +80,11 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     totalCost,
     discountedCost,
     remainingBalance,
-    nightsCount
+    nightsCount,
+    accommodationCounts,
+    selectedVenues,
+    accommodations,
+    venues
   );
   
   // Initialize accommodation counts when accommodations are loaded
