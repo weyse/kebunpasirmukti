@@ -15,7 +15,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Forbidden from './pages/Forbidden';
 import UserManagement from './pages/admin/UserManagement';
 import AddAdmin from './pages/admin/AddAdmin';
-import SetupAdmin from './pages/admin/SetupAdmin'; // Added import for SetupAdmin
+import SetupAdmin from './pages/admin/SetupAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { AuthProvider } from './context/AuthContext';
@@ -30,6 +30,7 @@ function App() {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        
         setUser(session?.user || null);
       } catch (error) {
         console.error("Error checking session:", error);
@@ -142,6 +143,11 @@ function App() {
             <Route path="admin/add-admin" element={
               <ProtectedRoute requiredRole="admin">
                 <AddAdmin />
+              </ProtectedRoute>
+            } />
+            <Route path="admin/setup" element={
+              <ProtectedRoute>
+                <SetupAdmin />
               </ProtectedRoute>
             } />
           </Route>

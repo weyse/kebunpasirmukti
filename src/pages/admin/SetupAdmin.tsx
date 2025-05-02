@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { Shield, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 
@@ -42,28 +42,33 @@ export default function SetupAdmin() {
     setLoading(true);
     
     try {
-      // Use a direct INSERT approach instead of UPDATE to avoid RLS recursion
-      // First, delete any existing role for this user
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', user.id);
+      // First try to delete any existing role for this user if it exists
+      try {
+        await supabase
+          .from('user_roles')
+          .delete()
+          .eq('user_id', user.id);
+      } catch (deleteError) {
+        // Ignore delete errors, as the user might not have a role yet
+        console.log("No existing role to delete or delete failed:", deleteError);
+      }
         
-      // Then insert a new record with admin role
-      const { error } = await supabase
+      // Now insert a new record with admin role
+      const { error: insertError } = await supabase
         .from('user_roles')
         .insert({ 
           user_id: user.id, 
           role: 'admin' 
         });
         
-      if (error) {
-        throw error;
+      if (insertError) {
+        throw insertError;
       }
       
       toast({
-        title: 'Success!',
-        description: 'You have been promoted to admin. The page will reload to apply changes.',
+        title: 'Berhasil!',
+        description: 'Anda telah menjadi admin. Halaman akan dimuat ulang untuk menerapkan perubahan.',
+        variant: 'default',
       });
       
       // Reload the page to update auth context
@@ -75,7 +80,7 @@ export default function SetupAdmin() {
       console.error('Error promoting to admin:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to promote to admin',
+        description: error.message || 'Gagal mempromosikan menjadi admin',
         variant: 'destructive',
       });
     } finally {
@@ -89,21 +94,21 @@ export default function SetupAdmin() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-green-500" />
-            <CardTitle>Admin Status Active</CardTitle>
+            <CardTitle>Status Admin Aktif</CardTitle>
           </div>
           <CardDescription>
-            You already have admin privileges.
+            Anda sudah memiliki hak akses admin.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2 text-green-600">
             <CheckCircle className="h-5 w-5" />
-            <p>Your account has admin privileges</p>
+            <p>Akun Anda memiliki hak akses admin</p>
           </div>
         </CardContent>
         <CardFooter>
           <Button onClick={() => navigate('/admin/users')} variant="outline" className="w-full">
-            Go to User Management
+            Ke Manajemen Pengguna
           </Button>
         </CardFooter>
       </Card>
@@ -115,12 +120,12 @@ export default function SetupAdmin() {
       <CardHeader>
         <div className="flex items-center gap-2">
           <Shield className="h-6 w-6 text-pasirmukti-500" />
-          <CardTitle>Admin Setup</CardTitle>
+          <CardTitle>Setup Admin</CardTitle>
         </div>
         <CardDescription>
           {adminCount === 0 
-            ? "No admin accounts found. You can promote yourself to admin." 
-            : "There are already admin accounts set up."}
+            ? "Tidak ada akun admin ditemukan. Anda dapat mempromosikan diri menjadi admin." 
+            : `Ada ${adminCount} akun admin yang sudah diatur.`}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -128,22 +133,22 @@ export default function SetupAdmin() {
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-amber-600">
               <AlertCircle className="h-5 w-5" />
-              <p>No admin accounts detected in the system</p>
+              <p>Tidak ada akun admin terdeteksi dalam sistem</p>
             </div>
             <p className="text-sm text-muted-foreground">
-              Promote yourself to admin to unlock full system management capabilities. 
-              This should only be done for the initial system setup.
+              Promosikan diri Anda menjadi admin untuk membuka kemampuan manajemen sistem lengkap.
+              Ini hanya perlu dilakukan untuk pengaturan sistem awal.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-amber-600">
               <AlertCircle className="h-5 w-5" />
-              <p>Admin accounts already exist</p>
+              <p>Akun admin sudah ada</p>
             </div>
             <p className="text-sm text-muted-foreground">
-              There {adminCount === 1 ? 'is' : 'are'} already {adminCount} admin {adminCount === 1 ? 'account' : 'accounts'} in the system.
-              You can still promote yourself if needed.
+              Sudah ada {adminCount} akun admin dalam sistem.
+              Anda masih dapat mempromosikan diri jika diperlukan.
             </p>
           </div>
         )}
@@ -154,7 +159,14 @@ export default function SetupAdmin() {
           disabled={loading}
           className="w-full"
         >
-          {loading ? "Processing..." : "Promote Me to Admin"}
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Memproses...
+            </>
+          ) : (
+            "Promosikan Saya Menjadi Admin"
+          )}
         </Button>
       </CardFooter>
     </Card>
