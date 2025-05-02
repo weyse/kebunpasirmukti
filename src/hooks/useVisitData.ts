@@ -54,6 +54,13 @@ export const useVisitData = () => {
       // Process the data to ensure proper typing
       const processedVisits: Visit[] = data.map(visit => ({
         ...visit,
+        // Ensure total_visitors is calculated even if not present in database
+        total_visitors: visit.total_visitors || 
+          (Number(visit.adult_count || 0) + 
+           Number(visit.children_count || 0) + 
+           Number(visit.teacher_count || 0) +
+           Number(visit.free_of_charge_teacher_count || 0)),
+           
         // Parse rooms_json safely, ensure it matches RoomsJsonData interface
         rooms_json: safeParseJson(visit.rooms_json, { 
           accommodation_counts: {},

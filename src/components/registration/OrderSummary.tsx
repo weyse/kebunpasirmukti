@@ -1,19 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
-interface SummaryItem {
-  label: string;
-  value: string;
-}
-
-interface RoomVenueItem {
-  name: string;
-  count?: number;
-  price?: number;
-}
+import { SummaryItem, RoomVenueItem } from '@/hooks/registration/summary/types';
 
 interface OrderSummaryProps {
   basicInfo: SummaryItem[];
