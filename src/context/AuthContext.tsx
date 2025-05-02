@@ -93,21 +93,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Logout function
+  // Logout function - improved error handling
   const logout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
-        throw error;
+        console.error("Logout error:", error);
+        toast({
+          title: "Logout gagal",
+          description: "Terjadi kesalahan saat logout, tetapi sesi lokal telah dihapus",
+          variant: "destructive",
+        });
       }
-      navigate("/login");
+
+      // Even if there's an error, navigate to login page to ensure user is logged out locally
+      navigate("/login", { replace: true });
+      
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout exception:", error);
       toast({
         title: "Logout gagal",
         description: "Terjadi kesalahan saat logout",
         variant: "destructive",
       });
+      
+      // Force navigation to login anyway for better UX
+      navigate("/login", { replace: true });
     }
   };
 

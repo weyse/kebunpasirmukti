@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Search, Shield, UserX } from 'lucide-react';
+import { Search, Shield, UserX, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface UserData {
   id: string;
@@ -32,6 +33,7 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [userToUpdate, setUserToUpdate] = useState<UserData | null>(null);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     fetchUsers();
@@ -39,17 +41,16 @@ export default function UserManagement() {
   
   const fetchUsers = async () => {
     setIsLoading(true);
+    setError(null); // Reset error state when fetching
+    
     try {
-      // First fetch all auth users
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      // First fetch all users from auth.users table
+      const { data: userData, error: authError } = await supabase
+        .from('auth.users')
+        .select('id, email, created_at, user_metadata');
       
       if (authError) {
-        throw authError;
-      }
-      
-      if (!authData) {
-        setIsLoading(false);
-        return;
+        throw new Error(`Error fetching users: ${authError.message}`);
       }
       
       // Then fetch roles from user_roles table
@@ -58,11 +59,11 @@ export default function UserManagement() {
         .select('user_id, role');
         
       if (rolesError) {
-        throw rolesError;
+        throw new Error(`Error fetching roles: ${rolesError.message}`);
       }
       
       // Combine the data
-      const userData: UserData[] = authData.users.map(user => {
+      const combinedData: UserData[] = userData?.map(user => {
         const roleEntry = rolesData?.find(r => r.user_id === user.id);
         return {
           id: user.id,
@@ -71,11 +72,12 @@ export default function UserManagement() {
           role: (roleEntry?.role as 'admin' | 'guest') || 'guest',
           full_name: user.user_metadata?.full_name,
         };
-      });
+      }) || [];
       
-      setUsers(userData);
-    } catch (error) {
+      setUsers(combinedData);
+    } catch (error: any) {
       console.error('Error fetching users:', error);
+      setError(error.message || 'Failed to load users data');
       toast({
         title: 'Error',
         description: 'Failed to load users data',
@@ -88,10 +90,31 @@ export default function UserManagement() {
   
   const handleRoleUpdate = async (user: UserData, newRole: 'admin' | 'guest') => {
     try {
-      const { error } = await supabase
+      // First determine if this is an insert or update operation
+      const { data: existingRole, error: checkError } = await supabase
         .from('user_roles')
-        .update({ role: newRole })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+      
+      let error;
+      
+      if (existingRole) {
+        // Update existing role
+        ({ error } = await supabase
+          .from('user_roles')
+          .update({ role: newRole })
+          .eq('user_id', user.id));
+      } else {
+        // Insert new role
+        ({ error } = await supabase
+          .from('user_roles')
+          .insert({ user_id: user.id, role: newRole }));
+      }
         
       if (error) {
         throw error;
@@ -109,7 +132,7 @@ export default function UserManagement() {
       
       setIsUpdateDialogOpen(false);
       setUserToUpdate(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating role:', error);
       toast({
         title: 'Error',
@@ -139,6 +162,24 @@ export default function UserManagement() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
+      </div>
+      
+      {error && (
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
+      <div>
+        <Button 
+          onClick={() => fetchUsers()} 
+          variant="outline" 
+          size="sm"
+        >
+          Reload Data
+        </Button>
       </div>
       
       <Table>

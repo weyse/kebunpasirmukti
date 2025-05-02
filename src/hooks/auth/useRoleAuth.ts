@@ -29,8 +29,10 @@ export const useRoleAuth = () => {
         setAuthState(prev => ({ ...prev, user: currentUser }));
         
         if (currentUser) {
-          // Fetch the user's role
-          fetchUserRole(currentUser.id);
+          // Fetch the user's role - use setTimeout to avoid potential deadlocks
+          setTimeout(() => {
+            fetchUserRole(currentUser.id);
+          }, 0);
         } else {
           // Reset role if user is not logged in
           setAuthState(prev => ({ 
@@ -50,7 +52,10 @@ export const useRoleAuth = () => {
         
         if (session?.user) {
           setAuthState(prev => ({ ...prev, user: session.user }));
-          fetchUserRole(session.user.id);
+          // Fetch the user's role - use setTimeout to avoid potential deadlocks
+          setTimeout(() => {
+            fetchUserRole(session.user.id);
+          }, 0);
         } else {
           setAuthState(prev => ({ ...prev, isLoading: false }));
         }
@@ -71,33 +76,22 @@ export const useRoleAuth = () => {
   // Function to fetch user role
   const fetchUserRole = async (userId: string) => {
     try {
-      // First, try to use the has_role function to check if user is admin
+      // Use the has_role function we created in SQL that avoids recursion
       const { data: isAdminData, error: isAdminError } = await supabase.rpc(
         'has_role',
         { requested_role: 'admin' }
       );
       
       if (isAdminError) {
+        console.error("Error checking admin role:", isAdminError);
         throw isAdminError;
       }
       
-      // Then fetch the actual role from user_roles
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-      
-      if (roleError && roleError.code !== 'PGRST116') {
-        throw roleError;
-      }
-
-      const role = roleData?.role || 'guest';
-      
+      // Get the actual role directly without causing recursion
       setAuthState({
         user: authState.user,
-        role: role as UserRole,
-        isAdmin: isAdminData === true,
+        role: isAdminData ? 'admin' : 'guest',
+        isAdmin: Boolean(isAdminData),
         isLoading: false
       });
 
