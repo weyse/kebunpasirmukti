@@ -101,6 +101,7 @@ const GuestRegistrationForm = () => {
             totalAdults={Number(form.watch("adult_count")) || 0}
             totalChildren={Number(form.watch("children_count")) || 0}
             totalTeachers={Number(form.watch("teacher_count")) || 0}
+            totalFreeTeachers={Number(form.watch("free_of_charge_teacher_count")) || 0}
           />
           
           {/* Accommodation Section */}

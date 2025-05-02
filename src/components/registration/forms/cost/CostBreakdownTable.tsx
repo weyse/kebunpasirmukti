@@ -29,6 +29,7 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
                 <TableHead>Dewasa</TableHead>
                 <TableHead>Anak</TableHead>
                 <TableHead>Guru</TableHead>
+                <TableHead>Guru (Free)</TableHead>
                 <TableHead className="text-right">Jumlah</TableHead>
               </TableRow>
             </TableHeader>
@@ -39,6 +40,7 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
                   <TableCell>{pkg.adults} (Rp {pkg.adultCost.toLocaleString()})</TableCell>
                   <TableCell>{pkg.children} (Rp {pkg.childrenCost.toLocaleString()})</TableCell>
                   <TableCell>{pkg.teachers} (Rp {pkg.teacherCost.toLocaleString()})</TableCell>
+                  <TableCell>{pkg.free_teachers} (Rp 0)</TableCell>
                   <TableCell className="text-right font-medium">Rp {pkg.total.toLocaleString()}</TableCell>
                 </TableRow>
               ))}
@@ -81,7 +83,14 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
             </TableCell>
           </TableRow>
           <TableRow>
-            <TableCell>Guru</TableCell>
+            <TableCell>
+              Guru
+              {calculationSummary.freeTeachersCount > 0 && (
+                <span className="block text-xs text-muted-foreground">
+                  (+ {calculationSummary.freeTeachersCount} Guru Free of Charge)
+                </span>
+              )}
+            </TableCell>
             <TableCell className="text-right">Rp {calculationSummary.teacherCost.toLocaleString()}</TableCell>
           </TableRow>
           {calculationSummary.accommodationCost > 0 && (

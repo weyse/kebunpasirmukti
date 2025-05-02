@@ -128,19 +128,34 @@ const BasicInformationForm: React.FC<BasicInformationFormProps> = ({ form }) => 
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="teacher_count"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Guru</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} min="0" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-2">
+              <FormField
+                control={form.control}
+                name="teacher_count"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Guru</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} min="0" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="free_of_charge_teacher_count"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Guru (Free)</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} min="0" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           </div>
         </div>
       </CardContent>

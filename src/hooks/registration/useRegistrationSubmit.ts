@@ -26,8 +26,9 @@ export const useRegistrationSubmit = (
     try {
       setIsSubmitting(true);
       
-      // Calculate total guests
-      const totalGuests = Number(formValues.adult_count) + Number(formValues.children_count) + Number(formValues.teacher_count);
+      // Calculate total guests including free teachers
+      const totalGuests = Number(formValues.adult_count) + Number(formValues.children_count) + 
+                         Number(formValues.teacher_count) + Number(formValues.free_of_charge_teacher_count || 0);
       
       // Map the boolean payment_status to the expected enum values
       const dbPaymentStatus: PaymentStatus = formValues.payment_status ? 'lunas' : 'belum_lunas';
@@ -55,6 +56,7 @@ export const useRegistrationSubmit = (
         adult_count: Number(formValues.adult_count),
         children_count: Number(formValues.children_count),
         teacher_count: Number(formValues.teacher_count),
+        free_of_charge_teacher_count: Number(formValues.free_of_charge_teacher_count || 0), // Include free teachers
         visit_type: dbVisitType,
         // We're still storing a single package_type for backward compatibility,
         // using the first selected package or null if none selected

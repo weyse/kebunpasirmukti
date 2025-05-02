@@ -21,11 +21,25 @@ export const useSummaryData = (
       (sum, count) => sum + (count * EXTRA_BED_PRICE * nightsCount), 0
     );
     
+    // Calculate total participants
+    const totalParticipants = Number(values.adult_count) + 
+                             Number(values.children_count) + 
+                             Number(values.teacher_count) + 
+                             Number(values.free_of_charge_teacher_count);
+    
+    // Show teachers breakdown if we have free teachers
+    const teacherBreakdown = Number(values.free_of_charge_teacher_count) > 0 
+      ? `${Number(values.teacher_count)} berbayar, ${Number(values.free_of_charge_teacher_count)} free` 
+      : `${Number(values.teacher_count)}`;
+    
     const basicInfo = [
       { label: 'PIC', value: values.responsible_person || '-' },
       { label: 'Institusi', value: values.institution_name || '-' },
       { label: 'Tanggal Kunjungan', value: values.visit_date ? format(values.visit_date, 'dd MMM yyyy') : '-' },
-      { label: 'Jumlah Peserta', value: `${Number(values.adult_count) + Number(values.children_count) + Number(values.teacher_count)}` }
+      { label: 'Jumlah Peserta', value: `${totalParticipants}` },
+      { label: 'Dewasa', value: `${values.adult_count}` },
+      { label: 'Anak-anak', value: `${values.children_count}` },
+      { label: 'Guru', value: teacherBreakdown }
     ];
     
     // Add nights count if more than 1

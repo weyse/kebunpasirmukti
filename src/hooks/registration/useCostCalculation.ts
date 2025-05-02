@@ -17,6 +17,7 @@ export interface CostCalculationSummary {
   venueCost: number;
   subtotal: number;
   finalTotal: number;
+  freeTeachersCount: number;
   packageBreakdown: {
     packageId: string;
     packageName: string;
@@ -26,6 +27,7 @@ export interface CostCalculationSummary {
     childrenCost: number;
     teachers: number;
     teacherCost: number;
+    free_teachers: number;
     total: number;
   }[];
 }
@@ -55,6 +57,7 @@ export const useCostCalculation = (
     venueCost: 0,
     subtotal: 0,
     finalTotal: 0,
+    freeTeachersCount: 0,
     packageBreakdown: []
   });
 
@@ -82,6 +85,7 @@ export const useCostCalculation = (
     let totalAdultCost = 0;
     let totalChildrenCost = 0;
     let totalTeacherCost = 0;
+    let totalFreeTeachersCount = 0;
     
     const packageBreakdown = selectedPackages.map(packageId => {
       const packageData = packages.find(pkg => pkg.id === packageId);
@@ -93,6 +97,8 @@ export const useCostCalculation = (
       const adultCost = participants.adults * packageData.price_per_adult;
       const childrenCost = participants.children * packageData.price_per_child;
       const teacherCost = participants.teachers * packageData.price_per_teacher;
+      // Free teachers don't contribute to cost
+      totalFreeTeachersCount += participants.free_teachers;
       
       // Add to totals
       totalAdultCost += adultCost;
@@ -108,7 +114,8 @@ export const useCostCalculation = (
         childrenCost,
         teachers: participants.teachers,
         teacherCost,
-        total: adultCost + childrenCost + teacherCost
+        free_teachers: participants.free_teachers,
+        total: adultCost + childrenCost + teacherCost // Free teachers don't add to total
       };
     }).filter(Boolean);
     
@@ -156,6 +163,7 @@ export const useCostCalculation = (
       venueCost,
       subtotal,
       finalTotal: total,
+      freeTeachersCount: totalFreeTeachersCount,
       packageBreakdown: packageBreakdown as any[]
     });
   };

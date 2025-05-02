@@ -8,6 +8,7 @@ export interface PackageParticipants {
     adults: number;
     children: number;
     teachers: number;
+    free_teachers: number;
   }
 }
 
@@ -57,7 +58,7 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
         // Initialize empty participant allocations for the new package
         setPackageParticipants(prev => ({
           ...prev,
-          [packageId]: { adults: 0, children: 0, teachers: 0 }
+          [packageId]: { adults: 0, children: 0, teachers: 0, free_teachers: 0 }
         }));
         
         return [...prevSelected, packageId];
@@ -65,7 +66,7 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     });
   };
   
-  const handlePackageParticipantsChange = (packageId: string, type: 'adults' | 'children' | 'teachers', count: number) => {
+  const handlePackageParticipantsChange = (packageId: string, type: 'adults' | 'children' | 'teachers' | 'free_teachers', count: number) => {
     if (count < 0) return; // Prevent negative values
     
     setPackageParticipants(prev => ({

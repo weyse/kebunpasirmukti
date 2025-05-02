@@ -14,10 +14,12 @@ interface PackageSelectionCardProps {
   adults: number;
   children: number;
   teachers: number;
-  onParticipantChange: (type: 'adults' | 'children' | 'teachers', count: number) => void;
+  free_teachers: number;
+  onParticipantChange: (type: 'adults' | 'children' | 'teachers' | 'free_teachers', count: number) => void;
   maxAdults?: number;
   maxChildren?: number;
   maxTeachers?: number;
+  maxFreeTeachers?: number;
 }
 
 const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
@@ -30,17 +32,25 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
   adults,
   children,
   teachers,
+  free_teachers,
   onParticipantChange,
   maxAdults = Infinity,
   maxChildren = Infinity,
-  maxTeachers = Infinity
+  maxTeachers = Infinity,
+  maxFreeTeachers = Infinity
 }) => {
-  const handleInputChange = (type: 'adults' | 'children' | 'teachers', value: string) => {
+  const handleInputChange = (type: 'adults' | 'children' | 'teachers' | 'free_teachers', value: string) => {
     // Convert to number and ensure it's not negative
     const numValue = Math.max(0, parseInt(value) || 0);
     
     // Ensure the value doesn't exceed the maximum
-    const maxValue = type === 'adults' ? maxAdults : type === 'children' ? maxChildren : maxTeachers;
+    const maxValue = type === 'adults' 
+      ? maxAdults 
+      : type === 'children' 
+        ? maxChildren 
+        : type === 'teachers'
+          ? maxTeachers
+          : maxFreeTeachers;
     const validValue = Math.min(numValue, maxValue);
     
     onParticipantChange(type, validValue);
@@ -70,7 +80,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
         <div className="mt-4 space-y-2 border-t pt-3">
           <h4 className="text-sm font-medium mb-2">Jumlah Peserta</h4>
           
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor={`${id}-adults`} className="text-xs">Dewasa:</Label>
               <Input
@@ -111,6 +121,20 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 className="h-8 text-sm"
               />
               <div className="text-xs text-muted-foreground">Max: {maxTeachers}</div>
+            </div>
+            
+            <div className="space-y-1">
+              <Label htmlFor={`${id}-free-teachers`} className="text-xs">Guru (Free):</Label>
+              <Input
+                id={`${id}-free-teachers`}
+                type="number"
+                min="0"
+                max={maxFreeTeachers}
+                value={free_teachers}
+                onChange={(e) => handleInputChange('free_teachers', e.target.value)}
+                className="h-8 text-sm"
+              />
+              <div className="text-xs text-muted-foreground">Max: {maxFreeTeachers}</div>
             </div>
           </div>
         </div>

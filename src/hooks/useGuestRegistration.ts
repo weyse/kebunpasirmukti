@@ -112,6 +112,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
           adult_count: String(registrationData.adult_count) || '0',
           children_count: String(registrationData.children_count) || '0',
           teacher_count: String(registrationData.teacher_count) || '0',
+          free_of_charge_teacher_count: String(registrationData.free_of_charge_teacher_count || '0'),
           notes: registrationData.notes || '',
           document_url: registrationData.document_url || '',
           discount_percentage: String(registrationData.discount_percentage) || '0',

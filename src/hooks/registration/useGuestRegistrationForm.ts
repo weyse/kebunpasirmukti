@@ -40,6 +40,12 @@ export const formSchema = z.object({
   }, {
     message: "Jumlah guru harus berupa angka dan tidak boleh negatif.",
   }),
+  free_of_charge_teacher_count: z.string().refine((value) => {
+    const num = Number(value);
+    return !isNaN(num) && num >= 0;
+  }, {
+    message: "Jumlah guru free of charge harus berupa angka dan tidak boleh negatif.",
+  }),
   notes: z.string().optional(),
   document_url: z.string().optional(),
   discount_percentage: z.string().optional(),
@@ -64,6 +70,7 @@ export const useGuestRegistrationForm = (initialData?: Partial<FormSchema>) => {
       adult_count: initialData?.adult_count || "0",
       children_count: initialData?.children_count || "0",
       teacher_count: initialData?.teacher_count || "0",
+      free_of_charge_teacher_count: initialData?.free_of_charge_teacher_count || "0",
       notes: initialData?.notes || "",
       document_url: initialData?.document_url || "",
       discount_percentage: initialData?.discount_percentage || "0",
