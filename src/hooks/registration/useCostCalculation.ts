@@ -65,6 +65,12 @@ export const useCostCalculation = (
   ]);
 
   const calculateCosts = () => {
+    // Make sure we have all required data
+    if (!packages || packages.length === 0) {
+      console.warn("No packages available for cost calculation");
+      return;
+    }
+    
     // Calculate package costs using utility functions
     const { 
       totalAdultCost,
@@ -72,7 +78,11 @@ export const useCostCalculation = (
       totalTeacherCost,
       totalFreeTeachersCount,
       packageBreakdown
-    } = calculatePackageCosts(selectedPackages, packageParticipants, packages);
+    } = calculatePackageCosts(
+      selectedPackages || [], 
+      packageParticipants || {}, 
+      packages
+    );
     
     // Apply discount ONLY to children's cost
     const discountPercentage = Number(form.getValues("discount_percentage")) || 0;
@@ -81,16 +91,22 @@ export const useCostCalculation = (
     
     // Calculate accommodations cost (accounting for nights count)
     const accommodationCost = calculateAccommodationCost(
-      accommodationCounts, 
-      accommodations, 
-      nightsCount
+      accommodationCounts || {}, 
+      accommodations || [], 
+      nightsCount || 1
     );
     
     // Calculate extra bed cost (accounting for nights count)
-    const extraBedCost = calculateExtraBedCost(extraBedCounts, nightsCount);
+    const extraBedCost = calculateExtraBedCost(
+      extraBedCounts || {}, 
+      nightsCount || 1
+    );
     
     // Calculate venue cost
-    const venueCost = calculateVenueCost(selectedVenues, venues);
+    const venueCost = calculateVenueCost(
+      selectedVenues || [], 
+      venues || []
+    );
     
     // Calculate total cost with discount applied only to children
     const subtotal = totalAdultCost + totalChildrenCost + totalTeacherCost + 
@@ -98,6 +114,18 @@ export const useCostCalculation = (
     
     const total = totalAdultCost + discountedChildrenCost + totalTeacherCost + 
                   accommodationCost + extraBedCost + venueCost;
+    
+    console.log('Cost calculation:', {
+      totalAdultCost,
+      totalChildrenCost,
+      discountedChildrenCost,
+      totalTeacherCost,
+      accommodationCost,
+      extraBedCost,
+      venueCost,
+      subtotal,
+      total
+    });
     
     setTotalCost(subtotal);
     setDiscountedCost(total);

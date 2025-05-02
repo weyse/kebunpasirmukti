@@ -14,12 +14,15 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
   discountPercentage, 
   discountedCost 
 }) => {
+  // Safe check to ensure we have valid data
+  const hasPackages = calculationSummary?.packageBreakdown && calculationSummary.packageBreakdown.length > 0;
+  
   return (
     <div className="mt-4">
       <h3 className="font-medium mb-2">Ringkasan Perhitungan</h3>
       
       {/* Package breakdown */}
-      {calculationSummary.packageBreakdown && calculationSummary.packageBreakdown.length > 0 && (
+      {hasPackages && (
         <div className="mb-4">
           <h4 className="text-sm font-medium mb-2">Detail Paket</h4>
           <Table>
@@ -36,7 +39,7 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
             <TableBody>
               {calculationSummary.packageBreakdown.map((pkg, index) => (
                 <TableRow key={index}>
-                  <TableCell>{pkg.packageName}</TableCell>
+                  <TableCell>{pkg.packageName || `Paket ${index + 1}`}</TableCell>
                   <TableCell>{pkg.adults} (Rp {pkg.adultCost.toLocaleString()})</TableCell>
                   <TableCell>{pkg.children} (Rp {pkg.childrenCost.toLocaleString()})</TableCell>
                   <TableCell>{pkg.teachers} (Rp {pkg.teacherCost.toLocaleString()})</TableCell>

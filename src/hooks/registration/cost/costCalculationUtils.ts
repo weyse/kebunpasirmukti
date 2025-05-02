@@ -30,7 +30,7 @@ export const calculatePackageCosts = (
       totalAdultCost += adultCost;
       totalChildrenCost += childrenCost;
       totalTeacherCost += teacherCost;
-      totalFreeTeachersCount += participants.free_teachers;
+      totalFreeTeachersCount += participants.free_teachers || 0; // Added fallback for undefined
       
       return {
         packageId,
@@ -41,7 +41,7 @@ export const calculatePackageCosts = (
         childrenCost,
         teachers: participants.teachers,
         teacherCost,
-        free_teachers: participants.free_teachers,
+        free_teachers: participants.free_teachers || 0, // Added fallback for undefined
         total: adultCost + childrenCost + teacherCost
       };
     })
@@ -62,6 +62,10 @@ export const calculateAccommodationCost = (
   accommodations: any[],
   nightsCount: number
 ) => {
+  if (!accommodationCounts || Object.keys(accommodationCounts).length === 0) {
+    return 0;
+  }
+  
   return Object.entries(accommodationCounts).reduce((sum, [id, count]) => {
     const accommodation = accommodations.find(a => a.id === id);
     return sum + (accommodation ? accommodation.price_per_night * count * nightsCount : 0);
@@ -73,6 +77,10 @@ export const calculateExtraBedCost = (
   extraBedCounts: Record<string, number>,
   nightsCount: number
 ) => {
+  if (!extraBedCounts || Object.keys(extraBedCounts).length === 0) {
+    return 0;
+  }
+  
   return Object.entries(extraBedCounts).reduce((sum, [_, count]) => {
     return sum + (count * EXTRA_BED_PRICE * nightsCount);
   }, 0);
@@ -83,6 +91,10 @@ export const calculateVenueCost = (
   selectedVenues: string[],
   venues: any[]
 ) => {
+  if (!selectedVenues || selectedVenues.length === 0) {
+    return 0;
+  }
+  
   return selectedVenues.reduce((sum, venueId) => {
     const venue = venues.find(v => v.id === venueId);
     return sum + (venue ? venue.price : 0);
