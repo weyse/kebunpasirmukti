@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield, Users, UserCog, ShieldCheck } from 'lucide-react';
+import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield, Users, ShieldCheck } from 'lucide-react';
 import { 
   Sidebar as SidebarComponent, 
   SidebarContent, 
@@ -60,11 +60,6 @@ export function Sidebar() {
       name: 'Kelola Pengguna',
       path: '/admin/users',
       icon: Users
-    },
-    {
-      name: 'Tambah Admin',
-      path: '/admin/add-admin',
-      icon: Shield
     }
   ];
   
@@ -96,17 +91,6 @@ export function Sidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
-              
-              {/* Always show Setup Admin for all users */}
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className={isActive('/setup-admin') ? "bg-sidebar-accent" : ""}>
-                  <Link to="/setup-admin">
-                    <ShieldCheck className="h-5 w-5" />
-                    <span>Setup Admin</span>
-                    {!isAdmin && <Badge variant="outline" className="ml-auto bg-amber-100 text-amber-800">Direkomendasikan</Badge>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

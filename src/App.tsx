@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
@@ -138,11 +137,6 @@ function App() {
             <Route path="admin/users" element={
               <ProtectedRoute requiredRole="admin">
                 <UserManagement />
-              </ProtectedRoute>
-            } />
-            <Route path="admin/add-admin" element={
-              <ProtectedRoute requiredRole="admin">
-                <AddAdmin />
               </ProtectedRoute>
             } />
             <Route path="admin/setup" element={
