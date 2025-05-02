@@ -101,6 +101,9 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         // Convert payment_status enum to boolean
         const paymentStatusBool = registrationData.payment_status === 'lunas';
         
+        // Cast registrationData to handle the free_of_charge_teacher_count field
+        const typedData = registrationData as any;
+        
         // Update form values, safely handle free_of_charge_teacher_count which might not exist in older records
         form.reset({
           id: registrationData.id, // Set the id field
@@ -113,7 +116,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
           children_count: String(registrationData.children_count) || '0',
           teacher_count: String(registrationData.teacher_count) || '0',
           // Safely access free_of_charge_teacher_count with fallback to '0'
-          free_of_charge_teacher_count: String(registrationData.free_of_charge_teacher_count || '0'),
+          free_of_charge_teacher_count: String(typedData.free_of_charge_teacher_count || 0),
           notes: registrationData.notes || '',
           document_url: registrationData.document_url || '',
           discount_percentage: String(registrationData.discount_percentage) || '0',

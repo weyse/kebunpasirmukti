@@ -126,6 +126,7 @@ export type Database = {
           document_url: string | null
           down_payment: number | null
           extra_bed_cost: number
+          free_of_charge_teacher_count: number
           id: string
           institution_name: string
           nights_count: number
@@ -153,6 +154,7 @@ export type Database = {
           document_url?: string | null
           down_payment?: number | null
           extra_bed_cost?: number
+          free_of_charge_teacher_count?: number
           id?: string
           institution_name: string
           nights_count?: number
@@ -180,6 +182,7 @@ export type Database = {
           document_url?: string | null
           down_payment?: number | null
           extra_bed_cost?: number
+          free_of_charge_teacher_count?: number
           id?: string
           institution_name?: string
           nights_count?: number
