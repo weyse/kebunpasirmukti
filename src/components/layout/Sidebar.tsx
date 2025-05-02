@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield, Users } from 'lucide-react';
+import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield, Users, UserCog } from 'lucide-react';
 import { 
   Sidebar as SidebarComponent, 
   SidebarContent, 
@@ -65,6 +64,11 @@ export function Sidebar() {
       name: 'Tambah Admin',
       path: '/admin/add-admin',
       icon: Shield
+    },
+    {
+      name: 'Setup Admin',
+      path: '/setup-admin',
+      icon: UserCog
     }
   ];
   

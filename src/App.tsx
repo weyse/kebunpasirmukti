@@ -15,6 +15,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import Forbidden from './pages/Forbidden';
 import UserManagement from './pages/admin/UserManagement';
 import AddAdmin from './pages/admin/AddAdmin';
+import SetupAdmin from './pages/admin/SetupAdmin'; // Added import for SetupAdmin
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { AuthProvider } from './context/AuthContext';
@@ -81,6 +82,13 @@ function App() {
           <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
           <Route path="/forgot-password" element={user ? <Navigate to="/" /> : <ForgotPassword />} />
           <Route path="/forbidden" element={<Forbidden />} />
+          
+          {/* Admin Setup Route - available to authenticated users */}
+          <Route path="/setup-admin" element={
+            <ProtectedRoute>
+              <SetupAdmin />
+            </ProtectedRoute>
+          } />
           
           {/* Protected Routes */}
           <Route path="/" element={
