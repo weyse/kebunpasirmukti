@@ -44,16 +44,19 @@ export default function UserManagement() {
     setError(null); // Reset error state when fetching
     
     try {
-      // First fetch all users from auth.users table
-      const { data: userData, error: authError } = await supabase
-        .from('auth.users')
-        .select('id, email, created_at, user_metadata');
-      
-      if (authError) {
-        throw new Error(`Error fetching users: ${authError.message}`);
+      // First get current session to ensure we have authentication
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        throw new Error('You must be logged in to view users');
       }
       
-      // Then fetch roles from user_roles table
+      // Get user profile information from auth.getUser()
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) {
+        throw new Error(`Error getting current user: ${userError.message}`);
+      }
+      
+      // Fetch all user roles from public.user_roles table
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
@@ -62,19 +65,48 @@ export default function UserManagement() {
         throw new Error(`Error fetching roles: ${rolesError.message}`);
       }
       
-      // Combine the data
-      const combinedData: UserData[] = userData?.map(user => {
-        const roleEntry = rolesData?.find(r => r.user_id === user.id);
-        return {
-          id: user.id,
-          email: user.email || '',
-          created_at: user.created_at || '',
-          role: (roleEntry?.role as 'admin' | 'guest') || 'guest',
-          full_name: user.user_metadata?.full_name,
-        };
-      }) || [];
+      // Get all users who have a role - we can't query auth.users directly
+      // so we'll use the user_roles table as a starting point
+      const roleUsers = rolesData || [];
       
-      setUsers(combinedData);
+      // For each user role, get the user details from the current user
+      // (this is a limitation since we can't query auth.users directly)
+      let allUsers: UserData[] = [];
+      
+      // Add the current user to the list
+      if (userData.user) {
+        const userRole = roleUsers.find(r => r.user_id === userData.user?.id);
+        allUsers.push({
+          id: userData.user.id,
+          email: userData.user.email || '',
+          created_at: userData.user.created_at || '',
+          role: (userRole?.role as 'admin' | 'guest') || 'guest',
+          full_name: userData.user.user_metadata?.full_name,
+        });
+      }
+      
+      // Fetch other users from user_roles table
+      // Note: This is a workaround since we can't access auth.users directly
+      const uniqueUserIds = [...new Set(roleUsers.map(r => r.user_id))];
+      
+      // Filter out users we already have
+      const otherUserIds = uniqueUserIds.filter(id => id !== userData.user?.id);
+      
+      // For demo purposes, we'll just show the roles for users we can't fully access
+      // In a real application, you would need to use administrative API access
+      for (const userId of otherUserIds) {
+        const userRole = roleUsers.find(r => r.user_id === userId);
+        // Add a placeholder user with the role information we have
+        allUsers.push({
+          id: userId,
+          email: `User ID: ${userId.substring(0, 8)}...`,
+          created_at: new Date().toISOString(),
+          role: (userRole?.role as 'admin' | 'guest') || 'guest',
+          full_name: 'Unknown User', // We don't have access to user metadata
+        });
+      }
+      
+      setUsers(allUsers);
     } catch (error: any) {
       console.error('Error fetching users:', error);
       setError(error.message || 'Failed to load users data');
@@ -127,7 +159,7 @@ export default function UserManagement() {
       
       toast({
         title: 'Role updated',
-        description: `${user.email} is now a ${newRole}`,
+        description: `User is now a ${newRole}`,
       });
       
       setIsUpdateDialogOpen(false);

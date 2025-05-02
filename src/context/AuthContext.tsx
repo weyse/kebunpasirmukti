@@ -96,6 +96,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Logout function - improved error handling
   const logout = async () => {
     try {
+      // First navigate away to prevent any deadlocks
+      navigate("/login", { replace: true });
+      
+      // Then sign out
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -105,11 +109,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: "Terjadi kesalahan saat logout, tetapi sesi lokal telah dihapus",
           variant: "destructive",
         });
+      } else {
+        toast({
+          title: "Logout berhasil",
+          description: "Sampai jumpa kembali!",
+        });
       }
-
-      // Even if there's an error, navigate to login page to ensure user is logged out locally
-      navigate("/login", { replace: true });
-      
     } catch (error) {
       console.error("Logout exception:", error);
       toast({
@@ -117,9 +122,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "Terjadi kesalahan saat logout",
         variant: "destructive",
       });
-      
-      // Force navigation to login anyway for better UX
-      navigate("/login", { replace: true });
     }
   };
 

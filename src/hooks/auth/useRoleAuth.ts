@@ -31,7 +31,7 @@ export const useRoleAuth = () => {
         if (currentUser) {
           // Fetch the user's role - use setTimeout to avoid potential deadlocks
           setTimeout(() => {
-            fetchUserRole(currentUser.id);
+            fetchUserRole();
           }, 0);
         } else {
           // Reset role if user is not logged in
@@ -54,7 +54,7 @@ export const useRoleAuth = () => {
           setAuthState(prev => ({ ...prev, user: session.user }));
           // Fetch the user's role - use setTimeout to avoid potential deadlocks
           setTimeout(() => {
-            fetchUserRole(session.user.id);
+            fetchUserRole();
           }, 0);
         } else {
           setAuthState(prev => ({ ...prev, isLoading: false }));
@@ -74,7 +74,7 @@ export const useRoleAuth = () => {
   }, []);
 
   // Function to fetch user role
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRole = async () => {
     try {
       // Use the has_role function we created in SQL that avoids recursion
       const { data: isAdminData, error: isAdminError } = await supabase.rpc(
@@ -88,12 +88,12 @@ export const useRoleAuth = () => {
       }
       
       // Get the actual role directly without causing recursion
-      setAuthState({
-        user: authState.user,
+      setAuthState(prev => ({
+        ...prev,
         role: isAdminData ? 'admin' : 'guest',
         isAdmin: Boolean(isAdminData),
         isLoading: false
-      });
+      }));
 
     } catch (error: any) {
       console.error("Error fetching user role:", error);
