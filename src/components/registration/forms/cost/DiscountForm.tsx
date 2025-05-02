@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { UseFormReturn } from 'react-hook-form';
+import { formatCurrency } from '@/utils/formatters';
 
 interface DiscountFormProps {
   form: UseFormReturn<any>;
@@ -16,6 +17,9 @@ interface DiscountFormProps {
 }
 
 const DiscountForm: React.FC<DiscountFormProps> = ({ form, childrenDiscountAmount }) => {
+  // Ensure discount amount is a valid number
+  const safeDiscountAmount = isNaN(childrenDiscountAmount) ? 0 : childrenDiscountAmount;
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
       <FormField
@@ -31,7 +35,7 @@ const DiscountForm: React.FC<DiscountFormProps> = ({ form, childrenDiscountAmoun
             <div className="text-right text-sm">
               <span className="text-muted-foreground">Potongan Diskon: </span>
               <span className="font-medium text-red-500">
-                Rp {childrenDiscountAmount.toLocaleString()}
+                {formatCurrency(safeDiscountAmount)}
               </span>
             </div>
           </FormItem>

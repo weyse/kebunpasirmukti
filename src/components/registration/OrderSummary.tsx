@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Home, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { SummaryItem, RoomVenueItem } from '@/hooks/registration/summary/types';
+import { formatCurrency } from '@/utils/formatters';
 
 interface OrderSummaryProps {
   basicInfo: SummaryItem[];
@@ -64,7 +65,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                     <span className="text-muted-foreground">{room.name}:</span>
                     <span>
                       {room.count} kamar
-                      {safePrice ? ` (Rp ${safePrice.toLocaleString()})` : ''}
+                      {safePrice ? ` (${formatCurrency(safePrice)})` : ''}
                     </span>
                   </div>
                 );
@@ -88,7 +89,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                 return (
                   <div key={index} className="flex justify-between">
                     <span className="text-muted-foreground">{venue.name}:</span>
-                    <span>{safePrice ? `Rp ${safePrice.toLocaleString()}` : 'Dipilih'}</span>
+                    <span>{safePrice ? formatCurrency(safePrice) : 'Dipilih'}</span>
                   </div>
                 );
               })}
@@ -115,21 +116,21 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           <div className="space-y-1">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Biaya Dasar:</span>
-              <span>Rp {safeBaseTotal.toLocaleString()}</span>
+              <span>{formatCurrency(safeBaseTotal)}</span>
             </div>
             {safeBaseTotal !== safeDiscountedTotal && (
               <div className="flex justify-between text-green-600">
                 <span>Diskon untuk Anak-anak:</span>
-                <span>- Rp {(safeBaseTotal - safeDiscountedTotal).toLocaleString()}</span>
+                <span>- {formatCurrency(safeBaseTotal - safeDiscountedTotal)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total Setelah Diskon:</span>
-              <span>Rp {safeDiscountedTotal.toLocaleString()}</span>
+              <span>{formatCurrency(safeDiscountedTotal)}</span>
             </div>
             <div className="flex justify-between font-bold">
               <span>Sisa yang Harus Dibayar:</span>
-              <span>Rp {safeRemaining.toLocaleString()}</span>
+              <span>{formatCurrency(safeRemaining)}</span>
             </div>
           </div>
         </div>

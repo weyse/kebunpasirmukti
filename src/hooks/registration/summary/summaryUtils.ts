@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { FormSchema } from '../useGuestRegistrationForm';
 import { EXTRA_BED_PRICE } from '../cost/constants';
 import { SummaryItem, RoomVenueItem } from './types';
+import { formatCurrency } from '@/utils/formatters';
 
 // Prepare basic info summary items
 export const prepareBasicInfo = (
@@ -48,7 +49,7 @@ export const prepareBasicInfo = (
     const totalExtraBeds = Object.values(extraBedCounts || {}).reduce((sum, count) => sum + (Number(count) || 0), 0);
     basicInfo.push({ 
       label: 'Extra Bed', 
-      value: `${totalExtraBeds} (Rp ${totalExtraBedCost.toLocaleString()})` 
+      value: `${totalExtraBeds} (${formatCurrency(totalExtraBedCost)})` 
     });
   }
   
@@ -67,6 +68,15 @@ export const preparePaymentInfo = (values: FormSchema): SummaryItem[] => {
     paymentInfo.push({ 
       label: 'Tanggal Pembayaran', 
       value: format(new Date(values.payment_date), 'dd MMM yyyy') 
+    });
+  }
+  
+  // Add down payment info if available
+  if (values.down_payment) {
+    const downPayment = Number(values.down_payment) || 0;
+    paymentInfo.push({ 
+      label: 'Uang Muka', 
+      value: formatCurrency(downPayment)
     });
   }
   

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CostCalculationSummary } from "@/hooks/registration/useCostCalculation";
+import { formatCurrency } from '@/utils/formatters';
 
 interface CostBreakdownTableProps {
   calculationSummary: CostCalculationSummary;
@@ -59,11 +60,11 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
                 return (
                   <TableRow key={index}>
                     <TableCell>{pkg.packageName || `Paket ${index + 1}`}</TableCell>
-                    <TableCell>{pkg.adults} (Rp {adultCost.toLocaleString()})</TableCell>
-                    <TableCell>{pkg.children} (Rp {childrenCost.toLocaleString()})</TableCell>
-                    <TableCell>{pkg.teachers} (Rp {teacherCost.toLocaleString()})</TableCell>
-                    <TableCell>{pkg.free_teachers} (Rp 0)</TableCell>
-                    <TableCell className="text-right font-medium">Rp {total.toLocaleString()}</TableCell>
+                    <TableCell>{pkg.adults} ({formatCurrency(adultCost)})</TableCell>
+                    <TableCell>{pkg.children} ({formatCurrency(childrenCost)})</TableCell>
+                    <TableCell>{pkg.teachers} ({formatCurrency(teacherCost)})</TableCell>
+                    <TableCell>{pkg.free_teachers} ({formatCurrency(0)})</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(total)}</TableCell>
                   </TableRow>
                 );
               })}
@@ -83,24 +84,24 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
         <TableBody>
           <TableRow>
             <TableCell>Dewasa</TableCell>
-            <TableCell className="text-right">Rp {safeAdultCost.toLocaleString()}</TableCell>
+            <TableCell className="text-right">{formatCurrency(safeAdultCost)}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>
               Anak-anak
               {safeChildrenDiscountAmount > 0 && (
                 <span className="block text-xs text-green-600">
-                  Diskon {safeDiscountPercentage}% (- Rp {safeChildrenDiscountAmount.toLocaleString()})
+                  Diskon {safeDiscountPercentage}% (- {formatCurrency(safeChildrenDiscountAmount)})
                 </span>
               )}
             </TableCell>
             <TableCell className="text-right">
               <span className={safeChildrenDiscountAmount > 0 ? "line-through text-muted-foreground" : ""}>
-                Rp {safeChildrenCost.toLocaleString()}
+                {formatCurrency(safeChildrenCost)}
               </span>
               {safeChildrenDiscountAmount > 0 && (
                 <span className="block font-medium text-green-600">
-                  Rp {(safeChildrenCost - safeChildrenDiscountAmount).toLocaleString()}
+                  {formatCurrency(safeChildrenCost - safeChildrenDiscountAmount)}
                 </span>
               )}
             </TableCell>
@@ -114,29 +115,29 @@ const CostBreakdownTable: React.FC<CostBreakdownTableProps> = ({
                 </span>
               )}
             </TableCell>
-            <TableCell className="text-right">Rp {safeTeacherCost.toLocaleString()}</TableCell>
+            <TableCell className="text-right">{formatCurrency(safeTeacherCost)}</TableCell>
           </TableRow>
           {safeAccommodationCost > 0 && (
             <TableRow>
               <TableCell>Akomodasi</TableCell>
-              <TableCell className="text-right">Rp {safeAccommodationCost.toLocaleString()}</TableCell>
+              <TableCell className="text-right">{formatCurrency(safeAccommodationCost)}</TableCell>
             </TableRow>
           )}
           {safeExtraBedCost > 0 && (
             <TableRow>
               <TableCell>Extra Bed</TableCell>
-              <TableCell className="text-right">Rp {safeExtraBedCost.toLocaleString()}</TableCell>
+              <TableCell className="text-right">{formatCurrency(safeExtraBedCost)}</TableCell>
             </TableRow>
           )}
           {safeVenueCost > 0 && (
             <TableRow>
               <TableCell>Venue</TableCell>
-              <TableCell className="text-right">Rp {safeVenueCost.toLocaleString()}</TableCell>
+              <TableCell className="text-right">{formatCurrency(safeVenueCost)}</TableCell>
             </TableRow>
           )}
           <TableRow className="border-t-2">
             <TableCell className="font-medium">TOTAL</TableCell>
-            <TableCell className="text-right font-bold">Rp {safeDiscountedCost.toLocaleString()}</TableCell>
+            <TableCell className="text-right font-bold">{formatCurrency(safeDiscountedCost)}</TableCell>
           </TableRow>
         </TableBody>
       </Table>
