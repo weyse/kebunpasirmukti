@@ -9,7 +9,7 @@ import { useRegistrationSubmit } from './registration/useRegistrationSubmit';
 import { useSelectionState, PackageParticipants } from './registration/useSelectionState';
 import { useSummaryData } from './registration/useSummaryData';
 import { ClassType, classOptions } from './types/registrationTypes';
-import { PackagesJsonData, fetchGuestRegistration } from './registration/data/fetchGuestRegistration';
+import { PackagesJsonData, RoomsJsonData, VenuesJsonData, fetchGuestRegistration } from './registration/data/fetchGuestRegistration';
 
 // Re-export for backward compatibility
 export { EXTRA_BED_PRICE } from './registration/useCostCalculation';
@@ -42,7 +42,10 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     handleExtraBedChange,
     handleVenueChange,
     setPackageParticipants,
-    setSelectedPackages
+    setSelectedPackages,
+    setAccommodationCounts,
+    setExtraBedCounts,
+    setSelectedVenues
   } = useSelectionState();
   
   const { totalCost, discountedCost, remainingBalance, calculationSummary } = useCostCalculation(
@@ -66,7 +69,9 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     totalCost,
     discountedCost,
     extraBedCounts,
-    nightsCount
+    nightsCount,
+    selectedVenues,
+    accommodationCounts
   );
   
   const { getSummaryData } = useSummaryData(
@@ -94,7 +99,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
   
   const loadGuestRegistration = async (id: string) => {
     try {
-      const { registrationData, classes, packagesData } = await fetchGuestRegistration(id);
+      const { registrationData, classes, packagesData, roomsData, venuesData } = await fetchGuestRegistration(id);
       
       if (registrationData) {
         // Format the visit_date and payment_date if they exist
@@ -132,7 +137,7 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         // Set selected classes
         handleClassChange(classes);
         
-        // Handle packages data - IMPROVED LOADING PROCESS
+        // Handle packages data
         if (packagesData && packagesData.selected_packages && packagesData.package_participants) {
           console.log('Loading packages data:', packagesData);
           
@@ -146,6 +151,25 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         // For legacy data that only has package_type
         else if (registrationData.package_type) {
           handlePackageChange(registrationData.package_type);
+        }
+
+        // Handle rooms data
+        if (roomsData) {
+          console.log('Loading rooms data:', roomsData);
+          
+          if (roomsData.accommodation_counts) {
+            setAccommodationCounts(roomsData.accommodation_counts);
+          }
+          
+          if (roomsData.extra_bed_counts) {
+            setExtraBedCounts(roomsData.extra_bed_counts);
+          }
+        }
+
+        // Handle venues data
+        if (venuesData && venuesData.selected_venues) {
+          console.log('Loading venues data:', venuesData);
+          setSelectedVenues(venuesData.selected_venues);
         }
       }
     } catch (error) {

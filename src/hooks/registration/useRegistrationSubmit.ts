@@ -18,7 +18,9 @@ export const useRegistrationSubmit = (
   totalCost: number,
   discountedCost: number,
   extraBedCounts: Record<string, number>,
-  nightsCount: number = 1
+  nightsCount: number = 1,
+  selectedVenues: string[] = [],
+  accommodationCounts: Record<string, number> = {}
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,15 +67,28 @@ export const useRegistrationSubmit = (
         package_participants: cleanedPackageParticipants
       };
       
-      // Log the packages data being saved
+      // Prepare rooms JSON data
+      const roomsData = {
+        accommodation_counts: accommodationCounts,
+        extra_bed_counts: extraBedCounts
+      };
+
+      // Prepare venues JSON data
+      const venuesData = {
+        selected_venues: selectedVenues
+      };
+      
+      // Log the data being saved
       console.log('Saving packages data:', packagesData);
+      console.log('Saving rooms data:', roomsData);
+      console.log('Saving venues data:', venuesData);
       
       // Prepare data for submission
       const submissionData = {
         responsible_person: formValues.responsible_person,
         institution_name: formValues.institution_name,
         phone_number: formValues.phone_number,
-        address: formValues.address,
+        address: formValues.address || '',
         visit_date: visitDateForDB,
         adult_count: Number(formValues.adult_count),
         children_count: Number(formValues.children_count),
@@ -94,8 +109,10 @@ export const useRegistrationSubmit = (
         payment_status: dbPaymentStatus,
         extra_bed_cost: extraBedCost,
         nights_count: nightsCount,
-        // Store package participants as JSON in the packages_json column
-        packages_json: packagesData
+        // Store JSON data in their respective columns
+        packages_json: packagesData,
+        rooms_json: roomsData,
+        venues_json: venuesData
       };
 
       let registrationId;

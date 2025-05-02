@@ -10,6 +10,17 @@ export interface PackagesJsonData {
   package_participants?: PackageParticipants;
 }
 
+// Define the rooms data structure
+export interface RoomsJsonData {
+  accommodation_counts?: Record<string, number>;
+  extra_bed_counts?: Record<string, number>;
+}
+
+// Define the venues data structure
+export interface VenuesJsonData {
+  selected_venues?: string[];
+}
+
 export const fetchGuestRegistration = async (id: string) => {
   try {
     const { data, error } = await supabase
@@ -48,7 +59,48 @@ export const fetchGuestRegistration = async (id: string) => {
       }
     }
 
-    return { registrationData: data, classes, packagesData };
+    // Process rooms_json data if it exists
+    let roomsData: RoomsJsonData = {
+      accommodation_counts: {},
+      extra_bed_counts: {}
+    };
+
+    if (data.rooms_json) {
+      try {
+        if (typeof data.rooms_json === 'string') {
+          roomsData = JSON.parse(data.rooms_json);
+        } else if (typeof data.rooms_json === 'object' && data.rooms_json !== null) {
+          roomsData = data.rooms_json as RoomsJsonData;
+        }
+      } catch (err) {
+        console.error('Error parsing rooms_json:', err);
+      }
+    }
+
+    // Process venues_json data if it exists
+    let venuesData: VenuesJsonData = {
+      selected_venues: []
+    };
+
+    if (data.venues_json) {
+      try {
+        if (typeof data.venues_json === 'string') {
+          venuesData = JSON.parse(data.venues_json);
+        } else if (typeof data.venues_json === 'object' && data.venues_json !== null) {
+          venuesData = data.venues_json as VenuesJsonData;
+        }
+      } catch (err) {
+        console.error('Error parsing venues_json:', err);
+      }
+    }
+
+    return { 
+      registrationData: data, 
+      classes, 
+      packagesData,
+      roomsData,
+      venuesData
+    };
   } catch (error: any) {
     toast({
       title: "Error!",

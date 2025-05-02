@@ -138,9 +138,11 @@ export type Database = {
           payment_status: Database["public"]["Enums"]["payment_status"]
           phone_number: string
           responsible_person: string
+          rooms_json: Json | null
           teacher_count: number
           total_cost: number
           updated_at: string
+          venues_json: Json | null
           visit_date: string
           visit_type: Database["public"]["Enums"]["visit_type"]
         }
@@ -167,9 +169,11 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone_number: string
           responsible_person: string
+          rooms_json?: Json | null
           teacher_count?: number
           total_cost?: number
           updated_at?: string
+          venues_json?: Json | null
           visit_date: string
           visit_type: Database["public"]["Enums"]["visit_type"]
         }
@@ -196,9 +200,11 @@ export type Database = {
           payment_status?: Database["public"]["Enums"]["payment_status"]
           phone_number?: string
           responsible_person?: string
+          rooms_json?: Json | null
           teacher_count?: number
           total_cost?: number
           updated_at?: string
+          venues_json?: Json | null
           visit_date?: string
           visit_type?: Database["public"]["Enums"]["visit_type"]
         }

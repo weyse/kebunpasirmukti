@@ -126,6 +126,21 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     setSelectedPackages(packages);
   };
 
+  // Function to set all accommodation counts
+  const setAllAccommodationCounts = (counts: Record<string, number>) => {
+    setAccommodationCounts(counts);
+  };
+
+  // Function to set all extra bed counts
+  const setAllExtraBedCounts = (counts: Record<string, number>) => {
+    setExtraBedCounts(counts);
+  };
+
+  // Function to set selected venues directly
+  const setAllSelectedVenues = (venues: string[]) => {
+    setSelectedVenues(venues);
+  };
+
   return {
     selectedClasses,
     selectedPackages,
@@ -141,6 +156,9 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     handleExtraBedChange,
     handleVenueChange,
     setPackageParticipants: setAllPackageParticipants,
-    setSelectedPackages: setAllSelectedPackages
+    setSelectedPackages: setAllSelectedPackages,
+    setAccommodationCounts: setAllAccommodationCounts,
+    setExtraBedCounts: setAllExtraBedCounts,
+    setSelectedVenues: setAllSelectedVenues
   };
 };

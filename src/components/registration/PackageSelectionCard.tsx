@@ -101,7 +101,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 onChange={(e) => handleInputChange('adults', e.target.value)}
                 className="h-8 text-sm"
               />
-              <div className="text-xs text-muted-foreground">Max: {maxAdults}</div>
+              <div className="text-xs text-muted-foreground">Max: {maxAdults === Infinity ? '∞' : maxAdults}</div>
             </div>
             
             <div className="space-y-1">
@@ -115,7 +115,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 onChange={(e) => handleInputChange('children', e.target.value)}
                 className="h-8 text-sm"
               />
-              <div className="text-xs text-muted-foreground">Max: {maxChildren}</div>
+              <div className="text-xs text-muted-foreground">Max: {maxChildren === Infinity ? '∞' : maxChildren}</div>
             </div>
             
             <div className="space-y-1">
@@ -129,7 +129,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 onChange={(e) => handleInputChange('teachers', e.target.value)}
                 className="h-8 text-sm"
               />
-              <div className="text-xs text-muted-foreground">Max: {maxTeachers}</div>
+              <div className="text-xs text-muted-foreground">Max: {maxTeachers === Infinity ? '∞' : maxTeachers}</div>
             </div>
             
             <div className="space-y-1">
@@ -143,7 +143,7 @@ const PackageSelectionCard: React.FC<PackageSelectionCardProps> = ({
                 onChange={(e) => handleInputChange('free_teachers', e.target.value)}
                 className="h-8 text-sm"
               />
-              <div className="text-xs text-muted-foreground">Max: {maxFreeTeachers}</div>
+              <div className="text-xs text-muted-foreground">Max: {maxFreeTeachers === Infinity ? '∞' : maxFreeTeachers}</div>
             </div>
           </div>
         </div>
