@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
@@ -101,49 +102,17 @@ function App() {
             {/* Routes accessible by all authenticated users */}
             <Route path="calendar" element={<CalendarView />} />
             
-            {/* Admin-only routes */}
-            <Route path="visit-list" element={
-              <ProtectedRoute requiredRole="admin">
-                <VisitList />
-              </ProtectedRoute>
-            } />
-            <Route path="guest-registration" element={
-              <ProtectedRoute requiredRole="admin">
-                <GuestRegistrationList />
-              </ProtectedRoute>
-            } />
-            <Route path="guest-registration/new" element={
-              <ProtectedRoute requiredRole="admin">
-                <GuestRegistrationForm />
-              </ProtectedRoute>
-            } />
-            <Route path="guest-registration/edit/:id" element={
-              <ProtectedRoute requiredRole="admin">
-                <GuestRegistrationForm />
-              </ProtectedRoute>
-            } />
-            <Route path="guest-registration/view/:id" element={
-              <ProtectedRoute requiredRole="admin">
-                <GuestRegistrationForm />
-              </ProtectedRoute>
-            } />
-            <Route path="check-in/:id" element={
-              <ProtectedRoute requiredRole="admin">
-                <GuestRegistrationForm />
-              </ProtectedRoute>
-            } />
+            {/* Previously admin-only routes now accessible to all authenticated users */}
+            <Route path="visit-list" element={<VisitList />} />
+            <Route path="guest-registration" element={<GuestRegistrationList />} />
+            <Route path="guest-registration/new" element={<GuestRegistrationForm />} />
+            <Route path="guest-registration/edit/:id" element={<GuestRegistrationForm />} />
+            <Route path="guest-registration/view/:id" element={<GuestRegistrationForm />} />
+            <Route path="check-in/:id" element={<GuestRegistrationForm />} />
             
             {/* Admin management routes */}
-            <Route path="admin/users" element={
-              <ProtectedRoute requiredRole="admin">
-                <UserManagement />
-              </ProtectedRoute>
-            } />
-            <Route path="admin/setup" element={
-              <ProtectedRoute>
-                <SetupAdmin />
-              </ProtectedRoute>
-            } />
+            <Route path="admin/users" element={<UserManagement />} />
+            <Route path="admin/setup" element={<SetupAdmin />} />
           </Route>
           
           {/* 404 Route - this must be last */}

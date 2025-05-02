@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 
 export function Sidebar() {
   const location = useLocation();
-  const { isAdmin, logout } = useAuth();
+  const { logout } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -40,8 +40,8 @@ export function Sidebar() {
     }
   ];
   
-  // Admin-only menu items
-  const adminMenuItems = [
+  // Management menu items (now available to all users)
+  const managementItems = [
     {
       name: 'Daftar Kunjungan',
       path: '/visit-list',
@@ -54,7 +54,7 @@ export function Sidebar() {
     }
   ];
   
-  // Admin management menu items
+  // Admin management menu items (now available to all users)
   const adminManagementItems = [
     {
       name: 'Kelola Pengguna',
@@ -95,56 +95,51 @@ export function Sidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         
-        {isAdmin && (
-          <>
-            <SidebarGroup>
-              <SidebarGroupLabel>
-                <div className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  <span>Management</span>
-                  <Badge variant="outline" className="ml-auto">Admin</Badge>
-                </div>
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {adminMenuItems.map(item => (
-                    <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton asChild className={isActive(item.path) ? "bg-sidebar-accent" : ""}>
-                        <Link to={item.path}>
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.name}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-            
-            <SidebarGroup>
-              <SidebarGroupLabel>
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  <span>Administration</span>
-                </div>
-              </SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {adminManagementItems.map(item => (
-                    <SidebarMenuItem key={item.name}>
-                      <SidebarMenuButton asChild className={isActive(item.path) ? "bg-sidebar-accent" : ""}>
-                        <Link to={item.path}>
-                          <item.icon className="h-5 w-5" />
-                          <span>{item.name}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </>
-        )}
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span>Management</span>
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {managementItems.map(item => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton asChild className={isActive(item.path) ? "bg-sidebar-accent" : ""}>
+                    <Link to={item.path}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        
+        <SidebarGroup>
+          <SidebarGroupLabel>
+            <div className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              <span>Administration</span>
+            </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {adminManagementItems.map(item => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton asChild className={isActive(item.path) ? "bg-sidebar-accent" : ""}>
+                    <Link to={item.path}>
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

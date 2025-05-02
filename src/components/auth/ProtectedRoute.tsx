@@ -5,14 +5,12 @@ import { useAuth } from '@/context/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'any';
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  requiredRole = 'any'
+  children
 }) => {
-  const { isAuthenticated, isAdmin, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
   // Show loading state
@@ -30,12 +28,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check roles if required
-  if (requiredRole === 'admin' && !isAdmin) {
-    // Redirect to a forbidden page or home page
-    return <Navigate to="/forbidden" replace />;
-  }
-
-  // If authenticated and has required role, render the children
+  // If authenticated, render the children
   return <>{children}</>;
 };

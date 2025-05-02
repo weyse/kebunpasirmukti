@@ -19,7 +19,7 @@ export function AdminPanel() {
         </div>
         <div className="flex items-center gap-2">
           <Shield className="h-5 w-5 text-pasirmukti-500" />
-          <span className="font-medium text-pasirmukti-600">Admin Area</span>
+          <span className="font-medium text-pasirmukti-600">Administration Area</span>
         </div>
       </div>
       
