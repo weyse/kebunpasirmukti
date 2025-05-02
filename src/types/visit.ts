@@ -20,6 +20,8 @@ export type Visit = {
   nights_count?: number; // Number of nights staying
 };
 
+export type ChartPeriod = 'day' | 'week' | 'month' | 'year';
+
 // For dashboard data processing
 export type VisitData = {
   id: string;
@@ -39,21 +41,21 @@ export type DashboardMetrics = {
   totalVisitors: number;
   totalRevenue: number;
   monthlyGrowth: MonthlyGrowthData;
-  monthlyVisits: {
-    name: string;
-    visitors: number;
-  }[];
+  monthlyVisits: VisitorChartData[];
   upcomingVisits: UpcomingVisit[];
+  selectedPeriod: ChartPeriod;
+};
+
+export type VisitorChartData = {
+  name: string;
+  visitors: number;
 };
 
 export type MonthlyGrowthData = {
   visits: number;
   visitors: number;
   revenue: number;
-  monthlyVisits: {
-    name: string;
-    visitors: number;
-  }[];
+  monthlyVisits: VisitorChartData[];
 };
 
 export type MonthlyVisitData = {

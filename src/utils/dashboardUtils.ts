@@ -1,6 +1,6 @@
 
-import { format, isBefore, isAfter, parseISO, startOfMonth, endOfMonth, subMonths } from 'date-fns';
-import { UpcomingVisit, VisitData, MonthlyGrowthData } from '@/types/visit';
+import { format, isBefore, isAfter, parseISO, startOfMonth, endOfMonth, subMonths, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfYear, endOfYear, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, eachYearOfInterval } from 'date-fns';
+import { UpcomingVisit, VisitData, MonthlyGrowthData, ChartPeriod, VisitorChartData } from '@/types/visit';
 
 /**
  * Process visit data to calculate basic metrics
@@ -73,37 +73,99 @@ export const calculateMonthlyGrowth = (
   const revenueGrowth = previousMonthRevenue 
     ? ((currentMonthRevenue - previousMonthRevenue) / previousMonthRevenue) * 100 
     : 0;
-
-  // Calculate monthly data for chart
-  const last6Months = Array.from({ length: 6 }, (_, i) => {
-    const monthDate = subMonths(now, 5 - i);
-    return format(monthDate, 'MMM');
-  });
-
+  
   // Generate monthly visit data for chart
+  const chartData = generateVisitorChartData(now, "month", []);
+  
   return {
     visits: Math.round(visitsGrowth),
     visitors: Math.round(visitorsGrowth),
     revenue: Math.round(revenueGrowth),
-    monthlyVisits: generateMonthlyChartData(last6Months, now)
+    monthlyVisits: chartData
   };
 };
 
 /**
- * Generate monthly chart data for visitor trends
+ * Generate visitor chart data based on period (day, week, month, year)
  */
-const generateMonthlyChartData = (months: string[], now: Date) => {
-  return months.map(month => {
-    const monthIndex = months.indexOf(month);
-    const monthDate = subMonths(now, 5 - monthIndex);
+export const generateVisitorChartData = (
+  date: Date = new Date(),
+  period: ChartPeriod = "month",
+  visits: VisitData[] = []
+): VisitorChartData[] => {
+  let intervals: Date[] = [];
+  let formatPattern: string = "";
+  let startDate: Date = new Date();
+  let endDate: Date = new Date();
+  const now = date;
+  
+  // Set up intervals based on selected period
+  switch (period) {
+    case "day":
+      startDate = startOfWeek(now);
+      endDate = endOfWeek(now);
+      intervals = eachDayOfInterval({ start: startDate, end: endDate });
+      formatPattern = "EEE";
+      break;
+    case "week":
+      startDate = startOfMonth(now);
+      endDate = endOfMonth(now);
+      intervals = eachWeekOfInterval({ start: startDate, end: endDate });
+      formatPattern = "'Week' w";
+      break;
+    case "month":
+      startDate = startOfYear(now);
+      endDate = endOfYear(now);
+      intervals = eachMonthOfInterval({ start: startDate, end: endDate });
+      formatPattern = "MMM";
+      break;
+    case "year":
+      startDate = new Date(now.getFullYear() - 5, 0, 1);
+      endDate = now;
+      intervals = eachYearOfInterval({ start: startDate, end: endDate });
+      formatPattern = "yyyy";
+      break;
+  }
+  
+  return intervals.map(intervalDate => {
+    // Set up interval start/end for filtering visits
+    let intervalStart: Date;
+    let intervalEnd: Date;
     
-    // We would normally get this data from the visits
-    // This is a placeholder for demonstration purposes
-    const randomVisitors = Math.floor(Math.random() * 100) + 20;
+    switch (period) {
+      case "day":
+        intervalStart = startOfDay(intervalDate);
+        intervalEnd = endOfDay(intervalDate);
+        break;
+      case "week":
+        intervalStart = startOfWeek(intervalDate);
+        intervalEnd = endOfWeek(intervalDate);
+        break;
+      case "month":
+        intervalStart = startOfMonth(intervalDate);
+        intervalEnd = endOfMonth(intervalDate);
+        break;
+      case "year":
+        intervalStart = startOfYear(intervalDate);
+        intervalEnd = endOfYear(intervalDate);
+        break;
+    }
+    
+    // Filter visits in this interval
+    const intervalVisits = visits.filter(visit => {
+      const visitDate = parseISO(visit.visit_date);
+      return !isBefore(visitDate, intervalStart) && !isAfter(visitDate, intervalEnd);
+    });
+    
+    // Calculate total visitors for the interval
+    const visitorCount = intervalVisits.reduce(
+      (sum, visit) => sum + ((visit.adult_count || 0) + (visit.children_count || 0) + (visit.teacher_count || 0)),
+      0
+    );
     
     return {
-      name: month,
-      visitors: randomVisitors
+      name: format(intervalDate, formatPattern),
+      visitors: visitorCount
     };
   });
 };

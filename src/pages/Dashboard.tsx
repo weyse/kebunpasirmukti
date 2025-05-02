@@ -8,10 +8,15 @@ import { StatCard } from '@/components/dashboard/StatCard';
 import { VisitStatsChart } from '@/components/dashboard/VisitStatsChart';
 import { UpcomingVisits } from '@/components/dashboard/UpcomingVisits';
 import { formatCurrency } from '@/components/dashboard/DashboardUtils';
+import { ChartPeriod } from '@/types/visit';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { metrics, isLoading } = useDashboardMetrics();
+  const { metrics, isLoading, updateChartPeriod } = useDashboardMetrics();
+
+  const handlePeriodChange = (period: ChartPeriod) => {
+    updateChartPeriod(period);
+  };
 
   return (
     <div className="space-y-6">
@@ -54,7 +59,9 @@ const Dashboard = () => {
       <div className="grid gap-6 md:grid-cols-2">
         <VisitStatsChart 
           data={metrics.monthlyVisits} 
-          isLoading={isLoading} 
+          isLoading={isLoading}
+          selectedPeriod={metrics.selectedPeriod}
+          onPeriodChange={handlePeriodChange}
         />
         
         <UpcomingVisits 
