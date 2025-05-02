@@ -65,6 +65,9 @@ export const useRegistrationSubmit = (
         package_participants: cleanedPackageParticipants
       };
       
+      // Log the packages data being saved
+      console.log('Saving packages data:', packagesData);
+      
       // Prepare data for submission
       const submissionData = {
         responsible_person: formValues.responsible_person,

@@ -9,7 +9,7 @@ import { useRegistrationSubmit } from './registration/useRegistrationSubmit';
 import { useSelectionState, PackageParticipants } from './registration/useSelectionState';
 import { useSummaryData } from './registration/useSummaryData';
 import { ClassType, classOptions } from './types/registrationTypes';
-import { PackagesJsonData } from './registration/data/fetchGuestRegistration';
+import { PackagesJsonData, fetchGuestRegistration } from './registration/data/fetchGuestRegistration';
 
 // Re-export for backward compatibility
 export { EXTRA_BED_PRICE } from './registration/useCostCalculation';
