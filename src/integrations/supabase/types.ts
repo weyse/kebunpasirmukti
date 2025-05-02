@@ -128,6 +128,7 @@ export type Database = {
           extra_bed_cost: number
           id: string
           institution_name: string
+          nights_count: number
           notes: string | null
           order_id: string
           package_type: string
@@ -154,6 +155,7 @@ export type Database = {
           extra_bed_cost?: number
           id?: string
           institution_name: string
+          nights_count?: number
           notes?: string | null
           order_id: string
           package_type: string
@@ -180,6 +182,7 @@ export type Database = {
           extra_bed_cost?: number
           id?: string
           institution_name?: string
+          nights_count?: number
           notes?: string | null
           order_id?: string
           package_type?: string
