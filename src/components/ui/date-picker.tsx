@@ -49,13 +49,13 @@ export function DatePicker({
             {date ? format(date, "PPP") : <span>{placeholder}</span>}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 z-50" align="start">
           {mode === "single" && (
             <Calendar
               mode="single"
               selected={date || undefined}
               onSelect={onSelect}
-              defaultMonth={defaultMonth}
+              defaultMonth={defaultMonth || date || undefined}
               captionLayout={captionLayout}
               initialFocus
               className={cn("p-3 pointer-events-auto")}
@@ -66,7 +66,7 @@ export function DatePicker({
               mode="range"
               selected={date ? { from: date, to: date } : undefined}
               onSelect={(range) => onSelect && onSelect(range?.from)}
-              defaultMonth={defaultMonth}
+              defaultMonth={defaultMonth || date || undefined}
               captionLayout={captionLayout}
               initialFocus
               className={cn("p-3 pointer-events-auto")}
@@ -77,7 +77,7 @@ export function DatePicker({
               mode="multiple"
               selected={date ? [date] : []}
               onSelect={(dates) => onSelect && dates && onSelect(dates[0])}
-              defaultMonth={defaultMonth}
+              defaultMonth={defaultMonth || date || undefined}
               captionLayout={captionLayout}
               initialFocus
               className={cn("p-3 pointer-events-auto")}
