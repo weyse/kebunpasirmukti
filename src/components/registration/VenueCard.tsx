@@ -15,6 +15,7 @@ interface VenueCardProps {
 
 const VenueCard: React.FC<VenueCardProps> = ({
   name,
+  capacity,
   price,
   features,
   selected,
@@ -37,7 +38,7 @@ const VenueCard: React.FC<VenueCardProps> = ({
       <div className="ml-8 space-y-2">
         <div className="flex items-center text-sm text-muted-foreground">
           <Users className="h-4 w-4 mr-1.5" />
-          <span>Kapasitas: 1 pax</span>
+          <span>Kapasitas: {capacity} pax</span>
         </div>
         <p className="font-medium">Rp {price.toLocaleString()}</p>
         
