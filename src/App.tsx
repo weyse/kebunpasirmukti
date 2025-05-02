@@ -86,7 +86,7 @@ function App() {
           
           {/* Admin Setup Route - available to authenticated users */}
           <Route path="/setup-admin" element={
-            <ProtectedRoute>
+            <ProtectedRoute requiresAdmin={true}>
               <SetupAdmin />
             </ProtectedRoute>
           } />
@@ -102,17 +102,49 @@ function App() {
             {/* Routes accessible by all authenticated users */}
             <Route path="calendar" element={<CalendarView />} />
             
-            {/* Previously admin-only routes now accessible to all authenticated users */}
-            <Route path="visit-list" element={<VisitList />} />
-            <Route path="guest-registration" element={<GuestRegistrationList />} />
-            <Route path="guest-registration/new" element={<GuestRegistrationForm />} />
-            <Route path="guest-registration/edit/:id" element={<GuestRegistrationForm />} />
-            <Route path="guest-registration/view/:id" element={<GuestRegistrationForm />} />
-            <Route path="check-in/:id" element={<GuestRegistrationForm />} />
+            {/* Admin-only routes */}
+            <Route path="visit-list" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <VisitList />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationList />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/new" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/edit/:id" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="guest-registration/view/:id" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
+            <Route path="check-in/:id" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <GuestRegistrationForm />
+              </ProtectedRoute>
+            } />
             
             {/* Admin management routes */}
-            <Route path="admin/users" element={<UserManagement />} />
-            <Route path="admin/setup" element={<SetupAdmin />} />
+            <Route path="admin/users" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <UserManagement />
+              </ProtectedRoute>
+            } />
+            <Route path="admin/setup" element={
+              <ProtectedRoute requiresAdmin={true}>
+                <SetupAdmin />
+              </ProtectedRoute>
+            } />
           </Route>
           
           {/* 404 Route - this must be last */}

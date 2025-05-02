@@ -7,12 +7,14 @@ import { AlertTriangle } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requiresAdmin?: boolean;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children
+  children,
+  requiresAdmin = false
 }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isAdmin, isLoading } = useAuth();
   const location = useLocation();
 
   // Show loading state
@@ -30,6 +32,11 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // If authenticated, render the children
+  // Check admin permission
+  if (requiresAdmin && !isAdmin) {
+    return <Navigate to="/forbidden" replace />;
+  }
+
+  // If authenticated and has proper permission, render the children
   return <>{children}</>;
 };
