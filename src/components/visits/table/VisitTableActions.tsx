@@ -59,7 +59,7 @@ export function VisitTableActions({ visit, setVisitToDelete }: VisitTableActions
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuItem
-                onClick={() => navigate(`/visits/view/${visit.id}`)}
+                onClick={() => navigate(`/guest-registration/view/${visit.id}`)}
               >
                 <Eye className="mr-2 h-4 w-4" />
                 Lihat Detail
@@ -71,7 +71,7 @@ export function VisitTableActions({ visit, setVisitToDelete }: VisitTableActions
           <Tooltip>
             <TooltipTrigger asChild>
               <DropdownMenuItem
-                onClick={() => navigate(`/visits/edit/${visit.id}`)}
+                onClick={() => navigate(`/guest-registration/edit/${visit.id}`)}
               >
                 <Edit className="mr-2 h-4 w-4" />
                 Edit

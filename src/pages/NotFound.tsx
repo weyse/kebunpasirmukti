@@ -3,16 +3,25 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const NotFound = () => {
   const location = useLocation();
+  const { toast } = useToast();
 
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
-  }, [location.pathname]);
+    
+    // Show toast notification
+    toast({
+      title: "Halaman tidak ditemukan",
+      description: `Halaman ${location.pathname} tidak ada atau telah dipindahkan.`,
+      variant: "destructive",
+    });
+  }, [location.pathname, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">

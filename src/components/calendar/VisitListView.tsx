@@ -7,6 +7,7 @@ import { CalendarPermission } from '@/types/calendarPermission';
 import { getActivityLabel, getActivityColor } from '@/utils/visitHelpers';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNavigate } from 'react-router-dom';
 
 interface VisitListViewProps {
   visits: Visit[];
@@ -20,6 +21,12 @@ export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: Vi
   );
   
   const canEdit = accessLevel === 'admin' || accessLevel === 'edit';
+  const navigate = useNavigate();
+  
+  const handleIconClick = (e: React.MouseEvent, visit: Visit) => {
+    e.stopPropagation(); // Prevent triggering the parent onClick
+    navigate(`/guest-registration/${canEdit ? 'edit' : 'view'}/${visit.id}`);
+  };
   
   return (
     <div className="space-y-4">
@@ -51,7 +58,12 @@ export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: Vi
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={(e) => handleIconClick(e, visit)}
+                    >
                       <PenLine className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>
@@ -64,7 +76,12 @@ export const VisitListView = ({ visits, onVisitClick, accessLevel = 'view' }: Vi
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={(e) => handleIconClick(e, visit)}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                   </TooltipTrigger>

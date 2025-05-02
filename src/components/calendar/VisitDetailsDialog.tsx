@@ -62,7 +62,10 @@ export const VisitDetailsDialog = ({
                 <Button 
                   variant={canEdit ? "default" : "outline"} 
                   size="sm" 
-                  onClick={() => navigate(`/guest-registration/${canEdit ? 'edit' : 'view'}/${visit.id}`)}
+                  onClick={() => {
+                    onOpenChange(false);
+                    navigate(`/guest-registration/${canEdit ? 'edit' : 'view'}/${visit.id}`);
+                  }}
                 >
                   {canEdit ? 'Edit Detail' : 'Lihat Detail'}
                 </Button>
