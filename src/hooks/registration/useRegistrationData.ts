@@ -65,34 +65,11 @@ export const useRegistrationData = () => {
 
   const fetchVenues = async () => {
     try {
-      // Check if we can fetch from the database
-      const { data, error } = await supabase
-        .from('venues')
-        .select('id, venue_name, capacity, cost, venue_type');
-
-      if (error) {
-        console.error("Error fetching venues from database:", error);
-        // Fall back to mock data
-        useMockVenueData();
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const formattedVenues = data.map(venue => ({
-          id: venue.id,
-          name: venue.venue_name,
-          capacity: venue.capacity,
-          price: venue.cost,
-          features: [venue.venue_type]
-        }));
-        setVenues(formattedVenues);
-      } else {
-        // If no data in database, use mock data
-        useMockVenueData();
-      }
+      // Since the venues table doesn't exist in the database yet,
+      // we'll use mock data directly without trying to fetch from Supabase
+      useMockVenueData();
     } catch (error) {
       console.error("Failed to fetch venues:", error);
-      // Fall back to mock data on any error
       useMockVenueData();
     }
   };
