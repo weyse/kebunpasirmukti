@@ -130,30 +130,44 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
         // Set selected classes
         handleClassChange(classes);
         
-        // Set package type if any
-        if (registrationData.package_type) {
-          handlePackageChange(registrationData.package_type);
-        }
+        // First, clear any existing package selections to prevent interference
+        const initialSelectedPackages = [...selectedPackages];
+        initialSelectedPackages.forEach(pkg => handlePackageChange(pkg));
         
-        // Load package participants from database if available
+        // Handle packages_json data if available
         if (registrationData.packages_json) {
-          const packagesData = registrationData.packages_json as any;
-          
-          // Load selected packages
-          if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
-            packagesData.selected_packages.forEach((packageId: string) => {
-              handlePackageChange(packageId);
-            });
+          try {
+            const packagesData = registrationData.packages_json;
+            console.log('Loading packages data:', packagesData);
+            
+            // Process selected packages first
+            if (packagesData.selected_packages && Array.isArray(packagesData.selected_packages)) {
+              // Select each package
+              packagesData.selected_packages.forEach((packageId: string) => {
+                handlePackageChange(packageId);
+              });
+            }
+            
+            // Then set the participant allocations
+            if (packagesData.package_participants && typeof packagesData.package_participants === 'object') {
+              setPackageParticipants(packagesData.package_participants);
+            }
+          } catch (error) {
+            console.error('Error parsing packages_json data:', error);
           }
-          
-          // Load package participants
-          if (packagesData.package_participants) {
-            setPackageParticipants(packagesData.package_participants);
-          }
+        } 
+        // For legacy data that only has package_type
+        else if (registrationData.package_type) {
+          handlePackageChange(registrationData.package_type);
         }
       }
     } catch (error) {
       console.error("Failed to load guest registration:", error);
+      toast({
+        title: "Error",
+        description: "Gagal memuat data registrasi tamu.",
+        variant: "destructive",
+      });
     }
   };
 

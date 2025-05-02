@@ -111,6 +111,11 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     }
   };
 
+  // Add function to set the entire package participants state
+  const setAllPackageParticipants = (participants: PackageParticipants) => {
+    setPackageParticipants(participants);
+  };
+
   return {
     selectedClasses,
     selectedPackages,
@@ -125,6 +130,6 @@ export const useSelectionState = (initialAccommodations: any[] = []) => {
     handleAccommodationChange,
     handleExtraBedChange,
     handleVenueChange,
-    setPackageParticipants // Add this to allow direct setting of package participants
+    setPackageParticipants: setAllPackageParticipants
   };
 };

@@ -37,7 +37,7 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
   totalTeachers,
   totalFreeTeachers
 }) => {
-  // Calculate remaining participants
+  // Calculate allocated participants
   const allocatedCounts = useMemo(() => {
     const result = {
       adults: 0,
@@ -48,16 +48,18 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
     
     // Ensure packageParticipants is an object before using Object.values
     if (packageParticipants && typeof packageParticipants === 'object') {
-      Object.values(packageParticipants).forEach(counts => {
-        result.adults += counts.adults;
-        result.children += counts.children;
-        result.teachers += counts.teachers;
-        result.free_teachers += counts.free_teachers;
+      Object.entries(packageParticipants).forEach(([packageId, counts]) => {
+        if (selectedPackages.includes(packageId)) {
+          result.adults += counts.adults || 0;
+          result.children += counts.children || 0;
+          result.teachers += counts.teachers || 0;
+          result.free_teachers += counts.free_teachers || 0;
+        }
       });
     }
     
     return result;
-  }, [packageParticipants]);
+  }, [packageParticipants, selectedPackages]);
   
   const remainingParticipants = {
     adults: totalAdults - allocatedCounts.adults,
@@ -86,6 +88,16 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
     
     onParticipantChange(packageId, type, count);
   };
+
+  // Determine if any participants are unallocated
+  const hasUnallocatedParticipants = 
+    remainingParticipants.adults > 0 || 
+    remainingParticipants.children > 0 || 
+    remainingParticipants.teachers > 0 || 
+    remainingParticipants.free_teachers > 0;
+  
+  // Only show alert if packages are selected but participants remain unallocated
+  const showUnallocatedAlert = selectedPackages.length > 0 && hasUnallocatedParticipants;
   
   return (
     <Card>
@@ -117,9 +129,7 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
         </div>
 
         {/* Alert for unallocated participants */}
-        {(remainingParticipants.adults > 0 || remainingParticipants.children > 0 || 
-          remainingParticipants.teachers > 0 || remainingParticipants.free_teachers > 0) && 
-          selectedPackages.length > 0 && (
+        {showUnallocatedAlert && (
           <Alert className="bg-yellow-50 border-yellow-200">
             <AlertDescription className="text-sm">
               Masih terdapat peserta yang belum dialokasikan. Pastikan semua peserta telah dialokasikan ke paket.
@@ -142,10 +152,10 @@ const PackageSelectionForm: React.FC<PackageSelectionFormProps> = ({
                 price={pkg.price_per_adult}
                 checked={isSelected}
                 onCheckedChange={() => onPackageChange(pkg.id)}
-                adults={participants.adults}
-                children={participants.children}
-                teachers={participants.teachers}
-                free_teachers={participants.free_teachers}
+                adults={participants.adults || 0}
+                children={participants.children || 0}
+                teachers={participants.teachers || 0}
+                free_teachers={participants.free_teachers || 0}
                 onParticipantChange={(type, count) => handleParticipantChange(pkg.id, type, count)}
                 maxAdults={isSelected ? participants.adults + remainingParticipants.adults : totalAdults}
                 maxChildren={isSelected ? participants.children + remainingParticipants.children : totalChildren}
