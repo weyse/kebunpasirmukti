@@ -162,7 +162,7 @@ export type Database = {
           institution_name: string
           nights_count?: number
           notes?: string | null
-          order_id: string
+          order_id?: string
           package_type: string
           packages_json?: Json | null
           payment_date?: string | null
