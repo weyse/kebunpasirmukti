@@ -119,27 +119,40 @@ export const useRegistrationSubmit = (
       let isNewRegistration = !formValues.id;
       
       if (isNewRegistration) {
-        // For new records - let the database generate the order_id via trigger
-        // Don't include order_id in the insert to let the database trigger handle it
+        // For new registrations, make sure we NEVER include order_id
+        // Let the database trigger handle it completely
         const { data: insertedData, error } = await supabase
           .from('guest_registrations')
           .insert(submissionData)
           .select();
         
-        if (error) throw new Error(error.message);
+        if (error) {
+          console.error("Registration error:", error);
+          throw new Error(`Registration failed: ${error.message}`);
+        }
+        
         if (insertedData && insertedData.length > 0) {
           registrationId = insertedData[0].id;
+          console.log("Successfully created registration with ID:", registrationId);
+          console.log("Generated order_id:", insertedData[0].order_id);
+        } else {
+          throw new Error("Failed to get ID from inserted registration");
         }
       } else {
-        // Update existing record
+        // Update existing record - never update the order_id
         const { data: updatedData, error } = await supabase
           .from('guest_registrations')
           .update(submissionData)
           .eq('id', formValues.id)
           .select();
         
-        if (error) throw new Error(error.message);
+        if (error) {
+          console.error("Update error:", error);
+          throw new Error(`Update failed: ${error.message}`);
+        }
+        
         registrationId = formValues.id;
+        console.log("Successfully updated registration with ID:", registrationId);
       }
       
       // If we have a registration ID, save the selected classes
