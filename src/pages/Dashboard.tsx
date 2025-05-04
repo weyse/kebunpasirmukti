@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { useDashboardMetrics } from '@/hooks/dashboard';
-import { UpcomingVisits } from '@/components/dashboard/UpcomingVisits';
-
-const Dashboard: React.FC = () => {
-  const { isAdmin, user } = useAuth();
-  const { metrics, isLoading } = useDashboardMetrics();
-=======
-
 import React from 'react';
 import { Calendar, Clock, CreditCard } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
@@ -23,7 +12,6 @@ import { formatCurrency } from '@/utils/formatters';
 const Dashboard: React.FC = () => {
   const { isAdmin, user } = useAuth();
   const { metrics, isLoading, updateChartPeriod } = useDashboardMetrics();
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
   
   return (
     <div className="space-y-8">
@@ -37,9 +25,6 @@ const Dashboard: React.FC = () => {
             'Lihat jadwal kunjungan dan detail reservasi di dashboard ini'}
         </p>
       </div>
-<<<<<<< HEAD
-      <div className="grid gap-6 md:grid-cols-2">
-=======
       
       {/* Stats Overview */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -77,7 +62,6 @@ const Dashboard: React.FC = () => {
           onPeriodChange={updateChartPeriod}
         />
         
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
         <UpcomingVisits 
           upcomingVisits={metrics.upcomingVisits}
           isLoading={isLoading}
