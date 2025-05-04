@@ -36,6 +36,38 @@ export function formatDate(dateString: string): string {
 }
 
 /**
+ * Format a date to short Indonesian format (dd/MM/yyyy)
+ */
+export function formatShortDate(dateString: string): string {
+  if (!dateString) return '-';
+  
+  try {
+    return new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(new Date(dateString));
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    return '-';
+  }
+}
+
+/**
+ * Format invoice number from order_id
+ */
+export function formatInvoiceNumber(orderId: string | null | undefined): string {
+  if (!orderId) return '-';
+  
+  // Extract parts from ORD-YYYYMMDD-HHMMSS-RAND4 format
+  const parts = orderId.split('-');
+  if (parts.length < 3) return orderId;
+  
+  // Create invoice number format: INV/YYYYMMDD/RAND4
+  return `INV/${parts[1]}/${parts[3] || '0000'}`;
+}
+
+/**
  * Convert any value to a safe number
  */
 export function toSafeNumber(value: any): number {
