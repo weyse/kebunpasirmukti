@@ -50,6 +50,44 @@ export type Database = {
           },
         ]
       }
+      food_selections: {
+        Row: {
+          adult_menu: string | null
+          buffet_menu: string | null
+          children_menu: string | null
+          cost: number
+          id: string
+          registration_id: string
+          special_requests: string | null
+        }
+        Insert: {
+          adult_menu?: string | null
+          buffet_menu?: string | null
+          children_menu?: string | null
+          cost?: number
+          id?: string
+          registration_id: string
+          special_requests?: string | null
+        }
+        Update: {
+          adult_menu?: string | null
+          buffet_menu?: string | null
+          children_menu?: string | null
+          cost?: number
+          id?: string
+          registration_id?: string
+          special_requests?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_selections_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "guest_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       guest_classes: {
         Row: {
           class_type: Database["public"]["Enums"]["class_type"]

@@ -1,48 +1,78 @@
 
-import { format } from 'date-fns';
-
-export const formatCurrency = (amount: number | null | undefined): string => {
-  if (amount === null || amount === undefined) return 'Rp 0';
+/**
+ * Format a number as Indonesian Rupiah currency
+ */
+export function formatCurrency(amount: number | string | null | undefined): string {
+  // Convert string to number if needed
+  const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+  
+  // Ensure amount is a valid number
+  const safeAmount = numAmount === null || numAmount === undefined || isNaN(Number(numAmount)) ? 0 : Number(numAmount);
+  
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount);
-};
+  }).format(safeAmount);
+}
 
-export const formatDate = (date: string | Date | null | undefined): string => {
-  if (!date) return '-';
+/**
+ * Format a date to Indonesian format
+ */
+export function formatDate(dateString: string): string {
+  if (!dateString) return '-';
+  
   try {
-    return format(new Date(date), 'dd MMM yyyy');
+    return new Intl.DateTimeFormat('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    }).format(new Date(dateString));
   } catch (error) {
-    console.error('Error formatting date:', error);
-    return String(date);
+    console.error("Date formatting error:", error);
+    return '-';
   }
-};
+}
 
-export const formatShortDate = (date: string | Date | null | undefined): string => {
-  if (!date) return '-';
+/**
+ * Format a date to short Indonesian format (dd/MM/yyyy)
+ */
+export function formatShortDate(dateString: string): string {
+  if (!dateString) return '-';
+  
   try {
-    return format(new Date(date), 'dd/MM/yyyy');
+    return new Intl.DateTimeFormat('id-ID', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(new Date(dateString));
   } catch (error) {
-    console.error('Error formatting date:', error);
-    return String(date);
+    console.error("Date formatting error:", error);
+    return '-';
   }
-};
+}
 
-export const formatInvoiceNumber = (id: string, prefix = 'INV'): string => {
-  // Format ID as an invoice number (e.g., INV-20230001)
-  return `${prefix}-${new Date().getFullYear()}${id.slice(0, 4)}`;
-};
+/**
+ * Format invoice number from order_id
+ */
+export function formatInvoiceNumber(orderId: string | null | undefined): string {
+  if (!orderId) return '-';
+  
+  // Extract parts from ORD-YYYYMMDD-HHMMSS-RAND4 format
+  const parts = orderId.split('-');
+  if (parts.length < 3) return orderId;
+  
+  // Create invoice number format: INV/YYYYMMDD/RAND4
+  return `INV/${parts[1]}/${parts[3] || '0000'}`;
+}
 
-export const getPaymentStatusLabel = (status: string): string => {
-  switch (status) {
-    case 'lunas':
-      return 'Lunas';
-    case 'belum_lunas':
-      return 'Belum Lunas';
-    default:
-      return status;
-  }
-};
+/**
+ * Convert any value to a safe number
+ */
+export function toSafeNumber(value: any): number {
+  if (value === null || value === undefined || value === '') return 0;
+  
+  const num = Number(value);
+  return isNaN(num) ? 0 : num;
+}
