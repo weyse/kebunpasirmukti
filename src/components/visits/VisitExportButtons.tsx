@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 import React from 'react';
 import { FileSpreadsheet } from 'lucide-react';
+=======
+
+import React from 'react';
+import { FileText, FileSpreadsheet } from 'lucide-react';
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { Button } from '@/components/ui/button';
 import { exportAllVisitsToExcel, exportVisitToExcel } from '@/utils/export/exportHelpers';
 import { Visit } from '@/types/visit';
@@ -31,8 +37,23 @@ export const VisitExportButtons: React.FC<VisitExportButtonsProps> = ({
     exportAllVisitsToExcel(filteredVisits);
   };
 
+<<<<<<< HEAD
   return (
     <div className="flex gap-2">
+=======
+  const handlePdfExport = () => {
+    toast('Fitur export PDF akan segera tersedia', {
+      description: 'Silakan gunakan export Excel untuk saat ini'
+    });
+  };
+
+  return (
+    <div className="flex gap-2">
+      <Button variant="outline" onClick={handlePdfExport}>
+        <FileText className="mr-2 h-4 w-4" />
+        Export PDF
+      </Button>
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       <Button variant="outline" onClick={handleExcelExport}>
         <FileSpreadsheet className="mr-2 h-4 w-4" />
         Export {showSingleExport ? 'Invoice' : 'Excel'}

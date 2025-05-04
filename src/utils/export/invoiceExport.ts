@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { Visit } from '@/types/visit';
@@ -208,10 +212,17 @@ const addServicesTable = (ws: XLSX.WorkSheet, visit: Visit, startRow: number) =>
     });
     
     // Add extra beds if any
+<<<<<<< HEAD
     const extraBeds = Object.values(roomData.extra_bed_counts || {}).reduce((sum, c) => Number(sum) + Number(c), 0);
     if (Number(extraBeds) > 0) {
       const extraBedPrice = prices.extraBedPrice; // Base price per extra bed
       const extraBedSubtotal = extraBedPrice * Number(extraBeds) * visit.nights_count!;
+=======
+    const extraBeds = Object.values(roomData.extra_bed_counts || {}).reduce((sum, count) => sum + Number(count), 0);
+    if (extraBeds > 0) {
+      const extraBedPrice = prices.extraBedPrice; // Base price per extra bed
+      const extraBedSubtotal = extraBedPrice * extraBeds * visit.nights_count!;
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       
       ws[`A${currentRow}`] = { v: itemNumber++, t: 'n', s: { border: borderStyle } };
       ws[`B${currentRow}`] = { v: 'Akomodasi', t: 's', s: { border: borderStyle } };
@@ -333,6 +344,7 @@ const addFooter = (ws: XLSX.WorkSheet, startRow: number) => {
 };
 
 // Export visit data to Excel with professional invoice format
+<<<<<<< HEAD
 export const exportVisitInvoice = (visit) => {
   const formatRupiah = (num) => typeof num === 'number' ? 'Rp ' + num.toLocaleString('id-ID') : num;
   const formatDate = (date) => date ? new Date(date).toISOString().split('T')[0] : '';
@@ -392,4 +404,61 @@ export const exportVisitInvoice = (visit) => {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
   XLSX.writeFile(wb, `invoice-${visit.order_id || 'unknown'}.xlsx`);
+=======
+export const exportVisitInvoice = (visit: Visit) => {
+  try {
+    console.log('Starting invoice export for visit:', visit);
+    
+    // Create new workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([[]]);
+    
+    // Add professional header
+    const headerEndRow = addProfessionalHeader(ws);
+    console.log('Added header, next row:', headerEndRow);
+    
+    // Add invoice info and customer details
+    const infoEndRow = addInvoiceInfo(ws, visit, headerEndRow);
+    console.log('Added invoice info, next row:', infoEndRow);
+    
+    // Add services table
+    const tableEndRow = addServicesTable(ws, visit, infoEndRow);
+    console.log('Added services table, next row:', tableEndRow);
+    
+    // Add payment summary
+    const summaryEndRow = addPaymentSummary(ws, visit, tableEndRow);
+    console.log('Added payment summary, next row:', summaryEndRow);
+    
+    // Add footer with signature
+    addFooter(ws, summaryEndRow);
+    console.log('Added footer');
+    
+    // Set print area and page setup for A4
+    ws['!print'] = { 
+      area: "A1:F50",
+      orientation: 'portrait',
+      fitToPage: true
+    };
+    
+    console.log('Set print area');
+    
+    // Add the worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
+    console.log('Appended sheet to workbook');
+    
+    // Generate Excel file with order ID in filename
+    const currentDate = format(new Date(), 'yyyyMMdd');
+    const invoiceNumber = formatInvoiceNumber(visit.order_id);
+    const filename = `INVOICE-${invoiceNumber.replace(/\//g, '-')}-${currentDate}.xlsx`;
+    
+    console.log('Generating file:', filename);
+    XLSX.writeFile(wb, filename);
+    console.log('File written successfully');
+    
+    toast('Invoice berhasil diunduh sebagai file Excel');
+  } catch (error) {
+    console.error('Error exporting invoice:', error);
+    toast('Gagal mengekspor invoice');
+  }
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 };

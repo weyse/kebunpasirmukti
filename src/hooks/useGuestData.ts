@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -17,6 +21,7 @@ export type Guest = {
   visit_date: string;
   payment_status: PaymentStatus;
   created_at: string;
+<<<<<<< HEAD
   adult_count?: number;
   children_count?: number;
   teacher_count?: number;
@@ -28,6 +33,8 @@ export type Guest = {
   venues_json?: string;
   nights_count?: number;
   extra_bed_counts?: string;
+=======
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 };
 
 export const useGuestData = () => {
@@ -52,7 +59,11 @@ export const useGuestData = () => {
     try {
       const { data, error } = await supabase
         .from('guest_registrations')
+<<<<<<< HEAD
         .select('*, adult_count, children_count, teacher_count, rooms_json, venues_json, nights_count')
+=======
+        .select('*, adult_count, children_count, teacher_count')
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
         .order(sortField, { ascending: sortDirection === 'asc' });
       
       if (error) {
@@ -73,6 +84,7 @@ export const useGuestData = () => {
           visit_date: guest.visit_date,
           payment_status: guest.payment_status,
           created_at: guest.created_at,
+<<<<<<< HEAD
           adult_count: guest.adult_count,
           children_count: guest.children_count,
           teacher_count: guest.teacher_count,
@@ -83,6 +95,8 @@ export const useGuestData = () => {
           rooms_json: typeof guest.rooms_json === 'string' ? JSON.parse(guest.rooms_json) : guest.rooms_json,
           venues_json: typeof guest.venues_json === 'string' ? JSON.parse(guest.venues_json) : guest.venues_json,
           nights_count: guest.nights_count,
+=======
+>>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
         }));
         
         setGuests(processedGuests);
