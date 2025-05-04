@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,17 +41,12 @@ export const useRegistrationSubmit = (
       }
       
       // Format visit_date and payment_date to ISO string format for database
-<<<<<<< HEAD
       const visitDateForDB = formValues.visit_date ? 
         new Date(formValues.visit_date.getTime() - formValues.visit_date.getTimezoneOffset() * 60000).toISOString().split('T')[0] : 
         null;
       const paymentDateForDB = formValues.payment_date ? 
         new Date(formValues.payment_date.getTime() - formValues.payment_date.getTimezoneOffset() * 60000).toISOString().split('T')[0] : 
         null;
-=======
-      const visitDateForDB = formValues.visit_date ? formValues.visit_date.toISOString().split('T')[0] : null;
-      const paymentDateForDB = formValues.payment_date ? formValues.payment_date.toISOString().split('T')[0] : null;
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       
       // Calculate extra bed cost for inclusion in submission (accounting for nights count)
       const extraBedCost = Object.values(extraBedCounts).reduce((sum, count) => sum + (count * 160000 * nightsCount), 0);

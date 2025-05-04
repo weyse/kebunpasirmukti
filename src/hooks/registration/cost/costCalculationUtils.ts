@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { PackageParticipantCost } from './types';
 import { EXTRA_BED_PRICE } from './constants';
 import { PackageParticipants } from '../useSelectionState';
@@ -40,7 +36,6 @@ export const calculatePackageCosts = (
       const teachers = Number(participants?.teachers) || 0;
       const free_teachers = Number(participants?.free_teachers) || 0;
       
-<<<<<<< HEAD
       // Override prices except for Lansia 60+
       let pricePerAdult = Number(packageData?.price_per_adult) || 0;
       let pricePerTeacher = Number(packageData?.price_per_teacher) || 0;
@@ -51,11 +46,6 @@ export const calculatePackageCosts = (
         pricePerAdult = 100000;
         pricePerTeacher = 50000;
       }
-=======
-      const pricePerAdult = Number(packageData?.price_per_adult) || 0;
-      const pricePerChild = Number(packageData?.price_per_child) || 0;
-      const pricePerTeacher = Number(packageData?.price_per_teacher) || 0;
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       
       // Calculate costs for each participant type in this package
       const adultCost = adults * pricePerAdult;

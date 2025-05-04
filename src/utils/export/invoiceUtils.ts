@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { Visit } from '@/types/visit';
 import { formatCurrency, formatInvoiceNumber, formatShortDate } from '../formatters';
 

@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -14,10 +10,7 @@ import PackageSelectionForm from '@/components/registration/forms/PackageSelecti
 import AccommodationSelectionForm from '@/components/registration/forms/AccommodationSelectionForm';
 import VenueSelectionForm from '@/components/registration/forms/VenueSelectionForm';
 import CostCalculationForm from '@/components/registration/forms/CostCalculationForm';
-<<<<<<< HEAD
-=======
 import NotesForm from '@/components/registration/forms/NotesForm';
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import OrderSummary from '@/components/registration/OrderSummary';
 
 const GuestRegistrationForm = () => {
@@ -71,11 +64,7 @@ const GuestRegistrationForm = () => {
 
       // Navigate back to list on success
       if (registrationId) {
-<<<<<<< HEAD
-        navigate('/visit-list');
-=======
         navigate('/guest-registration');
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       }
     } catch (error) {
       // Error is handled in handleSubmit function
@@ -146,14 +135,6 @@ const GuestRegistrationForm = () => {
           />
           
           {/* Notes and Order Summary */}
-<<<<<<< HEAD
-          <div className="w-full">
-            <OrderSummary 
-              basicInfo={getSummaryData().basicInfo} 
-              paymentInfo={getSummaryData().paymentInfo} 
-              costCalculation={getSummaryData().costCalculation} 
-            />
-=======
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-3xl">
             <div className="md:col-span-2">
               <NotesForm form={form} />
@@ -166,7 +147,6 @@ const GuestRegistrationForm = () => {
                 costCalculation={getSummaryData().costCalculation} 
               />
             </div>
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
           </div>
           
           <div className="flex justify-end space-x-4">

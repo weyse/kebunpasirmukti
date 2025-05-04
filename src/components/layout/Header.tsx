@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import React from 'react';
 import { Moon, Sun, BellRing, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -54,15 +50,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
-<<<<<<< HEAD
-        {/* Removed logo image */}
-=======
         <img 
           src="/lovable-uploads/f94a1b65-60bc-4c63-aed5-6543cbeca768.png" 
           alt="PasirMukti Logo" 
           className="h-10"
         />
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       </div>
 
       <div className="flex items-center gap-4">

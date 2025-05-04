@@ -1,11 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-<<<<<<< HEAD
 import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield, Book } from 'lucide-react';
-=======
-import { CalendarCheck, Home, ListOrdered, LogOut, UserPlus, Settings, Shield } from 'lucide-react';
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { 
   Sidebar as SidebarComponent, 
   SidebarContent, 
@@ -54,14 +50,11 @@ export function Sidebar() {
       name: 'Registrasi Baru',
       path: '/guest-registration/new',
       icon: UserPlus
-<<<<<<< HEAD
     },
     {
       name: 'Laporan',
       path: '/laporan',
       icon: Book
-=======
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
     }
   ];
   

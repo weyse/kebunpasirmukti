@@ -4,10 +4,7 @@ import { Visit } from '@/types/visit';
 import { getActivityLabel } from '@/utils/visitHelpers';
 import { toast } from 'sonner';
 import { formatCurrency, formatInvoiceNumber, formatShortDate } from './formatters';
-<<<<<<< HEAD
 import { getProductPrices } from './export/invoiceUtils';
-=======
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 
 // Function to get package type label
 export const getPackageLabel = (type: string): string => {
@@ -184,12 +181,8 @@ const addServicesTable = (ws: XLSX.WorkSheet, visit: Visit, startRow: number) =>
   
   // Adult visitors
   if (visit.adult_count && visit.adult_count > 0) {
-<<<<<<< HEAD
     const prices = getProductPrices();
     const adultPrice = prices.adultPrice; // Base price per adult
-=======
-    const adultPrice = 100000; // Base price per adult
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
     const adultSubtotal = adultPrice * visit.adult_count;
     
     ws[`A${currentRow}`] = { v: itemNumber++, t: 'n', s: { border: borderStyle } };
@@ -204,12 +197,8 @@ const addServicesTable = (ws: XLSX.WorkSheet, visit: Visit, startRow: number) =>
   
   // Children visitors
   if (visit.children_count && visit.children_count > 0) {
-<<<<<<< HEAD
     const prices = getProductPrices();
     const childPrice = prices.childPrice; // Base price per child
-=======
-    const childPrice = 70000; // Base price per child
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
     const childSubtotal = childPrice * visit.children_count;
     
     ws[`A${currentRow}`] = { v: itemNumber++, t: 'n', s: { border: borderStyle } };
@@ -224,12 +213,8 @@ const addServicesTable = (ws: XLSX.WorkSheet, visit: Visit, startRow: number) =>
   
   // Teacher visitors
   if (visit.teacher_count && visit.teacher_count > 0) {
-<<<<<<< HEAD
     const prices = getProductPrices();
     const teacherPrice = prices.teacherPrice; // Base price per teacher
-=======
-    const teacherPrice = 50000; // Base price per teacher
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
     const teacherSubtotal = teacherPrice * visit.teacher_count;
     
     ws[`A${currentRow}`] = { v: itemNumber++, t: 'n', s: { border: borderStyle } };

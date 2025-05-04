@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ArrowUpDown, Eye, Edit, CalendarCheck, Trash, Download } from 'lucide-react';
+import { ArrowUpDown, Eye, Edit, CalendarCheck, Trash, Download, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 import {
@@ -24,7 +20,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { exportVisitToExcel } from '@/utils/exportHelpers';
@@ -51,13 +46,10 @@ type Guest = {
   discount_percentage?: number;
   discounted_cost?: number;
   down_payment?: number;
-<<<<<<< HEAD
   rooms_json?: string;
   venues_json?: string;
   nights_count?: number;
   extra_bed_counts?: number;
-=======
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 };
 
 interface GuestTableProps {
@@ -130,18 +122,12 @@ export function GuestTable({
       total_cost: guest.total_cost,
       discount_percentage: guest.discount_percentage,
       discounted_cost: guest.discounted_cost,
-<<<<<<< HEAD
       down_payment: guest.down_payment,
       rooms_json: typeof guest.rooms_json === 'string' ? JSON.parse(guest.rooms_json) : guest.rooms_json,
       venues_json: typeof guest.venues_json === 'string' ? JSON.parse(guest.venues_json) : guest.venues_json,
       nights_count: guest.nights_count,
     };
     console.log('Exporting visit to Excel:', visit);
-=======
-      down_payment: guest.down_payment
-    };
-    
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
     // Export the invoice using the new function
     exportVisitToExcel(visit);
   };

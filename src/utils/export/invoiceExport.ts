@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import * as XLSX from 'xlsx';
 import { format } from 'date-fns';
 import { Visit } from '@/types/visit';
@@ -212,17 +208,10 @@ const addServicesTable = (ws: XLSX.WorkSheet, visit: Visit, startRow: number) =>
     });
     
     // Add extra beds if any
-<<<<<<< HEAD
-    const extraBeds = Object.values(roomData.extra_bed_counts || {}).reduce((sum, c) => Number(sum) + Number(c), 0);
-    if (Number(extraBeds) > 0) {
-      const extraBedPrice = prices.extraBedPrice; // Base price per extra bed
-      const extraBedSubtotal = extraBedPrice * Number(extraBeds) * visit.nights_count!;
-=======
     const extraBeds = Object.values(roomData.extra_bed_counts || {}).reduce((sum, count) => sum + Number(count), 0);
     if (extraBeds > 0) {
       const extraBedPrice = prices.extraBedPrice; // Base price per extra bed
       const extraBedSubtotal = extraBedPrice * extraBeds * visit.nights_count!;
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
       
       ws[`A${currentRow}`] = { v: itemNumber++, t: 'n', s: { border: borderStyle } };
       ws[`B${currentRow}`] = { v: 'Akomodasi', t: 's', s: { border: borderStyle } };
@@ -344,67 +333,6 @@ const addFooter = (ws: XLSX.WorkSheet, startRow: number) => {
 };
 
 // Export visit data to Excel with professional invoice format
-<<<<<<< HEAD
-export const exportVisitInvoice = (visit) => {
-  const formatRupiah = (num) => typeof num === 'number' ? 'Rp ' + num.toLocaleString('id-ID') : num;
-  const formatDate = (date) => date ? new Date(date).toISOString().split('T')[0] : '';
-
-  const data = [
-    ['INVOICE'],
-    ['Kebun Wisata Pasirmukti'],
-    ['Jl. Raya Tajur – Pasirmukti KM. 4 Citeureup – Bogor 16810'],
-    ['Phone: (021) 8794 7002    Fax: (021) 8794 7003'],
-    ['Email: info@pasirmukti.co.id'],
-    [],
-    ['Order Information'],
-    ['Order ID', visit.order_id || ''],
-    ['Customer', visit.responsible_person || ''],
-    ['Institution', visit.institution_name || ''],
-    ['Phone', visit.phone_number || ''],
-    ['Visit Date', formatDate(visit.visit_date)],
-    ['Type', visit.visit_type || ''],
-    ['Notes', visit.notes || ''],
-    ['Payment Status', visit.payment_status || ''],
-    [],
-    ['Details'],
-    ['Item', 'Qty', 'Unit Price', 'Subtotal'],
-  ];
-
-  // Add items
-  if (visit.items && Array.isArray(visit.items) && visit.items.length > 0) {
-    visit.items.forEach((item) => {
-      data.push([
-        item.description || '',
-        item.qty || '',
-        formatRupiah(Number(item.unit_price) || 0),
-        formatRupiah(Number(item.subtotal) || 0),
-      ]);
-    });
-  } else {
-    data.push(['-', '-', '-', '-']);
-  }
-
-  data.push([]);
-  data.push(['Payment Summary']);
-  data.push(['Subtotal', '', '', formatRupiah(Number(visit.total_cost) || 0)]);
-  if (Number(visit.discount_percentage) > 0) {
-    data.push(['Discount', `${visit.discount_percentage}%`, '', '-' + formatRupiah(((Number(visit.total_cost) || 0) * (Number(visit.discount_percentage) / 100)))]);
-  }
-  data.push(['Total', '', '', formatRupiah(Number(visit.discounted_cost) || Number(visit.total_cost) || 0)]);
-  if (Number(visit.down_payment) > 0) {
-    data.push(['Down Payment', '', '', formatRupiah(Number(visit.down_payment))]);
-    data.push(['Remaining', '', '', formatRupiah((Number(visit.discounted_cost) || Number(visit.total_cost) || 0) - (Number(visit.down_payment) || 0))]);
-  }
-
-  data.push([]);
-  data.push(['Thank you for your visit!']);
-  data.push(['Kebun Wisata Pasirmukti']);
-
-  const ws = XLSX.utils.aoa_to_sheet(data);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Invoice');
-  XLSX.writeFile(wb, `invoice-${visit.order_id || 'unknown'}.xlsx`);
-=======
 export const exportVisitInvoice = (visit: Visit) => {
   try {
     console.log('Starting invoice export for visit:', visit);
@@ -460,5 +388,4 @@ export const exportVisitInvoice = (visit: Visit) => {
     console.error('Error exporting invoice:', error);
     toast('Gagal mengekspor invoice');
   }
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 };
