@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Visit } from '@/types/visit';
-import { exportVisitToExcel } from '@/utils/exportHelpers';
+import { exportVisitToExcel } from '@/utils/export/exportHelpers';
 
 interface VisitTableActionsProps {
   visit: Visit;

@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
 import { getActivityLabel } from '@/utils/visitHelpers';
-import { exportVisitToExcel } from '@/utils/exportHelpers';
+import { exportVisitToExcel } from '@/utils/export/exportHelpers';
 
 interface VisitTableRowProps {
   visit: Visit;

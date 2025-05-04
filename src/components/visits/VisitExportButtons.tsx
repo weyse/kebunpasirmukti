@@ -2,7 +2,7 @@
 import React from 'react';
 import { FileText, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { exportAllVisitsToExcel, exportVisitToExcel } from '@/utils/exportHelpers';
+import { exportAllVisitsToExcel, exportVisitToExcel } from '@/utils/export/exportHelpers';
 import { Visit } from '@/types/visit';
 import { toast } from 'sonner';
 
