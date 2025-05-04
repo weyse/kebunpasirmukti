@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
@@ -23,10 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
-<<<<<<< HEAD
 import Laporan from './pages/laporan';
-=======
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -152,14 +145,11 @@ function App() {
                 <SetupAdmin />
               </ProtectedRoute>
             } />
-<<<<<<< HEAD
             <Route path="laporan" element={
               <ProtectedRoute requiresAdmin={true}>
                 <Laporan />
               </ProtectedRoute>
             } />
-=======
->>>>>>> df37da58018e5b43eed8d5346a150adc2c758b23
           </Route>
           
           {/* 404 Route - this must be last */}
