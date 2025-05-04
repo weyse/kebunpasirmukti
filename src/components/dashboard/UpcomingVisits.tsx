@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,7 @@ export const UpcomingVisits = ({ upcomingVisits, isLoading }: UpcomingVisitsProp
   const navigate = useNavigate();
   
   return (
-    <Card className="col-span-1">
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Kunjungan Mendatang</CardTitle>
         <CardDescription>Kunjungan yang akan datang dalam waktu dekat</CardDescription>

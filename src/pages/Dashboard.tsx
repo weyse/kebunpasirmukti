@@ -26,42 +26,10 @@ const Dashboard: React.FC = () => {
         </p>
       </div>
       
-      {/* Stats Overview */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard 
-          title="Total Kunjungan" 
-          value={metrics.totalVisits.toString()}
-          change={metrics.monthlyGrowth.visits}
-          icon={Calendar}
-          isLoading={isLoading}
-        />
-        
-        <StatCard 
-          title="Total Pengunjung" 
-          value={metrics.totalVisitors.toString()}
-          change={metrics.monthlyGrowth.visitors}
-          icon={Clock}
-          isLoading={isLoading}
-        />
-        
-        <StatCard 
-          title="Pendapatan Total" 
-          value={formatCurrency(metrics.totalRevenue)}
-          change={metrics.monthlyGrowth.revenue}
-          icon={CreditCard}
-          isLoading={isLoading}
-        />
-      </div>
+      {/* Stats Overview removed as requested */}
       
       {/* Charts and upcoming visits */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <VisitStatsChart 
-          data={metrics.monthlyVisits}
-          isLoading={isLoading}
-          selectedPeriod={metrics.selectedPeriod}
-          onPeriodChange={updateChartPeriod}
-        />
-        
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-1">
         <UpcomingVisits 
           upcomingVisits={metrics.upcomingVisits}
           isLoading={isLoading}
