@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Sheet,
@@ -24,7 +25,7 @@ import {
   ClipboardList
 } from "lucide-react"
 import { NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { AuthContext } from '@/context/AuthContext';
 
 interface SidebarProps {
   children?: React.ReactNode;
@@ -71,7 +72,9 @@ const navigationItems = [
 
 export function Sidebar({ children }: SidebarProps) {
   const location = useLocation();
-  const { user } = useAuth();
+  // Use AuthContext directly instead of the useAuth hook
+  const authContext = React.useContext(AuthContext);
+  const user = authContext?.user;
 
   const filteredNavigationItems = navigationItems.filter(item => {
     if (!item.requiresRole) {

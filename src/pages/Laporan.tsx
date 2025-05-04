@@ -157,7 +157,7 @@ const Laporan: React.FC = () => {
                     <TableCell>{formatDate(visit.visit_date)}</TableCell>
                     <TableCell>{visit.order_id || '-'}</TableCell>
                     <TableCell>{visit.institution_name}</TableCell>
-                    <TableCell>{visit.package_type || '-'}</TableCell>
+                    <TableCell>{(visit as any).package_type || visit.visit_type || '-'}</TableCell>
                     <TableCell className="text-center">{visit.adult_count || 0}</TableCell>
                     <TableCell className="text-center">{visit.children_count || 0}</TableCell>
                     <TableCell className="text-center">{visit.teacher_count || 0}</TableCell>

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Visit } from '@/types/visit';
+import { Visit, PaymentStatus } from '@/types/visit';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -61,7 +61,9 @@ export const useReportData = () => {
       }
       
       if (filters.paymentStatus) {
-        query = query.eq('payment_status', filters.paymentStatus);
+        // Cast the string to the PaymentStatus type
+        const paymentStatus = filters.paymentStatus as PaymentStatus;
+        query = query.eq('payment_status', paymentStatus);
       }
       
       query = query.order('visit_date', { ascending: false });
@@ -73,11 +75,14 @@ export const useReportData = () => {
       }
       
       if (data) {
+        // Make sure we're properly handling visit.package_type which might be missing from type
         const processedData = data.map(visit => ({
           ...visit,
           id: visit.id,
           order_id: visit.order_id || '',
-          total_visitors: (visit.adult_count || 0) + (visit.children_count || 0) + (visit.teacher_count || 0)
+          total_visitors: (visit.adult_count || 0) + (visit.children_count || 0) + (visit.teacher_count || 0),
+          // Add visit_type as package_type if needed
+          package_type: (visit as any).package_type || visit.visit_type
         })) as Visit[];
         
         setVisits(processedData);
@@ -100,7 +105,8 @@ export const useReportData = () => {
     // Calculate top package
     const packageCounts: Record<string, number> = {};
     data.forEach(visit => {
-      const packageType = visit.package_type || 'Tidak ada';
+      // Access visit_type or package_type (if available)
+      const packageType = (visit as any).package_type || visit.visit_type || 'Tidak ada';
       packageCounts[packageType] = (packageCounts[packageType] || 0) + 1;
     });
     
