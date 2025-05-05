@@ -1,4 +1,3 @@
-
 import { useGuestRegistration as useGuestRegistrationInternal, classOptions, EXTRA_BED_PRICE } from './registration/useGuestRegistration';
 import type { ClassType, PackageParticipants, VisitType, PaymentStatus } from './registration/useGuestRegistration';
 
@@ -9,6 +8,7 @@ export type { ClassType, PackageParticipants, VisitType, PaymentStatus };
 interface UseGuestRegistrationProps {
   editId?: string;
   nightsCount?: number;
+  accommodations?: any[];
 }
 
 // This is a wrapper for backward compatibility

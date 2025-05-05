@@ -19,7 +19,8 @@ export const useRegistrationSubmit = (
   extraBedCounts: Record<string, number>,
   nightsCount: number = 1,
   selectedVenues: string[] = [],
-  accommodationCounts: Record<string, number> = {}
+  accommodationCounts: Record<string, number> = {},
+  accommodations: any[] = []
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -178,6 +179,33 @@ export const useRegistrationSubmit = (
             });
           
           if (classError) throw new Error(classError.message);
+        }
+      }
+      
+      // Insert bookings into accommodations table for each selected room
+      const checkinDate = visitDateForDB;
+      const checkoutDate = formValues.visit_date && nightsCount
+        ? new Date(new Date(formValues.visit_date).getTime() + nightsCount * 24 * 60 * 60 * 1000)
+            .toISOString().split('T')[0]
+        : null;
+      for (const [roomId, count] of Object.entries(accommodationCounts)) {
+        if (count > 0 && checkinDate && checkoutDate) {
+          const room = accommodations.find((r) => r.id === roomId);
+          const pricePerNight = room ? Number(room.price) || 0 : 0;
+          const cost = pricePerNight * count * nightsCount;
+          const { error: bookingError } = await supabase
+            .from('accommodations')
+            .insert({
+              registration_id: registrationId,
+              room_id: roomId,
+              checkin_date: checkinDate,
+              checkout_date: checkoutDate,
+              nights_count: nightsCount,
+              room_count: count,
+              cost,
+              status: 'confirmed'
+            });
+          if (bookingError) throw new Error(bookingError.message);
         }
       }
       

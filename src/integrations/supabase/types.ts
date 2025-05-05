@@ -19,6 +19,7 @@ export type Database = {
           registration_id: string
           room_count: number
           room_type: string
+          room_id: string
         }
         Insert: {
           checkin_date: string
@@ -29,6 +30,7 @@ export type Database = {
           registration_id: string
           room_count?: number
           room_type: string
+          room_id: string
         }
         Update: {
           checkin_date?: string
@@ -39,6 +41,7 @@ export type Database = {
           registration_id?: string
           room_count?: number
           room_type?: string
+          room_id?: string
         }
         Relationships: [
           {

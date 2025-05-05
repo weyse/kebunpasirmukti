@@ -77,20 +77,16 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
       
       <div className="pt-2 space-y-3">
         <div className="flex items-center justify-between">
-          <label htmlFor={`room-count-${name}`} className="text-sm font-medium">
-            Jumlah Kamar:
+          <label htmlFor={`room-select-${name}`} className="text-sm font-medium">
+            Pilih Kamar:
           </label>
-          <Input
-            id={`room-count-${name}`}
-            type="number"
-            min="0"
-            max={capacity} 
-            value={count}
-            onChange={handleCountChange}
-            className="w-20 text-center"
+          <Checkbox
+            id={`room-select-${name}`}
+            checked={count > 0}
+            onCheckedChange={(checked) => onCountChange(checked ? 1 : 0)}
+            className="h-5 w-5"
           />
         </div>
-        
         {count > 0 && (
           <>
             <div className="flex items-center justify-between">
@@ -104,27 +100,24 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
                 id={`extra-bed-${name}`}
                 type="number"
                 min="0"
-                max={count * 2} 
+                max={count * 2}
                 value={extraBedCount}
                 onChange={handleExtraBedChange}
                 className="w-20 text-center"
               />
             </div>
-            
             {extraBedCount > 0 && (
               <div className="text-sm text-right text-green-600">
                 Extra Bed: {extraBedCount} × Rp {EXTRA_BED_PRICE.toLocaleString()} × {nightsCount} malam = Rp {extraBedPrice.toLocaleString()}
               </div>
             )}
-            
             <div className="pt-1 border-t">
               <p className="text-sm text-right font-medium">
                 Total: Rp {totalPrice.toLocaleString()}
               </p>
             </div>
-            
             <p className="text-sm text-right text-muted-foreground">
-              Kamar yang dipilih: {count} dari {capacity} tersedia
+              Kapasitas: {capacity ? `${capacity} orang` : 'tidak diketahui'}
             </p>
           </>
         )}

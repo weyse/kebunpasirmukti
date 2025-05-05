@@ -61,24 +61,30 @@ const AccommodationSelectionForm: React.FC<AccommodationSelectionFormProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {accommodations.map(accommodation => (
-            <AccommodationCard
-              key={accommodation.id}
-              name={accommodation.name}
-              price={accommodation.price * nightsCount}
-              details={accommodation.details}
-              capacity={accommodation.capacity}
-              features={accommodation.features}
-              count={accommodationCounts[accommodation.id] || 0}
-              extraBedCount={extraBedCounts[accommodation.id] || 0}
-              onCountChange={(count) => onAccommodationChange(accommodation.id, count)}
-              onExtraBedChange={(count) => onExtraBedChange(accommodation.id, count)}
-              nightsCount={nightsCount}
-              status={accommodation.status}
-            />
-          ))}
-        </div>
+        {accommodations.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            Tidak ada kamar tersedia untuk tanggal yang dipilih.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {accommodations.map(accommodation => (
+              <AccommodationCard
+                key={accommodation.id}
+                name={accommodation.name}
+                price={accommodation.price * nightsCount}
+                details={accommodation.details}
+                capacity={accommodation.capacity}
+                features={accommodation.features}
+                count={accommodationCounts[accommodation.id] || 0}
+                extraBedCount={extraBedCounts[accommodation.id] || 0}
+                onCountChange={(count) => onAccommodationChange(accommodation.id, count)}
+                onExtraBedChange={(count) => onExtraBedChange(accommodation.id, count)}
+                nightsCount={nightsCount}
+                status={accommodation.status}
+              />
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

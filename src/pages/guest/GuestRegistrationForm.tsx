@@ -11,6 +11,8 @@ import AccommodationSelectionForm from '@/components/registration/forms/Accommod
 import VenueSelectionForm from '@/components/registration/forms/VenueSelectionForm';
 import CostCalculationForm from '@/components/registration/forms/CostCalculationForm';
 import OrderSummary from '@/components/registration/OrderSummary';
+import { useAccommodations } from '@/hooks/registration/data/useAccommodations';
+import { useRegistrationData } from '@/hooks/registration/useRegistrationData';
 
 const GuestRegistrationForm = () => {
   const navigate = useNavigate();
@@ -20,6 +22,7 @@ const GuestRegistrationForm = () => {
     id: string;
   }>();
   const [nightsCount, setNightsCount] = useState(1);
+  const { accommodations: allAccommodations } = useRegistrationData();
   const {
     form,
     isSubmitting,
@@ -46,8 +49,32 @@ const GuestRegistrationForm = () => {
     getSummaryData
   } = useGuestRegistration({
     editId,
-    nightsCount
+    nightsCount,
+    accommodations: allAccommodations
   });
+  
+  // Helper to format date as YYYY-MM-DD
+  function toDateString(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  const checkinDateRaw = form.watch('visit_date');
+  let checkinDate = null;
+  let checkoutDate = null;
+  if (checkinDateRaw && nightsCount) {
+    const checkin = new Date(checkinDateRaw);
+    if (!isNaN(checkin.getTime())) {
+      checkinDate = toDateString(checkin);
+      const checkout = new Date(checkin);
+      checkout.setDate(checkin.getDate() + Number(nightsCount));
+      checkoutDate = toDateString(checkout);
+    }
+  }
+  const { accommodations: availableAccommodations } = useAccommodations(checkinDate, checkoutDate);
   
   const onSubmit = async (values: any) => {
     try {
@@ -108,7 +135,7 @@ const GuestRegistrationForm = () => {
           
           {/* Accommodation Section */}
           <AccommodationSelectionForm 
-            accommodations={accommodations} 
+            accommodations={availableAccommodations} 
             accommodationCounts={accommodationCounts} 
             extraBedCounts={extraBedCounts} 
             onAccommodationChange={handleAccommodationChange} 

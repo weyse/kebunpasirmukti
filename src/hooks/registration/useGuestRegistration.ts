@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGuestRegistrationForm } from './useGuestRegistrationForm';
@@ -20,12 +19,14 @@ export type { PackageParticipants } from './useSelectionState';
 interface UseGuestRegistrationProps {
   editId?: string;
   nightsCount?: number;
+  accommodations?: any[];
 }
 
-export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegistrationProps = {}) => {
+export const useGuestRegistration = ({ editId, nightsCount = 1, accommodations: accommodationsProp }: UseGuestRegistrationProps = {}) => {
   // Custom hooks
   const form = useGuestRegistrationForm();
-  const { packages, accommodations, venues } = useRegistrationData();
+  const { packages, accommodations: accommodationsDefault, venues } = useRegistrationData();
+  const accommodations = accommodationsProp || accommodationsDefault;
   const [localNightsCount, setLocalNightsCount] = useState(nightsCount);
   
   const {
@@ -72,7 +73,8 @@ export const useGuestRegistration = ({ editId, nightsCount = 1 }: UseGuestRegist
     extraBedCounts,
     localNightsCount,
     selectedVenues,
-    accommodationCounts
+    accommodationCounts,
+    accommodations
   );
   
   const { getSummaryData } = useSummaryData(
