@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import AccommodationCard from '@/components/registration/AccommodationCard';
@@ -12,6 +11,7 @@ interface Accommodation {
   details: string;
   capacity: number;
   features: string[];
+  status: string;
 }
 
 interface AccommodationSelectionFormProps {
@@ -75,6 +75,7 @@ const AccommodationSelectionForm: React.FC<AccommodationSelectionFormProps> = ({
               onCountChange={(count) => onAccommodationChange(accommodation.id, count)}
               onExtraBedChange={(count) => onExtraBedChange(accommodation.id, count)}
               nightsCount={nightsCount}
+              status={accommodation.status}
             />
           ))}
         </div>

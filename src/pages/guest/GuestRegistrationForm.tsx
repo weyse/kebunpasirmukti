@@ -10,7 +10,6 @@ import PackageSelectionForm from '@/components/registration/forms/PackageSelecti
 import AccommodationSelectionForm from '@/components/registration/forms/AccommodationSelectionForm';
 import VenueSelectionForm from '@/components/registration/forms/VenueSelectionForm';
 import CostCalculationForm from '@/components/registration/forms/CostCalculationForm';
-import NotesForm from '@/components/registration/forms/NotesForm';
 import OrderSummary from '@/components/registration/OrderSummary';
 
 const GuestRegistrationForm = () => {
@@ -64,7 +63,7 @@ const GuestRegistrationForm = () => {
 
       // Navigate back to list on success
       if (registrationId) {
-        navigate('/guest-registration');
+        navigate('/visit-list');
       }
     } catch (error) {
       // Error is handled in handleSubmit function
@@ -75,7 +74,7 @@ const GuestRegistrationForm = () => {
   return (
     <div className="space-y-8">
       <div className="flex items-center space-x-2">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/guest-registration')}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/visit-list')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
@@ -135,22 +134,16 @@ const GuestRegistrationForm = () => {
           />
           
           {/* Notes and Order Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 rounded-3xl">
-            <div className="md:col-span-2">
-              <NotesForm form={form} />
-            </div>
-            
-            <div>
-              <OrderSummary 
-                basicInfo={getSummaryData().basicInfo} 
-                paymentInfo={getSummaryData().paymentInfo} 
-                costCalculation={getSummaryData().costCalculation} 
-              />
-            </div>
+          <div className="rounded-3xl">
+            <OrderSummary 
+              basicInfo={getSummaryData().basicInfo} 
+              paymentInfo={getSummaryData().paymentInfo} 
+              costCalculation={getSummaryData().costCalculation} 
+            />
           </div>
           
           <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline" onClick={() => navigate('/guest-registration')}>
+            <Button type="button" variant="outline" onClick={() => navigate('/visit-list')}>
               Batal
             </Button>
             <Button type="submit" disabled={isSubmitting}>

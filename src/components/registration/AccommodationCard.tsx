@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from "@/components/ui/input";
 import { BedDouble, Plus } from "lucide-react"; 
@@ -16,6 +15,7 @@ interface AccommodationCardProps {
   onCountChange: (count: number) => void;
   onExtraBedChange: (count: number) => void;
   nightsCount?: number;
+  status?: string;
 }
 
 const EXTRA_BED_PRICE = 160000;
@@ -30,7 +30,8 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
   extraBedCount,
   onCountChange,
   onExtraBedChange,
-  nightsCount = 1
+  nightsCount = 1,
+  status
 }) => {
   const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
@@ -54,6 +55,11 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
     <div className="border rounded-md p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold">{name}</h3>
+        {status && (
+          <span className={`px-2 py-1 rounded text-xs font-semibold ${status === 'available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            {status === 'available' ? 'Tersedia' : 'Tidak Tersedia'}
+          </span>
+        )}
       </div>
       
       <div>

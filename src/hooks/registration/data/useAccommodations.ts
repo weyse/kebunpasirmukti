@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -32,6 +31,7 @@ export const useAccommodations = () => {
         details: `Capacity: ${room.capacity} people`,
         capacity: room.capacity,
         features: [room.room_type],
+        status: room.status,
       })));
     }
   };
